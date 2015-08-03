@@ -1,0 +1,82 @@
+#!/bin/bash
+
+basename=`basename "$0"`
+if [ "$basename" = tino -o "$basename" = t ]; then
+  sandy="$basename "
+  if [ "$#" -eq 0 ]; then
+      basename="usage"
+  else
+      basename="$1"
+      shift
+  fi
+fi
+
+inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
+
+
+root_init() {
+  if [ "`id -u`" -ne 0 ]; then
+    if inpath sudo && sudo -l >/dev/null 2>&1; then
+      as_root() {
+        if [ "$1" = exec ]; then ex="exec"; shift; fi
+        $ex sudo "$@"
+      }
+    else
+      echo "Warning: sudo not installed or not configured" >&2
+      as_root() {
+        if [ "$1" = exec ]; then ex="exec"; shift; fi
+        $ex su -c "$*"
+      }
+    fi
+  else
+    as_root() { "$@" ; }
+  fi
+}
+
+case "$basename" in
+    test)
+        echo "hello"
+        ;;
+
+
+    edit|e)
+        gvime_ok() { inpath gvim &&
+            gvim --serverlist 2>/dev/null | grep '^E$' >/dev/null; }
+        gvim_ok() { inpath gvim &&
+            gvim --serverlist 2>/dev/null | grep '.' >/dev/null; }
+        case "$DISPLAY" in
+            :*)
+                if gvime_ok; then
+                    [ -n "$*" ] || exit 0
+                    exec gvim --servername E --remote-tab "$@"
+                elif gvim_ok; then
+                    [ -n "$*" ] || exit 0
+                    exec gvim --remote-tab "$@"
+                elif inpath gvim && [ -z "$*" ]; then
+                    exec gvim --servername e
+                fi ;;
+        esac
+        if [ -n "$STY" ]; then
+            exec ./sandy screen -ln -fn -t Editor tpope editor "$@"
+        else
+            exec ./sandy editor "$@"
+        fi
+        ;;
+
+
+    turtle)
+        read -r -d '' TURTLE <<'EOF'
+{-# LANGUAGE OverloadedStrings #-}
+import Turtle
+
+EOF
+
+        cat <(echo "$TURTLE") "${2:-/dev/stdin}" | stack --verbosity silent runghc
+        ;;
+
+
+    *)
+        root_init
+        as_root id -u
+        ;;
+esac
