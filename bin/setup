@@ -73,13 +73,9 @@ setup_env() {
     return
 }
 
-setup_test() {
-    install vim-gtk
-}
-
 setup_extra() {
-    install sshfs acpi sqlite3 iftop rfkill rsync subversion mercurial
-    install exuberant-ctags g++ binutils silversearcher-ag
+    install sshfs acpi sqlite3 iftop rfkill rsync subversion mercurial linux-headers-generic
+    install exuberant-ctags g++ binutils silversearcher-ag mlocate
 
     # setup stack
     wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
@@ -91,10 +87,17 @@ setup_extra() {
 }
 
 setup_gui() {
-    install terminator cmus avconv aspell aspell-en redshift xmodmap xclip acpi
-    install feh dzen2 conky scrot
-    install gimp vim-gtk pidgin thunar cmus luakit chromium-browser vlc texlive-latex-recommended anki
+    install terminator cmus avconv aspell aspell-en redshift xmodmap xclip acpi xterm x11-utils
+    install feh dzen2 conky scrot synapse
+    install thunar evince gpicview vim-gtk lxrandr
+    install gimp pidgin cmus luakit chromium-browser vlc texlive-latex-recommended anki deluge-gtk libreoffice
     as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
+
+    # TODO: get xmonad configs
+    stack install xmonad xmonad-contrib
+    xmonad --recompile
+
+    pip install beets
 
     # install cmus posting
     cd $DIR
@@ -106,7 +109,7 @@ setup_gui() {
 
 setup_stats() {
     install python-tk rescuetime imagemagick
-    as_root pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
+    pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
     cd
     git clone https://github.com/gurgeh/selfspy.git .src
     cd .src/selfspy
@@ -139,11 +142,6 @@ case "$1" in
         warning basic
         setup_basic
         setup_env
-        ;;
-
-    test)
-        warning test
-        setup_test
         ;;
 
     headless)

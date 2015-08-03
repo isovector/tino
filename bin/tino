@@ -75,6 +75,11 @@ EOF
         ;;
 
 
+    xul)
+        chromium-browser --app="$1"
+        ;;
+
+
     *)
         root_init
         as_root id -u
