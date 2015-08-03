@@ -64,7 +64,7 @@ setup_basic() {
     cd
     mkdir .ssh
     cd .ssh
-    yes '' |  USER ssh-keygen -t rsa -C "sandy@sandymaguire.me"
+    yes '' | ssh-keygen -t rsa -C "sandy@sandymaguire.me"
     as_root ssh-add id_rsa
     as_root adduser $USER netdev
 }
