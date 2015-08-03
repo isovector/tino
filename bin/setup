@@ -1,0 +1,172 @@
+#!/usr/bin/env bash
+
+USER=$(whoami)
+LSB=$(lsb_release -a 2>/dev/null | grep Codename | cut -d "	" -f 2-)
+
+inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
+
+install() {
+    as_root apt-get install "$@" -y
+}
+
+warning() {
+    echo "preparing to install ${1}...";
+    echo -n "continue? ";
+    read
+    init_root
+}
+
+init_root() {
+    if [ "`id -u`" -ne 0 ]; then
+        if inpath sudo && sudo -l >/dev/null 2>&1; then
+            as_root() {
+                if [ "$1" = exec ]; then ex="exec"; shift; fi
+                $ex sudo "$@"
+            }
+        else
+            echo "Warning: sudo not installed or not configured" >&2
+            as_root() {
+                if [ "$1" = exec ]; then ex="exec"; shift; fi
+                $ex su -c "$*"
+            }
+        fi
+    else
+        as_root() { "$@" ; }
+    fi
+}
+
+setup_basic() {
+    # setup pacman
+    as_root wget -O /usr/local/bin/pacman https://github.com/icy/pacapt/raw/master/pacapt
+    as_root chmod 755 /usr/local/bin/pacman
+
+    # install super basic packages
+    as_root apt-get update
+    install curl zsh git python2 python3 vim ssh tmux
+
+    # setup a sane env
+    chsh --shell /usr/bin/zsh
+    cd
+    mkdir .src
+
+    # TODO: make this do an install of tino
+    git clone https://github.com/isovector/tino .tino
+    cd .tino
+    ./bin/install.sh
+
+    # setup git
+    git config --global user.name "Sandy Maguire"
+    git config --global user.email "sandy@sandymaguire.me"
+    git config --global credential.helper cache
+    git config --global credential.helper 'cache --timeout=3600'
+
+    # setup ssh and net
+    cd
+    mkdir .ssh
+    cd .ssh
+    yes '' |  USER ssh-keygen -t rsa -C "sandy@sandymaguire.me"
+    as_root ssh-add id_rsa
+    as_root adduser $USER netdev
+}
+
+setup_env() {
+    return
+}
+
+setup_test() {
+    install vim-gtk
+}
+
+setup_extra() {
+    install sshfs acpi sqlite3 iftop rfkill rsync subversion mercurial
+    install exuberant-ctags g++ binutils silversearcher-ag
+
+    # setup stack
+    wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
+    echo "deb http://download.fpcomplete.com/ubuntu/$LSB stable main" | as_root tee /etc/apt/sources.list.d/fpco.list
+    as_root apt-get update
+    install stack
+
+    wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
+}
+
+setup_gui() {
+    install terminator cmus avconv aspell aspell-en redshift xmodmap xclip acpi
+    install feh dzen2 conky scrot
+    install gimp vim-gtk pidgin thunar cmus luakit chromium-browser vlc texlive-latex-recommended anki
+    as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
+
+    # install cmus posting
+    cd $DIR
+    mkdir .cmus
+    wget https://raw.github.com/jkramer/post-fm/master/post-fm -O .cmus/postfm
+    vim .cmus/postfm
+    chmod +x .cmus/postfm
+}
+
+setup_stats() {
+    install python-tk rescuetime imagemagick
+    as_root pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
+    cd
+    git clone https://github.com/gurgeh/selfspy.git .src
+    cd .src/selfspy
+    as_root python2 setup.py install
+}
+
+
+[ $# -gt 0 ] || set -- help
+
+
+case "$1" in
+    help)
+        echo "build types:"
+        echo -e "\tfull"
+        echo -e "\theadless"
+        echo -e "\tbasic"
+        echo -e "\tuntrusted"
+        ;;
+
+    full)
+        warning full
+        setup_basic
+        setup_env
+        setup_extra
+        setup_gui
+        setup_stats
+        ;;
+
+    basic)
+        warning basic
+        setup_basic
+        setup_env
+        ;;
+
+    test)
+        warning test
+        setup_test
+        ;;
+
+    headless)
+        warning headless
+        setup_basic
+        setup_env
+        setup_extra
+        ;;
+
+    untrusted)
+        warning untrusted
+        setup_basic
+        setup_env
+        setup_extra
+        setup_gui
+        ;;
+
+
+    *)
+        ;;
+esac
+
+
+
+
+# TODO: crontab
