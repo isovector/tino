@@ -2,7 +2,6 @@
 
 USER=$(whoami)
 LSB=$(lsb_release -a 2>/dev/null | grep Codename | cut -d "	" -f 2-)
-FRILLS=0
 
 inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
 
@@ -14,10 +13,8 @@ remove() {
     as_root apt-get remove "$@" -y
 }
 
-# frills are big packages that aren't necesssary
 frill() {
-    # make this do frill installs at some point
-    return
+    "$@"
 }
 
 warning() {
@@ -49,8 +46,14 @@ init_root() {
 purge() {
     echo "continuing past this point will delete a bunch of stuff"
     warning "purge"
-    remove firefox command-not-found command-not-found-data language-selector-common
-    remove bluez openbox
+
+    # "manually" install the components of these metapackages
+    as_root aptitude unmarkauto '?reverse-depends(lubuntu-core) | ?reverse-recommends(lubuntu-core)'
+    as_root aptitude unmarkauto '?reverse-depends(ubuntu-standard) | ?reverse-recommends(ubuntu-standard)'
+
+    # drop the ones we don't care about
+    remove firefox command-not-found language-selector-common
+    remove bluez bluez-cups bluez-alsa openbox
 }
 
 setup_basic() {
@@ -62,7 +65,7 @@ setup_basic() {
     as_root apt-get update
     install curl zsh git python vim ssh tmux
 
-    frill install python3
+    install python3
 
     # setup a sane env
     as_root chsh --shell `which zsh` "$USER"
@@ -72,6 +75,7 @@ setup_basic() {
     # install tino utils
     git clone https://github.com/isovector/tino .tino
     cd .tino
+    as_root ln -s "/$HOME/.tino/bin/tino" /usr/local/bin/tino
     ./bin/install dotfiles
     ./bin/install vim
 
@@ -102,10 +106,11 @@ setup_extra() {
 
 
     # install extra packages
-    install sshfs acpi sqlite3 iftop rfkill rsync make
+    install sshfs acpi sqlite3 iftop rfkill rsync
+    install make gcc g++ binutils libgmp-dev
     install exuberant-ctags silversearcher-ag mlocate
 
-    frill install subversion mercurial linux-headers-generic binutils g++
+    install subversion mercurial linux-headers-generic
 
     # setup stack
     wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
@@ -113,14 +118,14 @@ setup_extra() {
     as_root apt-get update
 
     cd
+    install libx11-dev
     install stack
     if [ "$?" != 0 ]; then
         # install stack on 32 bit systems
         wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-i386-linux.gz
         gunzip stack.gz
-        rm stack.gz
-        as_root mv stack-0.1.2.0-i386-linux /usr/local/bin/stack
-        as_root chmod +x /usr/local/bin/stack
+        chmod +x stack
+        as_root mv stack /usr/local/bin/stack
     fi
 
     # and pip
@@ -128,11 +133,11 @@ setup_extra() {
 }
 
 setup_gui() {
-    # these are not actually frills :D, just testing
-    frill install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
-    install feh dzen2 conky scrot synapse x11-server-utils
-    frill install thunar evince gpicview vim-gtk lxrandr
-    frill install pidgin cmus luakit chromium-browser vlc deluge-gtk
+    install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
+    install feh dzen2 conky scrot
+    # install synapse
+    install thunar evince gpicview vim-gtk lxrandr
+    install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
     frill install gimp anki texlive-latex-recommended libreoffice
 
@@ -142,8 +147,8 @@ setup_gui() {
     stack install xmonad xmonad-contrib
     xmonad --recompile
 
-    frill stack install turtle
-    frill pip install beets
+    stack install turtle
+    pip install beets
 
     # install cmus posting
     cd $DIR
@@ -211,5 +216,5 @@ case "$COMMAND" in
         ;;
 esac
 
-
 # TODO: crontab
+

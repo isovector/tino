@@ -1,6 +1,7 @@
 #!/bin/bash
 
 attach() {
+    mv "$HOME/.$1" "$HOME/.$1.old"
     ln -s "$HOME/.tino/.$1" "$HOME/.$1"
 }
 
