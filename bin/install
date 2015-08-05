@@ -4,10 +4,30 @@ attach() {
     ln -s "$HOME/.tino/.$1" "$HOME/.$1"
 }
 
-attach vim
-attach vimrc
-attach gvimrc
-attach gvimrc
-attach xmodmaprc
-attach xmonad
+[ $# -gt 0 ] || set -- help
+
+
+case "$1" in
+    help)
+        echo "install targets:"
+        echo -e "\tdotfiles"
+        echo -e "\tvim"
+        ;;
+
+    dotfiles)
+        attach vim
+        attach vimrc
+        attach gvimrc
+        attach gvimrc
+        attach xmodmaprc
+        attach xmonad
+        ;;
+
+    vim)
+        vim +PlugInstall +qall
+        ;;
+
+    *)
+        ;;
+esac
 
