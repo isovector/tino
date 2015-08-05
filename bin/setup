@@ -46,8 +46,6 @@ init_root() {
     fi
 }
 
-# TODO: install system font
-
 purge() {
     echo "continuing past this point will delete a bunch of stuff"
     warning "purge"
@@ -67,7 +65,7 @@ setup_basic() {
     frill install python3
 
     # setup a sane env
-    chsh --shell /usr/bin/zsh
+    as_root chsh --shell `which zsh` "$USER"
     cd
     mkdir .src
 
@@ -116,10 +114,11 @@ setup_extra() {
 
     cd
     install stack
-    if ["$?" != 0]; then
+    if [ "$?" != 0 ]; then
         # install stack on 32 bit systems
         wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-i386-linux.gz
         gunzip stack.gz
+        rm stack.gz
         as_root mv stack-0.1.2.0-i386-linux /usr/local/bin/stack
         as_root chmod +x /usr/local/bin/stack
     fi
@@ -129,16 +128,16 @@ setup_extra() {
 }
 
 setup_gui() {
-    install terminator cmus avconv aspell aspell-en redshift x11-xserver-utils xclip acpi xterm x11-utils
-    install feh dzen2 conky scrot synapse
-    install thunar evince gpicview vim-gtk lxrandr
-    install pidgin cmus luakit chromium-browser vlc deluge-gtk
+    # these are not actually frills :D, just testing
+    frill install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
+    install feh dzen2 conky scrot synapse x11-server-utils
+    frill install thunar evince gpicview vim-gtk lxrandr
+    frill install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
     frill install gimp anki texlive-latex-recommended libreoffice
 
     frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
-    # TODO: get xmonad configs
     stack setup
     stack install xmonad xmonad-contrib
     xmonad --recompile
@@ -211,8 +210,6 @@ case "$COMMAND" in
     *)
         ;;
 esac
-
-
 
 
 # TODO: crontab
