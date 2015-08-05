@@ -1,0 +1,8 @@
+/xmonad
+/xmonad.errors
+/xmonad-*
+/xmonad.o
+/xmonad.hi
+*.swn
+*.swo
+/history

@@ -1,0 +1,28 @@
+# main()
+snippet cv
+	case ${1:name}: ${2:T} =>
+	    ${3}
+snippet cc
+	case ${1:Some}( ${2:arg} ) =>
+	    ${3}
+snippet ce
+	case ${1:None} =>
+	    ${2}
+snippet cd
+	case _ =>
+	    ${1}
+snippet def
+	def ${1:name}( ${2:param} ) = {
+	}
+snippet case
+	case class ${1:Name}( ${2:arg} )
+snippet rich
+	case class Rich${2}(u: ${1}) {
+	    ${3}
+	}
+
+    implicit def toRich$2(u: $1): Rich$2 = Rich$2(u)
+snippet arg
+	${1:a}${0:, arg}
+snippet param
+	${1:a}: ${2:T}${0:, param}

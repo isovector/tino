@@ -1,0 +1,8 @@
+background yes
+out_to_console yes
+out_to_x no
+# Update interval in seconds
+update_interval 1
+
+TEXT
+${battery_percent BAT0}% ${if_existing /proc/net/route wlan0} ^i(/home/my_user/.xmonad/dzen2/net_wired.xbm) ^fg(\#00aa4a) ^i(/home/my_user/.xmonad/dzen2/net_down_03.xbm)${downspeed wlan0} ^fg(\#ff3333) ^i(/home/my_user/.xmonad/dzen2/net_up_03.xbm)${upspeed wlan0} ^fg(\#ebac54) ^i(/home/my_user/.xmonad/dzen2/mpd.xbm) ^fg(\#00ffff)${execi 2 /home/bootstrap/.xmonad/cmus.sh} ^fg(\#ebac54) ^i(/home/my_user/.xmonad/dzen2/volume.xbm) ^fg(\#00ffff)${exec amixer get Master | egrep -o "[0-9]+%" | head -1 | egrep -o "[0-9]*"}% ^fg(\#ebac54) ^i(/home/my_user/.xmonad/dzen2/clock.xbm) ^fg(\#FFFFFF) ${time %Y-%m-%d} ^fg(\#ebac54) ${time %R}
