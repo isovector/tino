@@ -134,19 +134,16 @@ setup_stats() {
     as_root python2 setup.py install
 }
 
+echo "build types:"
+echo -e "\tfull"
+echo -e "\theadless"
+echo -e "\tbasic"
+echo -e "\tuntrusted"
 
-[ $# -gt 0 ] || set -- help
+read COMMAND
 
 
-case "$1" in
-    help)
-        echo "build types:"
-        echo -e "\tfull"
-        echo -e "\theadless"
-        echo -e "\tbasic"
-        echo -e "\tuntrusted"
-        ;;
-
+case "$COMMAND" in
     full)
         warning full
         setup_basic
