@@ -180,12 +180,14 @@ case "$COMMAND" in
         setup_extra
         setup_gui
         setup_stats
+        purge
         ;;
 
     basic)
         warning basic
         setup_basic
         setup_env
+        purge
         ;;
 
     headless)
@@ -193,6 +195,7 @@ case "$COMMAND" in
         setup_basic
         setup_env
         setup_extra
+        purge
         ;;
 
     untrusted)
@@ -201,6 +204,7 @@ case "$COMMAND" in
         setup_env
         setup_extra
         setup_gui
+        purge
         ;;
 
 
