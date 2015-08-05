@@ -2,6 +2,7 @@
 
 USER=$(whoami)
 LSB=$(lsb_release -a 2>/dev/null | grep Codename | cut -d "	" -f 2-)
+FRILLS=0
 
 inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
 
@@ -42,7 +43,11 @@ setup_basic() {
 
     # install super basic packages
     as_root apt-get update
-    install curl zsh git python2 python3 vim ssh tmux
+    install curl zsh git python2 vim ssh tmux
+
+    if [ FRILLS ]; then
+        install python3
+    fi
 
     # setup a sane env
     chsh --shell /usr/bin/zsh
@@ -74,8 +79,12 @@ setup_env() {
 }
 
 setup_extra() {
-    install sshfs acpi sqlite3 iftop rfkill rsync subversion mercurial linux-headers-generic
-    install exuberant-ctags g++ binutils silversearcher-ag mlocate
+    install sshfs acpi sqlite3 iftop rfkill rsync
+    install exuberant-ctags silversearcher-ag mlocate
+
+    if [ FRILLS ]; then
+        install subversion mercurial linux-headers-generic binutils g++
+    fi
 
     # setup stack
     wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
@@ -90,14 +99,22 @@ setup_gui() {
     install terminator cmus avconv aspell aspell-en redshift xmodmap xclip acpi xterm x11-utils
     install feh dzen2 conky scrot synapse
     install thunar evince gpicview vim-gtk lxrandr
-    install gimp pidgin cmus luakit chromium-browser vlc texlive-latex-recommended anki deluge-gtk libreoffice
+    install pidgin cmus luakit chromium-browser vlc deluge-gtk
+
+    if [ FRILLS ]; then
+        install gimp anki texlive-latex-recommended libreoffice
+    fi
+
     as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
     # TODO: get xmonad configs
     stack install xmonad xmonad-contrib
     xmonad --recompile
 
-    pip install beets
+    if [ FRILLS ]; then
+        stack install turtle
+        pip install beets
+    fi
 
     # install cmus posting
     cd $DIR
