@@ -1,0 +1,13 @@
+#!/bin/bash
+
+attach() {
+    ln -s "$HOME/.tino/.$1" "$HOME/.$1"
+}
+
+attach vim
+attach vimrc
+attach gvimrc
+attach gvimrc
+attach xmodmaprc
+attach xmonad
+

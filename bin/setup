@@ -57,7 +57,7 @@ setup_basic() {
     # TODO: make this do an install of tino
     git clone https://github.com/isovector/tino .tino
     cd .tino
-    ./bin/install.sh
+    ./bin/install
 
     # setup git
     git config --global user.name "Sandy Maguire"
