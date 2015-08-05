@@ -10,6 +10,16 @@ install() {
     as_root apt-get install "$@" -y
 }
 
+remove() {
+    as_root apt-get remove "$@" -y
+}
+
+# frills are big packages that aren't necesssary
+frill() {
+    # make this do frill installs at some point
+    return
+}
+
 warning() {
     echo "preparing to install ${1}...";
     echo -n "continue? ";
@@ -36,25 +46,32 @@ init_root() {
     fi
 }
 
+# TODO: install system font
+
+purge() {
+    echo "continuing past this point will delete a bunch of stuff"
+    warning "purge"
+    remove firefox command-not-found command-not-found-data language-selector-common
+    remove bluez openbox
+}
+
 setup_basic() {
     # setup pacman
-    as_root wget -O /usr/local/bin/pacman https://github.com/icy/pacapt/raw/master/pacapt
+    as_root wget -O /usr/local/bin/pacman https://raw.githubusercontent.com/icy/pacapt/5b8990742657c1d44c0ee63d223afbf60d96e026/pacapt
     as_root chmod 755 /usr/local/bin/pacman
 
     # install super basic packages
     as_root apt-get update
-    install curl zsh git python2 vim ssh tmux
+    install curl zsh git python vim ssh tmux
 
-    if [ FRILLS ]; then
-        install python3
-    fi
+    frill install python3
 
     # setup a sane env
     chsh --shell /usr/bin/zsh
     cd
     mkdir .src
 
-    # TODO: make this do an install of tino
+    # install tino utils
     git clone https://github.com/isovector/tino .tino
     cd .tino
     ./bin/install dotfiles
@@ -80,42 +97,54 @@ setup_env() {
 }
 
 setup_extra() {
-    install sshfs acpi sqlite3 iftop rfkill rsync
+    # install pragmata pro
+    as_root mkdir -p /usr/share/fonts/truetype/pragmata
+    as_root wget -O/usr/share/fonts/truetype/pragmata/PragmataPro.ttf https://github.com/xpando/Dash/raw/master/Fonts/PragmataPro.ttf
+    as_root fc-cache -f -v
+
+
+    # install extra packages
+    install sshfs acpi sqlite3 iftop rfkill rsync make
     install exuberant-ctags silversearcher-ag mlocate
 
-    if [ FRILLS ]; then
-        install subversion mercurial linux-headers-generic binutils g++
-    fi
+    frill install subversion mercurial linux-headers-generic binutils g++
 
     # setup stack
     wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
-    echo "deb http://download.fpcomplete.com/ubuntu/$LSB stable main" | as_root tee /etc/apt/sources.list.d/fpco.list
+    echo "deb http://download.fpcomplete.com/ubuntu/$LSB stable main" | as_root tee -a /etc/apt/sources.list
     as_root apt-get update
-    install stack
 
+    cd
+    install stack
+    if ["$?" != 0]; then
+        # install stack on 32 bit systems
+        wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-i386-linux.gz
+        gunzip stack.gz
+        as_root mv stack-0.1.2.0-i386-linux /usr/local/bin/stack
+        as_root chmod +x /usr/local/bin/stack
+    fi
+
+    # and pip
     wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
 }
 
 setup_gui() {
-    install terminator cmus avconv aspell aspell-en redshift xmodmap xclip acpi xterm x11-utils
+    install terminator cmus avconv aspell aspell-en redshift x11-xserver-utils xclip acpi xterm x11-utils
     install feh dzen2 conky scrot synapse
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
-    if [ FRILLS ]; then
-        install gimp anki texlive-latex-recommended libreoffice
-    fi
+    frill install gimp anki texlive-latex-recommended libreoffice
 
-    as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
+    frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
     # TODO: get xmonad configs
+    stack setup
     stack install xmonad xmonad-contrib
     xmonad --recompile
 
-    if [ FRILLS ]; then
-        stack install turtle
-        pip install beets
-    fi
+    frill stack install turtle
+    frill pip install beets
 
     # install cmus posting
     cd $DIR
