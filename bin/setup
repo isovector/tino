@@ -54,6 +54,7 @@ purge() {
     # drop the ones we don't care about
     remove firefox command-not-found language-selector-common
     remove bluez bluez-cups bluez-alsa openbox
+    as_root apt-get autoremove
 }
 
 setup_basic() {
