@@ -5,6 +5,25 @@ attach() {
     ln -s "$HOME/.tino/.$1" "$HOME/.$1"
 }
 
+init_root() {
+    if [ "`id -u`" -ne 0 ]; then
+        if inpath sudo && sudo -l >/dev/null 2>&1; then
+            as_root() {
+                if [ "$1" = exec ]; then ex="exec"; shift; fi
+                $ex sudo "$@"
+            }
+        else
+            echo "Warning: sudo not installed or not configured" >&2
+            as_root() {
+                if [ "$1" = exec ]; then ex="exec"; shift; fi
+                $ex su -c "$*"
+            }
+        fi
+    else
+        as_root() { "$@" ; }
+    fi
+}
+
 [ $# -gt 0 ] || set -- help
 
 
@@ -13,6 +32,7 @@ case "$1" in
         echo "install targets:"
         echo -e "\tdotfiles"
         echo -e "\tvim"
+        echo -e "\tenv"
         ;;
 
     dotfiles)
@@ -22,10 +42,16 @@ case "$1" in
         attach gvimrc
         attach xmodmaprc
         attach xmonad
+        attach zshrc
         ;;
 
     vim)
         vim +PlugInstall +qall
+        ;;
+
+    env)
+        init_root
+        echo 'PATH="$PATH:$HOME/.local/bin"' | as_root tee -a /etc/environment
         ;;
 
     *)
