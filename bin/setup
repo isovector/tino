@@ -133,6 +133,10 @@ setup_extra() {
     wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
 }
 
+setup_heavy() {
+    frill install gimp anki texlive-latex-recommended libreoffice
+}
+
 setup_gui() {
     install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
     install feh dzen2 conky scrot
@@ -140,7 +144,8 @@ setup_gui() {
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
-    frill install gimp anki texlive-latex-recommended libreoffice
+    frill install anki
+
 
     frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
@@ -185,6 +190,7 @@ case "$COMMAND" in
         setup_extra
         setup_gui
         setup_stats
+        setup_heavy
         purge
         ;;
 
