@@ -129,6 +129,9 @@ setup_extra() {
         as_root mv stack /usr/local/bin/stack
     fi
 
+    stack setup
+    stack install cabal-install
+
     # and pip
     wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
 }
@@ -149,7 +152,6 @@ setup_gui() {
 
     frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
-    stack setup
     stack install xmonad xmonad-contrib
     xmonad --recompile
 
