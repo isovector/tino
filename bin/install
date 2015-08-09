@@ -119,7 +119,6 @@ setup_extra() {
     as_root apt-get update
 
     cd
-    install libx11-dev
     install stack
     if [ "$?" != 0 ]; then
         # install stack on 32 bit systems
@@ -153,7 +152,7 @@ setup_gui() {
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
-    install libxrandr pkg-config libxft-dev
+    install libxrandr-dev pkg-config libxft-dev libx11-dev
     ./bin/setup xmonad
 
     frill install anki

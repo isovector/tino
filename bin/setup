@@ -57,11 +57,11 @@ case "$1" in
 
         # build xmonad
         cd ~/.tino/.xmonad
-        cabal sandbox init
-        cabal install xmonad xmonad-contrib xmonad-extras
-        cabal build
+        ~/.cabal/bin/cabal sandbox init
+        ~/.cabal/bin/cabal install xmonad xmonad-contrib xmonad-extras
+        ~/.cabal/bin/cabal build
         cp dist/build/xmonad/xmonad xmonad
-        cabal exec ./xmonad -- --recompile
+        ~/.cabal/bin/cabal exec ./xmonad -- --recompile
         as_root ln -s "$HOME/.tino/.xmonad/xmonad" /usr/local/bin/xmonad
 
         # setup desktop env for it
