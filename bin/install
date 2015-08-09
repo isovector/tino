@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/zsh
 
 attach() {
     mv "$HOME/.$1" "$HOME/.$1.old"
@@ -32,6 +32,7 @@ case "$1" in
         echo "install targets:"
         echo -e "\tdotfiles"
         echo -e "\tvim"
+        echo -e "\txmonad"
         echo -e "\tenv"
         ;;
 
@@ -47,6 +48,31 @@ case "$1" in
 
     vim)
         vim +PlugInstall +qall
+        ;;
+
+    xmonad)
+        init_root
+
+        # build xmonad
+        cd ~/.tino/.xmonad
+        cabal sandbox init
+        cabal build
+        cp dist/build/xmonad xmonad
+        cabal exec ./xmonad -- --recompile
+        as_root ln -s "$HOME/.tino/.xmonad/xmonad" /usr/local/bin/xmonad
+
+        # setup desktop env for it
+        read -r -d '' XMONAD <<'EOF'
+[Desktop Entry]
+Name=XMonad
+Comment=Log in using XMonad
+Exec=/usr/local/bin/xmonad
+TryExec=/usr/local/bin/xmonad
+Icon=xmonad
+Type=Application
+EOF
+
+        echo "$XMONAD" | as_root tee /usr/share/xsessions/xmonad.desktop
         ;;
 
     env)

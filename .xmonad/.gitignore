@@ -6,3 +6,6 @@
 *.swn
 *.swo
 /history
+/.cabal-sandbox
+/cabal.sandbox.config
+/dist

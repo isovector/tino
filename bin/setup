@@ -130,7 +130,13 @@ setup_extra() {
     fi
 
     stack setup
-    stack install cabal-install
+    stack install turtle
+
+    # bootstrap cabal
+    install cabal-install haskell-platform
+    cabal update
+    cabal install cabal-install
+    remove cabal-install haskell-platform
 
     # and pip
     wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
@@ -147,16 +153,12 @@ setup_gui() {
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
+    ./bin/install xmonad
+
     frill install anki
-
-
     frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
 
-    stack install xmonad xmonad-contrib
-    xmonad --recompile
-
-    stack install turtle
-    pip install beets
+    frill pip install beets
 
     # install cmus posting
     cd $DIR
@@ -181,10 +183,9 @@ echo -e "\theadless"
 echo -e "\tbasic"
 echo -e "\tuntrusted"
 
-read COMMAND
+[ $# -gt 0 ] || set -- help
 
-
-case "$COMMAND" in
+case "$1" in
     full)
         warning full
         setup_basic
