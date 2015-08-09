@@ -1,5 +1,7 @@
 #!/usr/bin/zsh
 
+inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
+
 attach() {
     mv "$HOME/.$1" "$HOME/.$1.old"
     ln -s "$HOME/.tino/.$1" "$HOME/.$1"
@@ -56,8 +58,9 @@ case "$1" in
         # build xmonad
         cd ~/.tino/.xmonad
         cabal sandbox init
+        cabal install xmonad xmonad-contrib xmonad-extras
         cabal build
-        cp dist/build/xmonad xmonad
+        cp dist/build/xmonad/xmonad xmonad
         cabal exec ./xmonad -- --recompile
         as_root ln -s "$HOME/.tino/.xmonad/xmonad" /usr/local/bin/xmonad
 
