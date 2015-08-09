@@ -1,27 +1,10 @@
-#!/usr/bin/env bash
-
-USER=$(whoami)
-LSB=$(lsb_release -a 2>/dev/null | grep Codename | cut -d "	" -f 2-)
+#!/usr/bin/zsh
 
 inpath() { [ -x "`which "$1" 2>/dev/null`" ]; }
 
-install() {
-    as_root apt-get install "$@" -y
-}
-
-remove() {
-    as_root apt-get remove "$@" -y
-}
-
-frill() {
-    "$@"
-}
-
-warning() {
-    echo "preparing to install ${1}...";
-    echo -n "continue? ";
-    read
-    init_root
+attach() {
+    mv "$HOME/.$1" "$HOME/.$1.old"
+    ln -s "$HOME/.tino/.$1" "$HOME/.$1"
 }
 
 init_root() {
@@ -43,189 +26,64 @@ init_root() {
     fi
 }
 
-purge() {
-    echo "continuing past this point will delete a bunch of stuff"
-    warning "purge"
-
-    # "manually" install the components of these metapackages
-    as_root aptitude unmarkauto '?reverse-depends(lubuntu-core) | ?reverse-recommends(lubuntu-core)'
-    as_root aptitude unmarkauto '?reverse-depends(ubuntu-standard) | ?reverse-recommends(ubuntu-standard)'
-
-    # drop the ones we don't care about
-    remove firefox command-not-found language-selector-common
-    remove bluez bluez-cups bluez-alsa openbox
-    as_root apt-get autoremove
-}
-
-setup_basic() {
-    # setup pacman
-    as_root wget -O /usr/local/bin/pacman https://raw.githubusercontent.com/icy/pacapt/5b8990742657c1d44c0ee63d223afbf60d96e026/pacapt
-    as_root chmod 755 /usr/local/bin/pacman
-
-    # install super basic packages
-    as_root apt-get update
-    install curl zsh git python vim ssh tmux
-
-    install python3
-
-    # setup a sane env
-    as_root chsh --shell `which zsh` "$USER"
-    cd
-    mkdir .src
-
-    # install tino utils
-    git clone https://github.com/isovector/tino .tino
-    cd .tino
-    as_root ln -s "/$HOME/.tino/bin/tino" /usr/local/bin/tino
-    ./bin/install dotfiles
-    ./bin/install vim
-
-    # setup git
-    git config --global user.name "Sandy Maguire"
-    git config --global user.email "sandy@sandymaguire.me"
-    git config --global credential.helper cache
-    git config --global credential.helper 'cache --timeout=3600'
-
-    # setup ssh and net
-    cd
-    mkdir .ssh
-    cd .ssh
-    yes '' | ssh-keygen -t rsa -C "sandy@sandymaguire.me"
-    as_root ssh-add id_rsa
-    as_root adduser $USER netdev
-}
-
-setup_env() {
-    return
-}
-
-setup_extra() {
-    # install pragmata pro
-    as_root mkdir -p /usr/share/fonts/truetype/pragmata
-    as_root wget -O/usr/share/fonts/truetype/pragmata/PragmataPro.ttf https://github.com/xpando/Dash/raw/master/Fonts/PragmataPro.ttf
-    as_root fc-cache -f -v
-
-
-    # install extra packages
-    install sshfs acpi sqlite3 iftop rfkill rsync
-    install make gcc g++ binutils libgmp-dev
-    install exuberant-ctags silversearcher-ag mlocate
-
-    install subversion mercurial linux-headers-generic
-
-    # setup stack
-    wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | as_root apt-key add -
-    echo "deb http://download.fpcomplete.com/ubuntu/$LSB stable main" | as_root tee -a /etc/apt/sources.list
-    as_root apt-get update
-
-    cd
-    install libx11-dev
-    install stack
-    if [ "$?" != 0 ]; then
-        # install stack on 32 bit systems
-        wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-i386-linux.gz
-        gunzip stack.gz
-        chmod +x stack
-        as_root mv stack /usr/local/bin/stack
-    fi
-
-    stack setup
-    stack install turtle
-
-    # bootstrap cabal
-    install cabal-install haskell-platform
-    cabal update
-    cabal install cabal-install
-    remove cabal-install haskell-platform
-
-    # and pip
-    wget -q -O- https://bootstrap.pypa.io/get-pip.py | as_root python2
-}
-
-setup_heavy() {
-    frill install gimp anki texlive-latex-recommended libreoffice
-}
-
-setup_gui() {
-    install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
-    install feh dzen2 conky scrot
-    # install synapse
-    install thunar evince gpicview vim-gtk lxrandr
-    install pidgin cmus luakit chromium-browser vlc deluge-gtk
-
-    install libxrandr pkg-config libxft-dev
-    ./bin/install xmonad
-
-    frill install anki
-    frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"
-
-    frill pip install beets
-
-    # install cmus posting
-    cd $DIR
-    mkdir .cmus
-    wget https://raw.github.com/jkramer/post-fm/master/post-fm -O .cmus/postfm
-    vim .cmus/postfm
-    chmod +x .cmus/postfm
-}
-
-setup_stats() {
-    install python-tk rescuetime imagemagick
-    pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
-    cd
-    git clone https://github.com/gurgeh/selfspy.git .src
-    cd .src/selfspy
-    as_root python2 setup.py install
-}
-
-echo "build types:"
-echo -e "\tfull"
-echo -e "\theadless"
-echo -e "\tbasic"
-echo -e "\tuntrusted"
-
 [ $# -gt 0 ] || set -- help
 
+
 case "$1" in
-    full)
-        warning full
-        setup_basic
-        setup_env
-        setup_extra
-        setup_gui
-        setup_stats
-        setup_heavy
-        purge
+    help)
+        echo "install targets:"
+        echo -e "\tdotfiles"
+        echo -e "\tvim"
+        echo -e "\txmonad"
+        echo -e "\tenv"
         ;;
 
-    basic)
-        warning basic
-        setup_basic
-        setup_env
-        purge
+    dotfiles)
+        attach vim
+        attach vimrc
+        attach gvimrc
+        attach gvimrc
+        attach xmodmaprc
+        attach xmonad
+        attach zshrc
         ;;
 
-    headless)
-        warning headless
-        setup_basic
-        setup_env
-        setup_extra
-        purge
+    vim)
+        vim +PlugInstall +qall
         ;;
 
-    untrusted)
-        warning untrusted
-        setup_basic
-        setup_env
-        setup_extra
-        setup_gui
-        purge
+    xmonad)
+        init_root
+
+        # build xmonad
+        cd ~/.tino/.xmonad
+        cabal sandbox init
+        cabal install xmonad xmonad-contrib xmonad-extras
+        cabal build
+        cp dist/build/xmonad/xmonad xmonad
+        cabal exec ./xmonad -- --recompile
+        as_root ln -s "$HOME/.tino/.xmonad/xmonad" /usr/local/bin/xmonad
+
+        # setup desktop env for it
+        read -r -d '' XMONAD <<'EOF'
+[Desktop Entry]
+Name=XMonad
+Comment=Log in using XMonad
+Exec=/usr/local/bin/xmonad
+TryExec=/usr/local/bin/xmonad
+Icon=xmonad
+Type=Application
+EOF
+
+        echo "$XMONAD" | as_root tee /usr/share/xsessions/xmonad.desktop
         ;;
 
+    env)
+        init_root
+        echo 'PATH="$PATH:$HOME/.local/bin"' | as_root tee -a /etc/environment
+        ;;
 
     *)
         ;;
 esac
-
-# TODO: crontab
 
