@@ -64,6 +64,13 @@ case "$basename" in
         ;;
 
 
+    vpn)
+        (   sleep 5 &&
+            chromium-browser --proxy-server="socks5://localhost:12345" --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE localhost"
+        ) &
+        ssh -vvv -N -D 12345 amaguire@csc.uwaterloo.ca
+        ;;
+
     turtle)
         read -r -d '' TURTLE <<'EOF'
 {-# LANGUAGE OverloadedStrings #-}
