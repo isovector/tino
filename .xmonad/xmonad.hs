@@ -43,7 +43,7 @@ cmus = mod3Mask
 setWallpaper :: String -> X ()
 setWallpaper strWallpaper = spawn $ "feh --bg-fill /home/bootstrap/" ++ strWallpaper
 
-myManageHook = fullscreenManageHook<+> manageSpawn <+> manageDocks <+> composeAll
+myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeAll
    [ className =? "Gvim" --> viewShift "2"
    , role =? "conversation" --> doFloat
    , isFullscreen --> doFullFloat
