@@ -2,6 +2,7 @@ import Prelude hiding (mod)
 
 import Control.Monad (when, liftM2)
 import Data.List (isInfixOf)
+import Data.Monoid (mconcat)
 import Graphics.X11.ExtraTypes.XF86
 import System.Environment (getArgs)
 import System.IO
@@ -21,7 +22,11 @@ import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Prompt
 import XMonad.Prompt.Input
-import XMonad.Util.EZConfig (additionalKeys, removeKeys)
+import XMonad.Util.EZConfig ( additionalKeys
+                            , removeKeys
+                            , additionalMouseBindings
+                            , removeMouseBindings
+                            )
 import XMonad.Util.Replace (replace)
 import XMonad.Util.Run
 import qualified XMonad.StackSet as W
@@ -31,6 +36,7 @@ import qualified XMonad.StackSet as W
 (=??) :: Query String -> String -> Query Bool
 q =?? x = fmap (isInfixOf x) q
 
+alt = mod1Mask
 mod  = mod4Mask
 cmus = mod3Mask
 
@@ -76,9 +82,26 @@ myLayoutHook = avoidStruts $ tall ||| Mirror tall  ||| noBorders (fullscreenFull
   where tall = Tall 1 (3/100) (1/2)
 
 
-main = do d <- spawnPipe "dzen2 -p -ta l -h '14' -e 'onstart=lower' -fn 'Bitstream Vera Sans-6:Bold'"
-          t <- spawnPipe "trayer --edge top --align right --SetDockType true --SetPartialStrut true --expand false --widthtype pixel --transparent true --tint 0 --alpha 0 --height 14"
-          c <- spawnPipe "conky -c /home/bootstrap/.xmonad/conky.rc | dzen2 -x '800' -w '624' -h '14' -ta 'r' -bg '#000000' -fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-6:Bold'"
+main = do d <- spawnPipe
+             $ mconcat
+                [ "dzen2 "
+                , "-p -ta l -h '14' "
+                , "-e 'onstart=lower' "
+                , "-fn 'Bitstream Vera Sans-6:Bold'"
+                ]
+          t <- spawnPipe
+             $ mconcat
+                [ "trayer "
+                , "--edge top --align right --SetDockType true "
+                , "--SetPartialStrut true --expand false --widthtype pixel "
+                , "--transparent true --tint 0 --alpha 0 --height 14"
+                ]
+          c <- spawnPipe
+             $ mconcat
+                [ "conky -c /home/bootstrap/.xmonad/conky.rc | "
+                , "dzen2 -x '700' -w '800' -h '14' -ta 'r' -bg '#000000' "
+                , "-fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-6:Bold'"
+                ]
 
           spawn "xmodmap ~/.xmodmaprc"
           xmonad $ ewmh $ withUrgencyHook NoUrgencyHook $
@@ -90,9 +113,20 @@ main = do d <- spawnPipe "dzen2 -p -ta l -h '14' -e 'onstart=lower' -fn 'Bitstre
                           , handleEventHook    = docksEventHook <+> fullscreenEventHook
                           , logHook            = myLogHook d
                           , layoutHook         = myLayoutHook
-                          } `removeKeys` [ (mod, xK_p)
-                                         , (mod .|. shiftMask, xK_p)
-                                         ]
+                          } `removeKeys`
+                                [ (mod, xK_p)
+                                , (mod .|. shiftMask, xK_p)
+                                ]
+                            `removeMouseBindings`
+                                [ (mod, button1)
+                                , (mod, button2)
+                                , (mod, button3)
+                                ]
+                            `additionalMouseBindings`
+                                [ ((alt, button1), \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
+                                , ((alt, button2), windows . (W.shiftMaster .) . W.focusWindow)
+                                , ((alt, button3), \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
+                                ]
                             `additionalKeys` myKeys
 
 myKeys =
