@@ -16,7 +16,11 @@ import Data.Time.LocalTime ( getCurrentTimeZone
 import Text.ParserCombinators.Parsec
 
 type Project = String
-type Time = (Int, Int)
+newtype Time = Time (Int, Int)
+
+instance Show Time where
+    show (Time (h, m)) =
+        (pad2 "0" $ show h) ++ ":" ++ (pad2 "0" $ show m)
 
 data Stretch = Stretch
     { project   :: Project
@@ -25,7 +29,7 @@ data Stretch = Stretch
     } deriving (Show)
 
 duration :: Time -> Time -> Int
-duration  (h, m) (h', m') = (h' - h) * 60 + (m' - m)
+duration  (Time (h, m)) (Time (h', m')) = (h' - h) * 60 + (m' - m)
 
 durationOf :: Stretch -> IO Int
 durationOf s =
@@ -36,16 +40,25 @@ durationOf s =
 date :: IO (Integer,Int,Int)
 date = getCurrentTime >>= return . toGregorian . utctDay
 
+now :: IO Time
+now = do
+    tz <- getCurrentTimeZone
+    now <- getCurrentTime
+    let when = localTimeOfDay $ utcToLocalTime tz now
+    return $ Time (todHour when, todMin when)
+
+
 endOrNow :: Stretch -> IO Time
 endOrNow s =
     case endTime s of
       Just end -> return end
-      Nothing  -> do
-          tz <- getCurrentTimeZone
-          now <- getCurrentTime
-          let when = localTimeOfDay $ utcToLocalTime tz now
-          return (todHour when, todMin when)
+      Nothing  -> now
 
+pad2 :: String -> String -> String
+pad2 c d =
+    if length d < 2
+       then c ++ d
+       else d
 
 dateFile :: IO FilePath
 dateFile = do
@@ -54,16 +67,11 @@ dateFile = do
         [ "/home/bootstrap/.tino/var/"
         , show year
         , "-"
-        , pad "0" $ show month
+        , pad2 "0" $ show month
         , "-"
-        , pad "0" $ show day
+        , pad2 "0" $ show day
         , ".txt"
         ]
-  where
-      pad c d =
-          if length d < 2
-             then "0" ++ d
-             else d
 
 projectParser :: GenParser Char st String
 projectParser = many $ noneOf " "
@@ -74,7 +82,7 @@ timeParser = do
     hour   <- read <$> many digit
     string ":"
     minute <- read <$> many digit
-    return (hour, minute)
+    return $ Time (hour, minute)
 
 parseStretch :: String -> Either ParseError Stretch
 parseStretch input =
@@ -107,5 +115,15 @@ productive start ss = fmap (reverse . snd)
             return (acc', [(start, end)] ++ result)
         perc acc when = fromIntegral acc / fromIntegral (duration start when)
 
+writeStart :: String -> Maybe Time -> IO ()
+writeStart p Nothing  = fmap Just now >>= writeStart p
+writeStart p (Just t) = do
+    file <- dateFile
+    appendFile file $ p ++ " " ++ show t
 
+writeEnd :: Maybe Time -> IO ()
+writeEnd Nothing  = fmap Just now >>= writeEnd
+writeEnd (Just t) = do
+    file <- dateFile
+    appendFile file $ " " ++ show t ++ "\n"
 
