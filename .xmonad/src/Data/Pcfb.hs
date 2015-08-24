@@ -1,10 +1,18 @@
-module Data.Pcfb where
+module Data.Pcfb ( Time (..)
+                 , Stretch
+                 , dateFile
+                 , todayStretches
+                 , productive
+                 , activeProject
+                 , writeStart
+                 , writeEnd
+                 ) where
 
 import Control.Applicative ((<$>))
-import Control.Monad (foldM)
-import Data.Either (rights)
-import Data.Maybe (isNothing)
-import Data.Monoid (mconcat)
+import Control.Monad       (foldM)
+import Data.Either         (rights)
+import Data.Maybe          (isNothing)
+import Data.Monoid         (mconcat)
 import Data.Time.Clock
 import Data.Time.Calendar
 import Data.Time.LocalTime ( getCurrentTimeZone
@@ -15,6 +23,7 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , hoursToTimeZone
                            )
 import Text.ParserCombinators.Parsec
+
 
 type Project = String
 newtype Time = Time (Int, Int)
@@ -105,23 +114,24 @@ getStretches file = do
 todayStretches :: IO [Stretch]
 todayStretches = dateFile >>= getStretches
 
-currentProject :: [Stretch] -> Maybe Project
-currentProject ss =
+activeProject :: [Stretch] -> Maybe Project
+activeProject ss =
     let p = last ss
      in case endTime p of
           Just _  -> Nothing
           Nothing -> Just $ project p
 
-productive :: Time -> [Stretch] -> IO [(Float, Float)]
-productive start ss = fmap (reverse . snd)
-                   $ foldM go (0, []) ss
+productive :: [Stretch] -> IO [(Float, Float)]
+productive ss = fmap (reverse . snd)
+              $ foldM go (0, []) ss
     where
         go (acc, result) s = do
             acc' <- (acc +) <$> durationOf s
+            end  <- perc acc' <$> endOrNow s
             let start = perc acc $ startTime s
-            end <- perc acc' <$> endOrNow s
             return (acc', [(start, end)] ++ result)
-        perc acc when = fromIntegral acc / fromIntegral (duration start when)
+        perc acc when = fromIntegral acc / fromIntegral (duration' when)
+        duration' = duration (Time (0, 0))
 
 writeStart :: String -> Maybe Time -> IO ()
 writeStart p Nothing  = fmap Just now >>= writeStart p

@@ -1,6 +1,7 @@
 import Prelude hiding (mod)
 
 import Control.Monad (when, liftM2)
+import Data.Pcfb
 import Data.List (isInfixOf)
 import Data.Monoid (mconcat)
 import Graphics.X11.ExtraTypes.XF86
@@ -53,7 +54,7 @@ myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeA
 
 
 cmusPrompt :: X ()
-cmusPrompt = inputPrompt defaultXPConfig "live-filter: " ?+ cmus'
+cmusPrompt = inputPrompt defaultXPConfig "live-filter" ?+ cmus'
   where cmus' s = spawn $ "cmus-remote -C 'live-filter " ++ s ++ "'"
 
 -- StartupHook
