@@ -12,15 +12,22 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , todHour
                            , todMin
                            , localTimeOfDay
+                           , hoursToTimeZone
                            )
 import Text.ParserCombinators.Parsec
+
+midnight :: TimeZone
+midnight = hoursToTimeZone $ -1
 
 type Project = String
 newtype Time = Time (Int, Int)
 
 instance Show Time where
-    show (Time (h, m)) =
-        (pad2 "0" $ show h) ++ ":" ++ (pad2 "0" $ show m)
+    show (Time (h, m)) = mconcat
+        [ pad2 "0" $ show h
+        , ":"
+        , pad2 "0" $ show m
+        ]
 
 data Stretch = Stretch
     { project   :: Project
@@ -42,9 +49,8 @@ date = getCurrentTime >>= return . toGregorian . utctDay
 
 now :: IO Time
 now = do
-    tz <- getCurrentTimeZone
     now <- getCurrentTime
-    let when = localTimeOfDay $ utcToLocalTime tz now
+    let when = localTimeOfDay $ utcToLocalTime midnight now
     return $ Time (todHour when, todMin when)
 
 
@@ -101,8 +107,12 @@ getStretches file = do
 todayStretches :: IO [Stretch]
 todayStretches = dateFile >>= getStretches
 
-isOpen :: [Stretch] -> Bool
-isOpen = isNothing . endTime . last
+currentProject :: [Stretch] -> Maybe Project
+currentProject ss =
+    let p = last ss
+     in case endTime p of
+          Just _  -> Nothing
+          Nothing -> Just $ project p
 
 productive :: Time -> [Stretch] -> IO [(Float, Float)]
 productive start ss = fmap (reverse . snd)
