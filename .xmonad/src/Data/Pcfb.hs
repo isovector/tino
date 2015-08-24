@@ -1,4 +1,4 @@
-module Pcfb where
+module Data.Pcfb where
 
 import Control.Applicative ((<$>))
 import Control.Monad (foldM)
@@ -15,9 +15,6 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , hoursToTimeZone
                            )
 import Text.ParserCombinators.Parsec
-
-midnight :: TimeZone
-midnight = hoursToTimeZone $ -1
 
 type Project = String
 newtype Time = Time (Int, Int)
@@ -49,8 +46,9 @@ date = getCurrentTime >>= return . toGregorian . utctDay
 
 now :: IO Time
 now = do
+    tz  <- getCurrentTimeZone
     now <- getCurrentTime
-    let when = localTimeOfDay $ utcToLocalTime midnight now
+    let when = localTimeOfDay $ utcToLocalTime tz now
     return $ Time (todHour when, todMin when)
 
 
