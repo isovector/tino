@@ -171,6 +171,7 @@ setup_gui() {
 setup_stats() {
     install python-tk rescuetime imagemagick
     pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
+    as_root pip install galileo
     cd
     git clone https://github.com/gurgeh/selfspy.git .src
     cd .src/selfspy
