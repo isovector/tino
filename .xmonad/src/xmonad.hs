@@ -1,12 +1,13 @@
 import Prelude hiding (mod)
 
 import Control.Monad (when, liftM2)
-import Data.Pcfb
 import Data.List (isInfixOf)
 import Data.Monoid (mconcat)
 import Graphics.X11.ExtraTypes.XF86
 import System.Environment (getArgs)
 import System.IO
+
+import XPcfb
 
 import XMonad
 import XMonad.Actions.DynamicWorkspaces
@@ -76,10 +77,13 @@ myLogHook h = dynamicLogWithPP $ defaultPP
     , ppWsSep           = ""
     , ppSep             = "  "
     , ppOutput          = hPutStrLn h
+    , ppExtras          = [ pcfbLogger ]
     }
 
     -- add avoidStruts to your layoutHook like so
-myLayoutHook = avoidStruts $ tall ||| Mirror tall  ||| noBorders (fullscreenFull Full)
+myLayoutHook = avoidStruts $ tall
+                         ||| Mirror tall
+                         ||| noBorders (fullscreenFull Full)
   where tall = Tall 1 (3/100) (1/2)
 
 
@@ -129,6 +133,7 @@ main = do d <- spawnPipe
                                 , ((alt, button3), \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
                                 ]
                             `additionalKeys` myKeys
+                            `additionalKeys` pcfbKeys mod
 
 myKeys =
         [ ((mod, xK_f),                  runOrRaise "luakit" $ className =? "luakit")

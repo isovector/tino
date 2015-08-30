@@ -1,3 +1,11 @@
+module XPcfb ( pcfbOpen
+             , pcfbClose
+             , pcfbPrompt
+             , currentProject
+             , pcfbKeys
+             , pcfbLogger
+             ) where
+
 import Prelude hiding (mod)
 
 import Control.Monad (when, liftM2)
@@ -28,6 +36,7 @@ pcfbEnd = do
 
 withActiveProject :: IO () -> IO () -> IO ()
 withActiveProject w wo = do
+    hello Nothing
     ss <- todayStretches
     case activeProject ss of
       Just _  -> w
@@ -60,25 +69,18 @@ mutActive = unsafePerformIO $ newIORef False
 currentProject :: X String
 currentProject = liftIO $ readIORef mutProj
 
-{--
-myKeys =
-        [ ((mod, xK_f),                  runOrRaise "luakit" $ className =? "luakit")
-        , ((mod, xK_g),                  runOrRaise "gvim" $ className =? "Gvim")
-        , ((mod .|. shiftMask, xK_f),    runOrRaise "chromium-browser" $ className =? "Chromium-browser")
-        , ((mod .|. shiftMask, xK_q),    kill)
-        , ((mod, xK_d),                  safeSpawnProg "synapse")
-        , ((mod, xK_x),                  safeSpawnProg "terminator")
-        , ((mod, xK_t),                  safeSpawnProg "thunar")
-        , ((mod, xK_p),                  safeSpawnProg "scrot")
-        , ((mod .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
-        , ((0, xF86XK_AudioRaiseVolume), safeSpawn "amixer" $ words "-q set Master 2dB+")
-        , ((0, xF86XK_AudioLowerVolume), safeSpawn "amixer" $ words "-q set Master 2dB-")
-        , ((cmus, xK_Left),              safeSpawn "cmus-remote" ["--prev"])
-        , ((cmus, xK_Right),             safeSpawn "cmus-remote" ["--next"])
-        , ((cmus, xK_Down),              safeSpawn "cmus-remote" ["--pause"])
-        , ((cmus, xK_m),                 raise $ title =?? "cmus")
-        , ((cmus, xK_l),                 cmusPrompt)
-        ]
+pcfbLogger :: X (Maybe String)
+pcfbLogger = liftIO $ do
+    proj   <- readIORef mutProj
+    active <- readIORef mutActive
+    return $ if active
+       then Just $ "WORKING: " ++ proj
+       else Just $ "fuck off"
 
---}
+pcfbKeys :: ButtonMask -> [((ButtonMask, KeySym), X ())]
+pcfbKeys mod =
+        [ ((mod, xK_bracketleft),   liftIO $ pcfbOpen)
+        , ((mod, xK_bracketright),  liftIO $ pcfbClose)
+        , ((mod, xK_c),             pcfbPrompt)
+        ]
 

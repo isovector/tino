@@ -6,9 +6,12 @@ module Data.Pcfb ( Time (..)
                  , activeProject
                  , writeStart
                  , writeEnd
+                 , hello
                  ) where
 
+import Prelude hiding (catch)
 import Control.Applicative ((<$>))
+import Control.Exception
 import Control.Monad       (foldM)
 import Data.Either         (rights)
 import Data.Maybe          (isNothing)
@@ -19,9 +22,12 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , utcToLocalTime
                            , todHour
                            , todMin
+                           , localDay
                            , localTimeOfDay
                            , hoursToTimeZone
                            )
+import System.IO.Error hiding (catch)
+import System.Posix.User (getEffectiveUserName)
 import Text.ParserCombinators.Parsec
 
 
@@ -75,14 +81,14 @@ pad2 c d =
 
 dateFile :: IO FilePath
 dateFile = do
-    (year, month, day) <- date
+    tz  <- getCurrentTimeZone
+    stamp <- localDay . utcToLocalTime tz <$> getCurrentTime
+    me <- getEffectiveUserName
     return $ mconcat
-        [ "/home/bootstrap/.tino/var/"
-        , show year
-        , "-"
-        , pad2 "0" $ show month
-        , "-"
-        , pad2 "0" $ show day
+        [ "/home/"
+        , me
+        , "/.tino/var/"
+        , show stamp
         , ".txt"
         ]
 
@@ -111,10 +117,24 @@ getStretches file = do
     contents <- readFile file
     return . rights . map parseStretch $ lines contents
 
+hello :: Maybe Time -> IO ()
+hello Nothing  = fmap Just now >>= hello
+hello (Just t) = do
+    today <- dateFile
+    result <- readFile today `catch` handle today
+    return $ seq result ()
+    where
+        handle today e
+            | isDoesNotExistError e = do
+                writeFile today ""
+                return ""
+            | otherwise             = throwIO e
+
 todayStretches :: IO [Stretch]
 todayStretches = dateFile >>= getStretches
 
 activeProject :: [Stretch] -> Maybe Project
+activeProject [] = Nothing
 activeProject ss =
     let p = last ss
      in case endTime p of
