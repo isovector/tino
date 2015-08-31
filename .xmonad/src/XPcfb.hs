@@ -75,7 +75,7 @@ pcfbLogger = liftIO $ do
     active <- readIORef mutActive
     return $ if active
        then Just $ "WORKING: " ++ proj
-       else Just $ "fuck off"
+       else Nothing
 
 pcfbKeys :: ButtonMask -> [((ButtonMask, KeySym), X ())]
 pcfbKeys mod =
