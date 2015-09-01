@@ -92,6 +92,7 @@ setup_basic() {
     git config --global user.email "sandy@sandymaguire.me"
     git config --global credential.helper cache
     git config --global credential.helper 'cache --timeout=3600'
+    git config --global push.default matching
 
     # setup ssh and net
     cd
