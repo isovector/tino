@@ -13,6 +13,10 @@ remove() {
     as_root apt-get remove "$@" -y
 }
 
+tino() {
+    "$HOME/.tino/bin/$@"
+}
+
 frill() {
     "$@"
 }
@@ -80,8 +84,8 @@ setup_basic() {
     git clone https://github.com/isovector/tino .tino
     cd .tino
     as_root ln -s "/$HOME/.tino/bin/tino" /usr/local/bin/tino
-    ./bin/setup dotfiles
-    ./bin/setup vim
+    tino setup dotfiles
+    tino setup vim
 
     # setup git
     git config --global user.name "Sandy Maguire"
@@ -150,13 +154,13 @@ setup_heavy() {
 
 setup_gui() {
     install terminator aspell aspell-en redshift xclip acpi xterm x11-utils
-    install feh dzen2 conky scrot
+    install feh dzen2 conky scrot trayer
     # install synapse
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
     install libxrandr-dev pkg-config libxft-dev libx11-dev
-    ./bin/setup xmonad
+    tino setup xmonad
 
     frill install anki
     frill as_root python -c "import sys; py3 = sys.version_info[0] > 2; u = __import__('urllib.request' if py3 else 'urllib', fromlist=1); exec(u.urlopen('http://status.calibre-ebook.com/linux_installer').read()); main()"

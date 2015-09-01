@@ -6,5 +6,7 @@ use for it.
 ## Installing
 
 ```bash
-wget -O- https://raw.githubusercontent.com/isovector/tino/master/bin/setup | bash
+wget https://raw.githubusercontent.com/isovector/tino/master/bin/install
+chmod +x ./install
+./install features
 ```
