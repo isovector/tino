@@ -43,7 +43,7 @@ mod  = mod4Mask
 cmus = mod3Mask
 
 setWallpaper :: String -> X ()
-setWallpaper strWallpaper = spawn $ "feh --bg-fill /home/bootstrap/" ++ strWallpaper
+setWallpaper strWallpaper = spawn $ "feh --bg-fill /home/maguirea/" ++ strWallpaper
 
 myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeAll
    [ className =? "Gvim" --> viewShift "2"
@@ -65,6 +65,7 @@ myStartupHook = do setWMName "LG3D"
                    spawnOn "9" "terminator -e cmus"
                    spawn "nm-applet"
                    spawn "rescuetime"
+                   spawn "xinput disable 11"
 
 myLogHook h = dynamicLogWithPP $ defaultPP
     { ppCurrent         = dzenColor "#303030" "#909090" . pad
@@ -87,25 +88,40 @@ myLayoutHook = avoidStruts $ tall
   where tall = Tall 1 (3/100) (1/2)
 
 
+trayHeight :: Int
+trayHeight = 20
+
+fontSize :: Int
+fontSize = 10
+
 main = do d <- spawnPipe
              $ mconcat
                 [ "dzen2 "
-                , "-p -ta l -h '14' "
+                , "-p -ta l -h '"
+                , show trayHeight
+                , "' "
                 , "-e 'onstart=lower' "
-                , "-fn 'Bitstream Vera Sans-6:Bold'"
+                , "-fn 'Bitstream Vera Sans-"
+                , show fontSize
+                , ":Bold'"
                 ]
           t <- spawnPipe
              $ mconcat
                 [ "trayer "
                 , "--edge top --align right --SetDockType true "
                 , "--SetPartialStrut true --expand false --widthtype pixel "
-                , "--transparent true --tint 0 --alpha 0 --height 14"
+                , "--transparent true --tint 0 --alpha 0 --height "
+                , show trayHeight
                 ]
           c <- spawnPipe
              $ mconcat
-                [ "conky -c /home/bootstrap/.xmonad/conky.rc | "
-                , "dzen2 -x '700' -w '800' -h '14' -ta 'r' -bg '#000000' "
-                , "-fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-6:Bold'"
+                [ "conky -c /home/maguirea/.xmonad/conky.rc | "
+                , "dzen2 -x '700' -w '1200' -h '"
+                , show trayHeight
+                , "' -ta 'r' -bg '#000000' "
+                , "-fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-"
+                , show fontSize
+                , ":Bold'"
                 ]
 
           spawn "xmodmap ~/.xmodmaprc"
