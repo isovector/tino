@@ -78,7 +78,12 @@ EOF
 
     env)
         init_root
-        echo 'PATH="$PATH:$HOME/.local/bin"' | as_root tee -a /etc/environment
+        echo "you need to change the safe path for visudo"
+        read
+        as_root visudo
+        # need to update visudo
+        # okay this is broken
+        # need to update /etc/profile also for sudo
         ;;
 
     *)

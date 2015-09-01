@@ -48,16 +48,19 @@ purge() {
     warning "purge"
 
     # "manually" install the components of these metapackages
-    as_root aptitude unmarkauto '?reverse-depends(lubuntu-core) | ?reverse-recommends(lubuntu-core)'
-    as_root aptitude unmarkauto '?reverse-depends(ubuntu-standard) | ?reverse-recommends(ubuntu-standard)'
+    # as_root aptitude unmarkauto '?reverse-depends(lubuntu-core) | ?reverse-recommends(lubuntu-core)'
+    # as_root aptitude unmarkauto '?reverse-depends(ubuntu-standard) | ?reverse-recommends(ubuntu-standard)'
 
     # drop the ones we don't care about
-    remove firefox command-not-found language-selector-common
-    remove bluez bluez-cups bluez-alsa openbox
+    # remove firefox command-not-found language-selector-common
+    # remove bluez bluez-cups bluez-alsa openbox
     as_root apt-get autoremove
 }
 
 setup_basic() {
+    # fix dpkg if it's broken
+    as_root dpkg --configure -a
+
     # setup pacman
     as_root wget -O /usr/local/bin/pacman https://raw.githubusercontent.com/icy/pacapt/5b8990742657c1d44c0ee63d223afbf60d96e026/pacapt
     as_root chmod 755 /usr/local/bin/pacman
@@ -122,14 +125,14 @@ setup_extra() {
     install stack
     if [ "$?" != 0 ]; then
         # install stack on 32 bit systems
-        wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-i386-linux.gz
+        wget -Ostack.gz https://github.com/commercialhaskell/stack/releases/download/v0.1.3.1/stack-0.1.3.1-x86_64-linux.gz
         gunzip stack.gz
         chmod +x stack
         as_root mv stack /usr/local/bin/stack
     fi
 
-    stack setup
-    stack install turtle
+    /usr/local/bin/stack setup
+    /usr/local/bin/stack install turtle
 
     # bootstrap cabal
     install cabal-install haskell-platform
@@ -146,7 +149,7 @@ setup_heavy() {
 }
 
 setup_gui() {
-    install terminator cmus avconv aspell aspell-en redshift xclip acpi xterm x11-utils
+    install terminator aspell aspell-en redshift xclip acpi xterm x11-utils
     install feh dzen2 conky scrot
     # install synapse
     install thunar evince gpicview vim-gtk lxrandr
@@ -169,6 +172,7 @@ setup_gui() {
 }
 
 setup_stats() {
+    # rescuetime is broken
     install python-tk rescuetime imagemagick
     pip install svn+https://python-xlib.svn.sourceforge.net/svnroot/python-xlib/tags/xlib_0_15rc1/
     as_root pip install galileo
@@ -219,6 +223,7 @@ case "$1" in
         setup_env
         setup_extra
         setup_gui
+        setup_heavy
         purge
         ;;
 
