@@ -160,7 +160,7 @@ setup_gui() {
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
-    install libxrandr-dev pkg-config libxft-dev libx11-dev
+    install libxrandr-dev pkg-config libxft-dev libx11-dev libxinerama-dev
     tino setup xmonad
 
     frill install anki
