@@ -1,11 +1,12 @@
 " TODO: and get yankring working properly
 "       write a haskell indenter
 
-
 autocmd!
 
+set nocompatible
+
 set shell=/usr/bin/zsh\ -l
-let $PATH = $PATH . ':' . expand('~/.local/bin') . ':' . expand('~/.stack/programs/x86_64-linux/ghc-7.8.4/bin')
+let $PATH = $PATH . ':' . expand('~/.local/bin') . ':' . expand('~/.cabal/bin') . ':' . expand('~/.stack/programs/x86_64-linux/ghc-7.8.4/bin')
 
 
 call plug#begin('~/.vim/plugged')
@@ -64,7 +65,7 @@ Plug 'michaeljsmith/vim-indent-object'
 
 
 " Languages
-Plug 'bitc/vim-hdevtools'
+" Plug 'bitc/vim-hdevtools'
 Plug 'raichoo/haskell-vim'
 "Plug 'tpope/vim-markdown'
 Plug 'tristen/vim-sparkup'
@@ -118,7 +119,8 @@ nnoremap <leader>gs :Gstatus<CR>
 nnoremap \<space> :noh<cr>
 nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
-nnoremap <leader>ex :e ~/.xmonad/xmonad.hs<cr>
+nnoremap <leader>el :e ~/.vimrc.local<cr>
+nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
 nnoremap <leader>cp :cd ~/Projects/
 nnoremap <leader>l :TagbarToggle<CR>
 noremap  <leader>mv :call RenameFile()<cr>
@@ -150,6 +152,8 @@ vnoremap <F1> <nop>
 inoremap <t_%9> <nop>
 nnoremap <C-q> <C-W><C-j><C-W><C-o>
 nnoremap gb :ls<CR>:b<Space>
+nnoremap gH :e %<.h<CR>
+nnoremap gC :e %<.cc<CR>
 
 " Unmapped
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
@@ -220,6 +224,7 @@ augroup END
 " Removing scrollbars
 if has("gui_running")
     set guitablabel=%-0.12t%M
+    au BufAdd * :RainbowParentheses
 else
     set t_Co=256
 endif
@@ -233,7 +238,6 @@ set guioptions=ac
 au VimResized * :wincmd =
 au BufWritePre * :%s/\s\+$//e
 au BufWritePre *.scala :SortScalaImports
-au BufAdd * :RainbowParentheses
 au bufwritepost .vimrc source ~/.vimrc
 
 autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
@@ -308,7 +312,6 @@ set matchtime=3
 set modelines=2
 set scrolloff=8
 set laststatus=2
-set nocompatible
 set nofoldenable
 set shiftwidth=4
 set softtabstop=4
@@ -434,4 +437,6 @@ nnoremap <expr> t <SID>bufSwitch(v:count1)
 au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |
                 \ execute "normal! ihello\<ESC>:bw!\<CR>" |
                 \ endif
+
+source ~/.vimrc.local
 

@@ -160,6 +160,12 @@ setup_gui() {
     install thunar evince gpicview vim-gtk lxrandr
     install pidgin cmus luakit chromium-browser vlc deluge-gtk
 
+    install libgtkhotkey1
+    cd ~/Downloads
+    wget -O synapse.deb https://launchpad.net/~synapse-core/+archive/ubuntu/ppa/+files/synapse_0.2.10-2ubuntu3_amd64.deb
+    as_root dpkg -i synapse.deb
+    cd
+
     install libxrandr-dev pkg-config libxft-dev libx11-dev libxinerama-dev
     tino setup xmonad
 

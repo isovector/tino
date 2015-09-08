@@ -81,6 +81,13 @@ EOF
         cat <(echo "$TURTLE") "${2:-/dev/stdin}" | stack --verbosity silent runghc
         ;;
 
+    xmonad)
+        cd ~/.xmonad
+        make
+        root_init
+        as_root pkill xmonad
+        ;;
+
 
     xul)
         chromium-browser --app="$1"
