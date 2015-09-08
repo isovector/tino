@@ -53,6 +53,10 @@ myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeA
      where viewShift = doF . liftM2 (.) W.greedyView W.shift
            role = stringProperty "WM_WINDOW_ROLE"
 
+mpcPrompt :: X ()
+mpcPrompt = inputPrompt defaultXPConfig "live-filter" ?+ mpc'
+  where mpc' s = spawn $ "mpc clear; mpc search any \"" ++ s ++ "\" | mpc add; mpc play"
+
 
 cmusPrompt :: X ()
 cmusPrompt = inputPrompt defaultXPConfig "live-filter" ?+ cmus'
@@ -61,8 +65,10 @@ cmusPrompt = inputPrompt defaultXPConfig "live-filter" ?+ cmus'
 -- StartupHook
 myStartupHook :: X()
 myStartupHook = do setWMName "LG3D"
+                   spawn "mopidy"
                    setWallpaper "Desktop/majora.png"
-                   spawnOn "9" "terminator -e cmus"
+                   spawnOn "9" "pidgin"
+                   spawnOn "9" "terminator --title='ncmpcpp' -e 'sleep 2 && ncmpcpp -s search-engine'"
                    spawn "nm-applet"
                    spawn "rescuetime"
                    spawn "xinput disable 11"
@@ -89,10 +95,10 @@ myLayoutHook = avoidStruts $ tall
 
 
 trayHeight :: Int
-trayHeight = 20
+trayHeight = 14
 
 fontSize :: Int
-fontSize = 10
+fontSize = 6
 
 main = do d <- spawnPipe
              $ mconcat
@@ -115,8 +121,8 @@ main = do d <- spawnPipe
                 ]
           c <- spawnPipe
              $ mconcat
-                [ "conky -c /home/maguirea/.xmonad/conky.rc | "
-                , "dzen2 -x '700' -w '1200' -h '"
+                [ "conky -c /usr/local/google/home/maguirea/.xmonad/conky.rc | "
+                , "dzen2 -x '700' -w '800' -h '"
                 , show trayHeight
                 , "' -ta 'r' -bg '#000000' "
                 , "-fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-"
@@ -137,6 +143,10 @@ main = do d <- spawnPipe
                           } `removeKeys`
                                 [ (mod, xK_p)
                                 , (mod .|. shiftMask, xK_p)
+                                , (mod, e)
+                                , (mod, r)
+                                , (mod, h)
+                                , (mod, l)
                                 ]
                             `removeMouseBindings`
                                 [ (mod, button1)
@@ -152,20 +162,25 @@ main = do d <- spawnPipe
                             `additionalKeys` pcfbKeys mod
 
 myKeys =
-        [ ((mod, xK_f),                  runOrRaise "luakit" $ className =? "luakit")
+        [ ((mod .|. shiftMask, xK_f),    runOrRaise "luakit" $ className =? "luakit")
+        , ((mod, xK_f),                  runOrRaise "chromium-browser" $ className =? "Chromium-browser")
         , ((mod, xK_g),                  runOrRaise "gvim" $ className =? "Gvim")
-        , ((mod .|. shiftMask, xK_f),    runOrRaise "chromium-browser" $ className =? "Chromium-browser")
         , ((mod .|. shiftMask, xK_q),    kill)
         , ((mod, xK_d),                  safeSpawnProg "synapse")
         , ((mod, xK_x),                  safeSpawnProg "terminator")
         , ((mod, xK_t),                  safeSpawnProg "thunar")
+        , ((mod .|. controlMask, xK_l),  safeSpawn "cinnamon-screensaver-command" ["--lock"])
         , ((mod, xK_p),                  safeSpawnProg "scrot")
         , ((mod .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
         , ((0, xF86XK_AudioRaiseVolume), safeSpawn "amixer" $ words "-q set Master 2dB+")
         , ((0, xF86XK_AudioLowerVolume), safeSpawn "amixer" $ words "-q set Master 2dB-")
-        , ((cmus, xK_Left),              safeSpawn "cmus-remote" ["--prev"])
-        , ((cmus, xK_Right),             safeSpawn "cmus-remote" ["--next"])
-        , ((cmus, xK_Down),              safeSpawn "cmus-remote" ["--pause"])
-        , ((cmus, xK_m),                 raise $ title =?? "cmus")
-        , ((cmus, xK_l),                 cmusPrompt)
+        , ((cmus, xK_Left),              safeSpawn "mpc" ["prev"])
+        , ((cmus, xK_Right),             safeSpawn "mpc" ["next"])
+        , ((cmus, xK_Down),              safeSpawn "mpc" ["toggle"])
+        , ((cmus, xK_m),                 raise $ title =?? "ncmpcpp")
+        , ((cmus, xK_l),                 mpcPrompt)
+        , ((mod, xK_l),                  nextScreen)
+        , ((mod, xK_h),                  prevScreen)
+        , ((mod .|. shiftMask, xK_h),    sendMessage Shrink)
+        , ((mod .|. shiftMask, xK_l),    sendMessage Expand)
         ]
