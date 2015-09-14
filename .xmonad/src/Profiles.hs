@@ -16,6 +16,7 @@ module Profiles ( MediaBackend (..)
 
 import Prelude hiding (mod)
 
+import Control.Monad (liftM2)
 import System.IO
 import System.IO.Unsafe (unsafePerformIO)
 
@@ -30,11 +31,12 @@ data Machine      = HomeLaptop | WorkLaptop | WorkDesktop deriving Eq
 data MediaCmd     = SongPause  | SongNext   | SongPrev    deriving Eq
 
 machine :: Machine
-machine = case takeWhile (/= '.') . unsafePerformIO $ readFile "/etc/hostname" of
-            "penguin"     -> HomeLaptop
-            "bigpunisher" -> WorkDesktop
-            "eviljeanius" -> WorkLaptop
-            _             -> HomeLaptop
+machine = case takeWhile predicate . unsafePerformIO $ readFile "/etc/hostname" of
+            "penguin"           -> HomeLaptop
+            "bigpunisher"       -> WorkDesktop
+            "maguirea-glaptop0" -> WorkLaptop
+            _                   -> HomeLaptop
+    where predicate = liftM2 (&&) ('.' /=) ('\n' /=)
 
 atWork :: Bool
 atWork = case machine of
