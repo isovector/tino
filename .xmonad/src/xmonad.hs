@@ -176,5 +176,6 @@ myKeys =
         , ((mod, xK_h),                  prevScreen)
         , ((mod .|. shiftMask, xK_h),    sendMessage Shrink)
         , ((mod .|. shiftMask, xK_l),    sendMessage Expand)
+        , ((mod, xK_v),                  spawn "$HOME/.tino/bin/tino pcfb")
         ]
 

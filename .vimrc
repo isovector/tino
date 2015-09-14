@@ -104,28 +104,32 @@ call plug#end()
 let mapleader = " "
 let maplocalleader = "_"
 
-nnoremap <CR> :
-nnoremap <S-CR> :<Up><CR>
-nnoremap <C-CR> :!  <BS>
+function! EditPcfbFile()
+  let file = system("date +'%Y-%m-%d'")
+  let file = strpart(file, 0, len(file) - 1)
+  execute ":e ~/.tino/var/" . file . ".txt"
+endfunction
+
 nnoremap <leader>g :Ag  <BS>
 nnoremap <leader>m :make<CR>
 nnoremap <leader>gp :Gpush<CR>
 nnoremap <leader>gy :Goyo<CR>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>gs :Gstatus<CR>
-nnoremap \<space> :noh<cr>
+nnoremap <silent> <space><space> :noh<cr>
 nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
+nnoremap <leader>ep :call EditPcfbFile()<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
+nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
 nnoremap <leader>cp :cd ~/Projects/
 nnoremap <leader>l :TagbarToggle<CR>
 noremap  <leader>mv :call RenameFile()<cr>
 nnoremap <leader>pf V:! pointfree "`cat`"<CR>==
 nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
 vnoremap <leader><leader>c :!octave --silent \| cut -c8-<cr>
-nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
 nnoremap <leader>sca V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Left>
 nnoremap <leader>scb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
@@ -152,6 +156,9 @@ nnoremap <C-q> <C-W><C-j><C-W><C-o>
 nnoremap gb :ls<CR>:b<Space>
 nnoremap gH :e %<.h<CR>
 nnoremap gC :e %<.cc<CR>
+nnoremap <CR> :
+nnoremap <S-CR> :<Up><CR>
+nnoremap <C-CR> :!  <BS>
 
 " Unmapped
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>

@@ -71,20 +71,22 @@ case "$basename" in
         ssh -vvv -N -D 12345 amaguire@csc.uwaterloo.ca
         ;;
 
+
     turtle)
         read -r -d '' TURTLE <<'EOF'
 {-# LANGUAGE OverloadedStrings #-}
 import Turtle
 
 EOF
-
         cat <(echo "$TURTLE") "${2:-/dev/stdin}" | stack --verbosity silent runghc
         ;;
 
-    pcfb)
+
+    p|pcfb)
         ~/.tino/bin/pcfb-show
-        gnome-open ~/.src/percentile-feedback/index.html
+        timeout 3s chromium-browser --app=file://$HOME/.src/percentile-feedback/index.html
         ;;
+
 
     xmonad)
         cd ~/.xmonad
