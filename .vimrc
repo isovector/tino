@@ -96,9 +96,6 @@ Plug 'terryma/vim-expand-region'
 Plug 'rbonvall/vim-textobj-latex'
 Plug 'Julian/vim-textobj-variable-segment'
 
-
-
-
 call plug#end()
 
 
@@ -121,6 +118,7 @@ nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
+nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>cp :cd ~/Projects/
 nnoremap <leader>l :TagbarToggle<CR>
 noremap  <leader>mv :call RenameFile()<cr>

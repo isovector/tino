@@ -83,8 +83,8 @@ EOF
 
     xmonad)
         cd ~/.xmonad
-        make
         root_init
+        make &&
         as_root pkill xmonad
         ;;
 
