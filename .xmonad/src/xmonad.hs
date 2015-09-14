@@ -6,10 +6,12 @@ import Data.Monoid (mconcat)
 import Graphics.X11.ExtraTypes.XF86
 import System.Environment (getArgs)
 import System.IO
+import System.IO.Unsafe (unsafePerformIO)
 
 import XPcfb
 
 import XMonad
+import XMonad.Actions.CycleWS
 import XMonad.Actions.DynamicWorkspaces
 import XMonad.Actions.SpawnOn
 import XMonad.Actions.WindowGo
@@ -33,45 +35,92 @@ import XMonad.Util.Replace (replace)
 import XMonad.Util.Run
 import qualified XMonad.StackSet as W
 
+data Machine = HomeLaptop | WorkLaptop | WorkDesktop deriving Eq
+data MediaBackend = Cmus | Mpc deriving Eq
+data MediaCmd = SongPause | SongNext | SongPrev deriving Eq
 
+machine :: Machine
+machine = case unsafePerformIO $ readFile "/etc/hostname" of
+            "penguin"     -> HomeLaptop
+            "bigpunisher" -> WorkDesktop
+            "eviljeanius" -> WorkLaptop
+            _             -> HomeLaptop
+
+atWork :: Bool
+atWork = case machine of
+           WorkDesktop -> True
+           WorkLaptop  -> True
+           _           -> False
 
 (=??) :: Query String -> String -> Query Bool
 q =?? x = fmap (isInfixOf x) q
 
-alt = mod1Mask
-mod  = mod4Mask
-cmus = mod3Mask
+alt   = mod1Mask
+mod   = mod4Mask
+media = mod3Mask
 
 setWallpaper :: String -> X ()
-setWallpaper strWallpaper = spawn $ "feh --bg-fill /home/maguirea/" ++ strWallpaper
+setWallpaper strWallpaper = spawn $ "feh --bg-fill $HOME/" ++ strWallpaper
 
 myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeAll
-   [ className =? "Gvim" --> viewShift "2"
+   [ className =? "Gvim"    --> viewShift "2"
    , role =? "conversation" --> doFloat
-   , isFullscreen --> doFullFloat
+   , isFullscreen           --> doFullFloat
    ]
      where viewShift = doF . liftM2 (.) W.greedyView W.shift
            role = stringProperty "WM_WINDOW_ROLE"
 
-mpcPrompt :: X ()
-mpcPrompt = inputPrompt defaultXPConfig "live-filter" ?+ mpc'
-  where mpc' s = spawn $ "mpc clear; mpc search any \"" ++ s ++ "\" | mpc add; mpc play"
+musicBackend :: MediaBackend
+musicBackend
+    | machine == HomeLaptop = Cmus
+    | otherwise             = Mpc
 
+musicRemote :: MediaCmd -> X ()
+musicRemote
+    | musicBackend == Cmus = cmus
+    | musicBackend == Mpc  = mpc
+    | otherwise            = error "Invalid music remote"
+  where cmus SongNext  = safeSpawn "cmus-remote" ["--next"]
+        cmus SongPrev  = safeSpawn "cmus-remote" ["--prev"]
+        cmus SongPause = safeSpawn "cmus-remote" ["--pause"]
+        mpc  SongNext  = safeSpawn "mpc" ["next"]
+        mpc  SongPrev  = safeSpawn "mpc" ["prev"]
+        mpc  SongPause = safeSpawn "mpc" ["toggLe"]
 
-cmusPrompt :: X ()
-cmusPrompt = inputPrompt defaultXPConfig "live-filter" ?+ cmus'
-  where cmus' s = spawn $ "cmus-remote -C 'live-filter " ++ s ++ "'"
+musicPrompt :: X ()
+musicPrompt
+    | musicBackend == Cmus = cmus
+    | musicBackend == Mpc  = mpc
+  where mpc = prompt $ \s ->
+            "mpc clear; mpc search any \"" ++ s ++ "\" | mpc add; mpc play"
+        cmus = prompt $ \s -> "cmus-remote -C 'live-filter " ++ s ++ "'"
+        prompt f = inputPrompt defaultXPConfig "live-filter" ?+ (spawn . f)
+
+musicProgram :: String
+musicProgram
+    | musicBackend == Cmus = "terminator -e 'cmus'"
+    | musicBackend == Mpc  =
+        "terminator --title='ncmpcpp' -e 'sleep 2 && ncmpcpp -s search-engine'"
+
+musicTitle :: String
+musicTitle
+    | musicBackend == Cmus = "cmus"
+    | musicBackend == Mpc  = "ncmpcpp"
 
 -- StartupHook
-myStartupHook :: X()
+myStartupHook :: X ()
 myStartupHook = do setWMName "LG3D"
-                   spawn "mopidy"
                    setWallpaper "Desktop/majora.png"
                    spawnOn "9" "pidgin"
-                   spawnOn "9" "terminator --title='ncmpcpp' -e 'sleep 2 && ncmpcpp -s search-engine'"
                    spawn "nm-applet"
                    spawn "rescuetime"
-                   spawn "xinput disable 11"
+                   if machine /= HomeLaptop
+                      then spawn "mopidy"
+                      else return ()
+                   spawnOn "9" $ musicProgram
+                   if machine == WorkLaptop
+                      then spawn "xinput disable 11"
+                      else return ()
 
 myLogHook h = dynamicLogWithPP $ defaultPP
     { ppCurrent         = dzenColor "#303030" "#909090" . pad
@@ -87,7 +136,6 @@ myLogHook h = dynamicLogWithPP $ defaultPP
     , ppExtras          = [ pcfbLogger ]
     }
 
-    -- add avoidStruts to your layoutHook like so
 myLayoutHook = avoidStruts $ tall
                          ||| Mirror tall
                          ||| noBorders (fullscreenFull Full)
@@ -95,10 +143,14 @@ myLayoutHook = avoidStruts $ tall
 
 
 trayHeight :: Int
-trayHeight = 14
+trayHeight
+    | machine == WorkLaptop = 24
+    | otherwise             = 14
 
 fontSize :: Int
-fontSize = 6
+fontSize
+    | machine == WorkLaptop = 12
+    | otherwise             = 6
 
 main = do d <- spawnPipe
              $ mconcat
@@ -111,6 +163,7 @@ main = do d <- spawnPipe
                 , show fontSize
                 , ":Bold'"
                 ]
+
           t <- spawnPipe
              $ mconcat
                 [ "trayer "
@@ -119,10 +172,11 @@ main = do d <- spawnPipe
                 , "--transparent true --tint 0 --alpha 0 --height "
                 , show trayHeight
                 ]
+
           c <- spawnPipe
              $ mconcat
-                [ "conky -c /usr/local/google/home/maguirea/.xmonad/conky.rc | "
-                , "dzen2 -x '700' -w '800' -h '"
+                [ "conky -c $HOME/.xmonad/conky.rc | "
+                , "dzen2 -x '700' -w '800' -h '" -- TODO: abstract these
                 , show trayHeight
                 , "' -ta 'r' -bg '#000000' "
                 , "-fg '#FFFFFF' -y '0' -fn 'Bitstream Vera Sans-"
@@ -140,29 +194,34 @@ main = do d <- spawnPipe
                           , handleEventHook    = docksEventHook <+> fullscreenEventHook
                           , logHook            = myLogHook d
                           , layoutHook         = myLayoutHook
+
                           } `removeKeys`
                                 [ (mod, xK_p)
                                 , (mod .|. shiftMask, xK_p)
-                                , (mod, e)
-                                , (mod, r)
-                                , (mod, h)
-                                , (mod, l)
+                                , (mod, xK_e)
+                                , (mod, xK_r)
+                                , (mod, xK_h)
+                                , (mod, xK_l)
                                 ]
+
                             `removeMouseBindings`
                                 [ (mod, button1)
                                 , (mod, button2)
                                 , (mod, button3)
                                 ]
+
                             `additionalMouseBindings`
                                 [ ((alt, button1), \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
                                 , ((alt, button2), windows . (W.shiftMaster .) . W.focusWindow)
                                 , ((alt, button3), \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
                                 ]
+
                             `additionalKeys` myKeys
                             `additionalKeys` pcfbKeys mod
 
 myKeys =
         [ ((mod .|. shiftMask, xK_f),    runOrRaise "luakit" $ className =? "luakit")
+        -- TODO: abstract this over atWork
         , ((mod, xK_f),                  runOrRaise "chromium-browser" $ className =? "Chromium-browser")
         , ((mod, xK_g),                  runOrRaise "gvim" $ className =? "Gvim")
         , ((mod .|. shiftMask, xK_q),    kill)
@@ -174,13 +233,14 @@ myKeys =
         , ((mod .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
         , ((0, xF86XK_AudioRaiseVolume), safeSpawn "amixer" $ words "-q set Master 2dB+")
         , ((0, xF86XK_AudioLowerVolume), safeSpawn "amixer" $ words "-q set Master 2dB-")
-        , ((cmus, xK_Left),              safeSpawn "mpc" ["prev"])
-        , ((cmus, xK_Right),             safeSpawn "mpc" ["next"])
-        , ((cmus, xK_Down),              safeSpawn "mpc" ["toggle"])
-        , ((cmus, xK_m),                 raise $ title =?? "ncmpcpp")
-        , ((cmus, xK_l),                 mpcPrompt)
+        , ((media, xK_Left),             musicRemote SongPrev)
+        , ((media, xK_Right),            musicRemote SongNext)
+        , ((media, xK_Down),             musicRemote SongPause)
+        , ((media, xK_m),                raise $ title =?? musicTitle)
+        , ((media, xK_l),                musicPrompt)
         , ((mod, xK_l),                  nextScreen)
         , ((mod, xK_h),                  prevScreen)
         , ((mod .|. shiftMask, xK_h),    sendMessage Shrink)
         , ((mod .|. shiftMask, xK_l),    sendMessage Expand)
         ]
+

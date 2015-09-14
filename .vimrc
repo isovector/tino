@@ -436,5 +436,9 @@ au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |
                 \ execute "normal! ihello\<ESC>:bw!\<CR>" |
                 \ endif
 
-source ~/.vimrc.local
+
+try
+    source ~/.vimrc.local
+catch
+endtry
 
