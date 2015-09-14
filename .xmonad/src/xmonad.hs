@@ -8,6 +8,7 @@ import System.Environment (getArgs)
 import System.IO
 import System.IO.Unsafe (unsafePerformIO)
 
+import Profiles
 import XPcfb
 
 import XMonad
@@ -35,23 +36,6 @@ import XMonad.Util.Replace (replace)
 import XMonad.Util.Run
 import qualified XMonad.StackSet as W
 
-data Machine = HomeLaptop | WorkLaptop | WorkDesktop deriving Eq
-data MediaBackend = Cmus | Mpc deriving Eq
-data MediaCmd = SongPause | SongNext | SongPrev deriving Eq
-
-machine :: Machine
-machine = case takeWhile (/= '.') . unsafePerformIO $ readFile "/etc/hostname" of
-            "penguin"     -> HomeLaptop
-            "bigpunisher" -> WorkDesktop
-            "eviljeanius" -> WorkLaptop
-            _             -> HomeLaptop
-
-atWork :: Bool
-atWork = case machine of
-           WorkDesktop -> True
-           WorkLaptop  -> True
-           _           -> False
-
 (=??) :: Query String -> String -> Query Bool
 q =?? x = fmap (isInfixOf x) q
 
@@ -70,44 +54,6 @@ myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeA
      where viewShift = doF . liftM2 (.) W.greedyView W.shift
            role = stringProperty "WM_WINDOW_ROLE"
 
-musicBackend :: MediaBackend
-musicBackend
-    | machine == HomeLaptop = Cmus
-    | otherwise             = Mpc
-
-musicRemote :: MediaCmd -> X ()
-musicRemote
-    | musicBackend == Cmus = cmus
-    | musicBackend == Mpc  = mpc
-    | otherwise            = error "Invalid music remote"
-  where cmus SongNext  = safeSpawn "cmus-remote" ["--next"]
-        cmus SongPrev  = safeSpawn "cmus-remote" ["--prev"]
-        cmus SongPause = safeSpawn "cmus-remote" ["--pause"]
-        mpc  SongNext  = safeSpawn "mpc" ["next"]
-        mpc  SongPrev  = safeSpawn "mpc" ["prev"]
-        mpc  SongPause = safeSpawn "mpc" ["toggLe"]
-
-musicPrompt :: X ()
-musicPrompt
-    | musicBackend == Cmus = cmus
-    | musicBackend == Mpc  = mpc
-  where mpc = prompt $ \s ->
-            "mpc clear; mpc search any \"" ++ s ++ "\" | mpc add; mpc play"
-        cmus = prompt $ \s -> "cmus-remote -C 'live-filter " ++ s ++ "'"
-        prompt f = inputPrompt defaultXPConfig "live-filter" ?+ (spawn . f)
-
-musicProgram :: String
-musicProgram
-    | musicBackend == Cmus = "terminator -e 'cmus'"
-    | musicBackend == Mpc  =
-        "terminator --title='ncmpcpp' -e 'sleep 2 && ncmpcpp -s search-engine'"
-
-musicTitle :: String
-musicTitle
-    | musicBackend == Cmus = "cmus"
-    | musicBackend == Mpc  = "ncmpcpp"
-
--- StartupHook
 myStartupHook :: X ()
 myStartupHook = do setWMName "LG3D"
                    setWallpaper "Desktop/majora.png"
@@ -140,17 +86,6 @@ myLayoutHook = avoidStruts $ tall
                          ||| Mirror tall
                          ||| noBorders (fullscreenFull Full)
   where tall = Tall 1 (3/100) (1/2)
-
-
-trayHeight :: Int
-trayHeight
-    | machine == WorkLaptop = 24
-    | otherwise             = 14
-
-fontSize :: Int
-fontSize
-    | machine == WorkLaptop = 12
-    | otherwise             = 6
 
 main = do d <- spawnPipe
              $ mconcat
@@ -221,8 +156,7 @@ main = do d <- spawnPipe
 
 myKeys =
         [ ((mod .|. shiftMask, xK_f),    runOrRaise "luakit" $ className =? "luakit")
-        -- TODO: abstract this over atWork
-        , ((mod, xK_f),                  runOrRaise "chromium-browser" $ className =? "Chromium-browser")
+        , ((mod, xK_f),                  runOrRaise browserProgram $ className =? browserTitle)
         , ((mod, xK_g),                  runOrRaise "gvim" $ className =? "Gvim")
         , ((mod .|. shiftMask, xK_q),    kill)
         , ((mod, xK_d),                  safeSpawnProg "synapse")
