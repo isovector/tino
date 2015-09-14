@@ -40,7 +40,7 @@ data MediaBackend = Cmus | Mpc deriving Eq
 data MediaCmd = SongPause | SongNext | SongPrev deriving Eq
 
 machine :: Machine
-machine = case unsafePerformIO $ readFile "/etc/hostname" of
+machine = case takeWhile (/= '.') . unsafePerformIO $ readFile "/etc/hostname" of
             "penguin"     -> HomeLaptop
             "bigpunisher" -> WorkDesktop
             "eviljeanius" -> WorkLaptop
