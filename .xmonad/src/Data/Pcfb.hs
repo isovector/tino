@@ -25,7 +25,7 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , localTimeOfDay
                            , hoursToTimeZone
                            )
-import System.Directory (doesFileExist)
+import System.Directory (doesFileExist, getHomeDirectory)
 import System.Posix.User (getEffectiveUserName)
 import Text.ParserCombinators.Parsec
 
@@ -82,10 +82,10 @@ dateFile :: IO FilePath
 dateFile = do
     tz  <- getCurrentTimeZone
     stamp <- localDay . utcToLocalTime tz <$> getCurrentTime
+    home <- getHomeDirectory
     me <- getEffectiveUserName
     return $ mconcat
-        [ "/home/"
-        , me
+        [ home
         , "/.tino/var/"
         , show stamp
         , ".txt"

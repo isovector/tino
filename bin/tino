@@ -81,6 +81,11 @@ EOF
         cat <(echo "$TURTLE") "${2:-/dev/stdin}" | stack --verbosity silent runghc
         ;;
 
+    pcfb)
+        ~/.tino/bin/pcfb-show
+        gnome-open ~/.src/percentile-feedback/index.html
+        ;;
+
     xmonad)
         cd ~/.xmonad
         root_init
