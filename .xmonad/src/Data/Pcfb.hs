@@ -9,7 +9,6 @@ module Data.Pcfb ( Time (..)
                  , hello
                  ) where
 
-import Prelude hiding (catch)
 import Control.Applicative ((<$>))
 import Control.Exception
 import Control.Monad       (foldM)
@@ -26,7 +25,7 @@ import Data.Time.LocalTime ( getCurrentTimeZone
                            , localTimeOfDay
                            , hoursToTimeZone
                            )
-import System.IO.Error hiding (catch)
+import System.Directory (doesFileExist)
 import System.Posix.User (getEffectiveUserName)
 import Text.ParserCombinators.Parsec
 
@@ -121,14 +120,10 @@ hello :: Maybe Time -> IO ()
 hello Nothing  = fmap Just now >>= hello
 hello (Just t) = do
     today <- dateFile
-    result <- readFile today `catch` handle today
-    return $ seq result ()
-    where
-        handle today e
-            | isDoesNotExistError e = do
-                writeFile today ""
-                return ""
-            | otherwise             = throwIO e
+    exists <- doesFileExist today
+    if exists
+       then return ()
+       else writeFile today ""
 
 todayStretches :: IO [Stretch]
 todayStretches = dateFile >>= getStretches

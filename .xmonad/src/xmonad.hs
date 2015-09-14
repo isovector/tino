@@ -163,6 +163,7 @@ main = do d <- spawnPipe
                 , show fontSize
                 , ":Bold'"
                 ]
+
           t <- spawnPipe
              $ mconcat
                 [ "trayer "
@@ -171,6 +172,7 @@ main = do d <- spawnPipe
                 , "--transparent true --tint 0 --alpha 0 --height "
                 , show trayHeight
                 ]
+
           c <- spawnPipe
              $ mconcat
                 [ "conky -c $HOME/.xmonad/conky.rc | "
@@ -192,6 +194,7 @@ main = do d <- spawnPipe
                           , handleEventHook    = docksEventHook <+> fullscreenEventHook
                           , logHook            = myLogHook d
                           , layoutHook         = myLayoutHook
+
                           } `removeKeys`
                                 [ (mod, xK_p)
                                 , (mod .|. shiftMask, xK_p)
@@ -200,16 +203,19 @@ main = do d <- spawnPipe
                                 , (mod, xK_h)
                                 , (mod, xK_l)
                                 ]
+
                             `removeMouseBindings`
                                 [ (mod, button1)
                                 , (mod, button2)
                                 , (mod, button3)
                                 ]
+
                             `additionalMouseBindings`
                                 [ ((alt, button1), \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
                                 , ((alt, button2), windows . (W.shiftMaster .) . W.focusWindow)
                                 , ((alt, button3), \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
                                 ]
+
                             `additionalKeys` myKeys
                             `additionalKeys` pcfbKeys mod
 
