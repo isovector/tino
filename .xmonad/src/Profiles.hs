@@ -82,14 +82,10 @@ musicTitle
     | musicBackend == Mpc  = "ncmpcpp"
 
 browserProgram :: String
-browserProgram
-    | atWork    = "google-chrome"
-    | otherwise = "chromium-browser"
+browserProgram = "chromium-browser"
 
 browserTitle :: String
-browserTitle
-    | atWork    = "Google-chrome"
-    | otherwise = "Chromium-browser"
+browserTitle = "Chromium-browser"
 
 trayHeight :: Int
 trayHeight

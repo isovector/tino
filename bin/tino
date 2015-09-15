@@ -64,7 +64,7 @@ case "$basename" in
         ;;
 
 
-    vpn)
+    proxy|vpn)
         (   sleep 5 &&
             chromium-browser --proxy-server="socks5://localhost:12345" --host-resolver-rules="MAP * 0.0.0.0 , EXCLUDE localhost"
         ) &
@@ -84,7 +84,7 @@ EOF
 
     p|pcfb)
         ~/.tino/bin/pcfb-show
-        timeout 3s chromium-browser --app=file://$HOME/.src/percentile-feedback/index.html
+        timeout 4s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
         ;;
 
 
@@ -97,7 +97,9 @@ EOF
 
 
     xul)
-        chromium-browser --app="$1"
+        RESULT=$1
+        shift
+        chromium-browser --app="$RESULT" $@
         ;;
 
 

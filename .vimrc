@@ -119,6 +119,7 @@ nnoremap <leader>gs :Gstatus<CR>
 nnoremap <silent> <space><space> :noh<cr>
 nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
+nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
