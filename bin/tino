@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 basename=`basename "$0"`
 if [ "$basename" = tino -o "$basename" = t ]; then
@@ -85,6 +85,24 @@ EOF
     p|pcfb)
         ~/.tino/bin/pcfb-show
         timeout 4s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
+        ;;
+
+
+    watch)
+        TEMP=$(mktemp)
+        date +%s > $TEMP
+        while read change; do
+            read NOW < $TEMP
+            ! [[ "$change" =~ .swp$ ]] && (
+                THEN=$(echo "$change" | grep -o "[^:]*" | head -n1)
+                [[ "$NOW" -lt "$THEN" ]] && (
+                    echo "$@"
+                    eval "$@"
+                    date +%s > $TEMP
+                    echo ""
+                )
+            )
+        done < <(inotifywait --quiet --recursive --monitor --event modify --format "%T:%w%f" --timefmt="%s" .)
         ;;
 
 
