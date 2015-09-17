@@ -117,7 +117,7 @@ setup_extra() {
     # install extra packages
     install sshfs acpi sqlite3 iftop rfkill rsync
     install make gcc g++ binutils libgmp-dev
-    install exuberant-ctags silversearcher-ag mlocate
+    install exuberant-ctags silversearcher-ag mlocate inotify-tools
 
     install subversion mercurial linux-headers-generic
 
