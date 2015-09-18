@@ -1,4 +1,4 @@
-if [ -e "~/.zshrc.local" ]; then
+if [ -e "$HOME/.zshrc.local" ]; then
     source ~/.zshrc.local
 fi
 

@@ -49,6 +49,7 @@ setWallpaper strWallpaper = spawn $ "feh --bg-fill $HOME/" ++ strWallpaper
 myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeAll
    [ className =? "Gvim"    --> viewShift "2"
    , role =? "conversation" --> doFloat
+   , role =? "pop-up"       --> doFloat
    , isFullscreen           --> doFullFloat
    ]
      where viewShift = doF . liftM2 (.) W.greedyView W.shift

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 basename=`basename "$0"`
 if [ "$basename" = tino -o "$basename" = t ]; then
@@ -89,13 +89,17 @@ EOF
 
 
     watch)
+        source ~/.zshrc
         TEMP=$(mktemp)
         date +%s > $TEMP
+        echo "$@"
+        eval "$@"
         while read change; do
             read NOW < $TEMP
             ! [[ "$change" =~ .swp$ ]] && (
                 THEN=$(echo "$change" | grep -o "[^:]*" | head -n1)
                 [[ "$NOW" -lt "$THEN" ]] && (
+                    clear
                     echo "$@"
                     eval "$@"
                     date +%s > $TEMP

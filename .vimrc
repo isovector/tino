@@ -1,5 +1,4 @@
 " TODO: and get yankring working properly
-"       write a haskell indenter
 
 autocmd!
 
@@ -28,9 +27,10 @@ Plug 'majutsushi/tagbar'
 Plug 'tpope/vim-characterize'
 Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
+Plug 'ap/vim-buftabline'
 
 if has("gui_running")
-    Plug 'bling/vim-airline'
+    " Plug 'bling/vim-airline'
 endif
 
 " Navigation
@@ -48,7 +48,7 @@ Plug 'junegunn/vim-peekaboo'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 " Plug 'airblade/vim-gitgutter'
-Plug 'laurentgoudet/vim-howdoi'
+" Plug 'laurentgoudet/vim-howdoi'
 
 
 
@@ -84,6 +84,10 @@ Plug 'ptrr/phd-vim'
 Plug 'ciaranm/inkpot'
 Plug 'ajh17/Spacegray.vim'
 Plug 'nanotech/jellybeans.vim'
+Plug 'ronny/birds-of-paradise.vim'
+Plug 'ratazzi/blackboard.vim'
+Plug 'justincampbell/vim-railscasts'
+Plug 'vim-scripts/leo256'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -110,13 +114,15 @@ function! EditPcfbFile()
   execute ":e ~/.tino/var/" . file . ".txt"
 endfunction
 
+nnoremap <leader>3 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR>
+nnoremap <leader>m :make<CR>
 nnoremap <leader>g :Ag  <BS>
 nnoremap <leader>m :make<CR>
 nnoremap <leader>gp :Gpush<CR>
 nnoremap <leader>gy :Goyo<CR>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>gs :Gstatus<CR>
-nnoremap <silent> <space><space> :noh<cr>
+nnoremap <silent> <s-space> :noh<cr>
 nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
@@ -144,7 +150,8 @@ inoremap \dt <esc>:r! date "+\%Y-\%m-\%d \%H:\%m"<cr>kJA  <BS>
 " Better normal behavior
 noremap  za <nop>
 nnoremap vv vip
-vnoremap : :B  <BS>
+vnoremap <CR> :B  <BS>
+nnoremap :: :bp\|bd #<CR>
 nnoremap ;; :w<CR>
 nnoremap :ws :w !sudo tee %<cr>
 nnoremap / /\v
@@ -259,12 +266,9 @@ au BufRead,BufNewFile *.htex setfiletype htex
 filetype on
 filetype plugin indent on
 
+vmap a <Plug>(EasyAlign)
 
-
-" Start interactive EasyAlign in visual mode (e.g. vip<Enter>)
-vmap <Enter> <Plug>(EasyAlign)
-
-set cc=81,121
+set cc=81
 
 " Markdown settings
 let g:vim_markdown_initial_foldlevel=1
@@ -338,7 +342,8 @@ set background=dark
 " colo inkpot
 " colo spacegray
 " colo phd
-colo jellybeans
+" colo jellybeans
+colo railscasts
 
 
 let g:grep_cmd_opts = '--line-numbers --noheading'
@@ -415,6 +420,8 @@ let g:easy_align_delimiters = {
 
 let g:gist_detect_filetype = 1
 
+let g:buftabline_numbers = 1
+
 if has("gui_running")
     let g:airline#extensions#tabline#enabled = 1
     let g:airline#extensions#tabline#buffer_nr_show = 1
@@ -449,4 +456,13 @@ try
     source ~/.vimrc.local
 catch
 endtry
+
+
+if g:colors_name ==# "railscasts"
+  hi WildMenu guifg=Black guibg=#777700 gui=bold cterm=bold
+  " hi StatusLine ctermbg=whatever ctermfg=whatever
+  hi Tabline guibg=#000000 guifg=#999999
+  hi TablineFill guibg=#777700 guifg=#000000
+  hi StatusLine guibg=#000000 guifg=#FFFFFF
+endif
 
