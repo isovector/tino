@@ -100,7 +100,7 @@ EOF
         for CMD in $*; do
           CMDS+=("'"'+argdo execute "normal '"$CMD"'"'"'")
         done
-        CMDS+=('+qall')
+        CMDS+=('+xa')
 
         (
           cd $TMP
