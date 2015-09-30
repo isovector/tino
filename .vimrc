@@ -4,7 +4,9 @@ autocmd!
 
 set nocompatible
 
-set shell=/usr/bin/zsh\ -l
+if !has('nvim')
+  set shell=/usr/bin/zsh\ -l
+endif
 let $PATH = $PATH . ':' . expand('~/.local/bin') . ':' . expand('~/.cabal/bin') . ':' . expand('~/.stack/programs/x86_64-linux/ghc-7.8.4/bin')
 
 
@@ -88,6 +90,7 @@ Plug 'ronny/birds-of-paradise.vim'
 Plug 'ratazzi/blackboard.vim'
 Plug 'justincampbell/vim-railscasts'
 Plug 'vim-scripts/leo256'
+Plug 'w0ng/vim-hybrid'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -99,6 +102,8 @@ Plug 'junegunn/vim-after-object'
 Plug 'terryma/vim-expand-region'
 Plug 'rbonvall/vim-textobj-latex'
 Plug 'Julian/vim-textobj-variable-segment'
+Plug 'deris/vim-shot-f'
+Plug 'wellle/targets.vim'
 
 call plug#end()
 
@@ -127,11 +132,14 @@ nnoremap <leader>sv :vert sb  <BS>
 nnoremap <leader>ev :e $MYVIMRC<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
+nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
 nnoremap <leader>cp :cd ~/Projects/
+nnoremap <leader>ct :cd ~/.tino/
+nnoremap <leader>cz :cd ~/.tino/zsh/
 nnoremap <leader>l :TagbarToggle<CR>
 noremap  <leader>mv :call RenameFile()<cr>
 nnoremap <leader>pf V:! pointfree "`cat`"<CR>==
@@ -187,6 +195,8 @@ nnoremap <left> <nop>
 nnoremap <right> <nop>
 nnoremap j gj
 nnoremap k gk
+vnoremap j gj
+vnoremap k gk
 
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
@@ -442,9 +452,9 @@ function! s:bufSwitch(count)
     if count ># 1
         return ":" . count . "b"
     endif
-    return 't'
+    return 'e'
 endfunction
-nnoremap <expr> t <SID>bufSwitch(v:count1)
+nnoremap <expr> e <SID>bufSwitch(v:count1)
 
 " wipeout buffer 1
 au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |

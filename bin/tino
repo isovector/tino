@@ -39,7 +39,7 @@ case "$basename" in
         ;;
 
 
-    edit|e)
+    e|edit)
         gvime_ok() { inpath gvim &&
             gvim --serverlist 2>/dev/null | grep '^E$' >/dev/null; }
         gvim_ok() { inpath gvim &&
@@ -87,11 +87,53 @@ EOF
         timeout 4s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
         ;;
 
+    refactor)
+        SEARCH=$1
+        IFS=$'\n' FILES=($(ag $SEARCH -l))
 
-    watch)
+        TMP=$(mktemp -d)
+        shift
+        for FILE in $FILES; do
+          cp --parents $FILE $TMP
+        done
+        CMDS=()
+        for CMD in $*; do
+          CMDS+=("'"'+argdo execute "normal '"$CMD"'"'"'")
+        done
+        CMDS+=('+qall')
+
+        (
+          cd $TMP
+          echo $CMDS $FILES | xargs vim
+          stty sane
+        )
+
+        git diff --no-index --diff-filter=M -- . $TMP
+
+        RESULT=""
+        while ! [[ "$RESULT" == "y" || "$RESULT" == "n" ]]; do
+          echo -n "Like it? y/n: "
+          read RESULT
+        done
+
+        if [[ "$RESULT" == "y" ]]; then
+          for FILE in $FILES; do
+            rm "$FILE"
+            mv "$TMP/$FILE" "$FILE"
+          done
+          echo "committing changes..."
+        else
+          echo "reverting changes..."
+        fi
+
+        rm -r $TMP
+        ;;
+
+    w|watch)
         source ~/.zshrc
         TEMP=$(mktemp)
         date +%s > $TEMP
+        clear
         echo "$@"
         eval "$@"
         while read change; do
