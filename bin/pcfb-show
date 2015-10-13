@@ -46,11 +46,11 @@ def flush(fname):
   with open(fname, 'w') as f:
     f.write(pending)
 
-write('var midnight = "00:00";')
-write('var midnight_seconds = 0;')
+write('var midnight = "0%d:00";' % midnight)
+write('var midnight_seconds = %d * 3600;' % midnight)
 write('var today_wr = %s;' % entries[-1])
 write('var updateInterval;')
 write('var refresh_delay = 43733.87873;')
 write('var past_wrs = [%s];' % ", ".join(entries[:-1]))
 flush(os.path.expanduser("~/.src/percentile-feedback/data.js"))
-
+print pending
