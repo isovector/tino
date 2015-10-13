@@ -104,6 +104,7 @@ Plug 'rbonvall/vim-textobj-latex'
 Plug 'Julian/vim-textobj-variable-segment'
 Plug 'deris/vim-shot-f'
 Plug 'wellle/targets.vim'
+Plug 'michaeljsmith/vim-indent-object'
 
 call plug#end()
 
@@ -134,6 +135,7 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
+nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -145,10 +147,12 @@ noremap  <leader>mv :call RenameFile()<cr>
 nnoremap <leader>pf V:! pointfree "`cat`"<CR>==
 nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
 vnoremap <leader><leader>c :!octave --silent \| cut -c8-<cr>
-nnoremap <leader>sca V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Left>
-nnoremap <leader>scb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
+nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Left>
+nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 vmap     <leader>b :<C-U>!git blame <C-R>=expand("%:p") <CR> \| sed -n <C-R>=line("'<") <CR>,<C-R>=line("'>") <CR>p <CR>
+nmap     <leader>td OTODO(sandy): <ESC>gccA
+nnoremap <silent> <leader>wtd :lgrep! TODO.sandy<CR>:lw<CR>
 
 " Useful inserts
 inoremap \fn <c-r>=expand('%:t:r')<cr>
@@ -168,13 +172,17 @@ inoremap <F1> <nop>
 nnoremap <F1> <nop>
 vnoremap <F1> <nop>
 inoremap <t_%9> <nop>
-nnoremap <C-q> <C-W><C-j><C-W><C-o>
+nnoremap <t_%9> <nop>
+vnoremap <t_%9> <nop>
+nnoremap <C-q> <C-W><C-q>
 nnoremap gb :ls<CR>:b<Space>
 nnoremap gH :e %<.h<CR>
 nnoremap gC :e %<.cc<CR>
 nnoremap <CR> :
 nnoremap <S-CR> :<Up><CR>
 nnoremap <C-CR> :!  <BS>
+nmap cod mmysiw]hxlysw'`ml
+nmap cop mmds'ds]i.<ESC>`mh
 
 " Unmapped
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
@@ -261,12 +269,20 @@ set guioptions=ac
 au VimResized * :wincmd =
 au BufWritePre * :%s/\s\+$//e
 au BufWritePre *.scala :SortScalaImports
-au bufwritepost .vimrc source ~/.vimrc
+augroup sourceme
+  au!
+  au bufwritepost .vimrc source ~/.vimrc
+augroup END
 
-autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
-autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
-
-
+augroup fixqf
+  au!
+  autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd BufReadPost quickfix nnoremap <buffer> : :
+  autocmd BufReadPost quickfix nnoremap <buffer> q <C-W><C-Q>
+  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd CmdwinEnter * nnoremap <buffer> : :
+  autocmd CmdwinEnter * nnoremap <buffer> q <C-W><C-Q>
+augroup END
 
 " Filetype setting
 au BufRead,BufNewFile *.db setfiletype db
