@@ -1,5 +1,6 @@
 alias ls='ls --color=tty'
 alias diff='git diff --'
+alias diffp='git diff --patience --'
 alias pacman='sudo pacman'
 
 alias calc='python'
