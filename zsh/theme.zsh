@@ -30,3 +30,6 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
 ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[yellow]%}✗%{$reset_color%} "
 ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%} "
 
+if [ -e "$HOME/.zshrc.theme.local" ]; then
+    source ~/.zshrc.theme.local
+fi
