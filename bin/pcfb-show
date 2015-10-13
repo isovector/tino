@@ -5,9 +5,12 @@ import re
 import time
 
 files = glob.glob(os.path.expanduser("~/.tino/var/*"))
+midnight = 7
 
 def time2sec(time):
+  global midnight
   pieces = map(int, re.split("([0-9]{2}):([0-9]{2})", time)[1:-1])
+  pieces[0] -= midnight
   return str(pieces[0] * 3600 + pieces[1] * 60)
 
 entries = []
