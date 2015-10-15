@@ -48,7 +48,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'junegunn/vim-peekaboo'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
-Plug 'laurentgoudet/vim-howdoi'
+Plug 'isovector/vim-howdoi'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -58,6 +58,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'raichoo/haskell-vim'
@@ -69,6 +70,7 @@ Plug 'plasticboy/vim-markdown'
 Plug 'PotatoesMaster/i3-vim-syntax'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
+Plug 'rhysd/conflict-marker.vim'
 
 " Colors
 Plug 'ptrr/phd-vim'
@@ -106,7 +108,7 @@ let mapleader = " "
 let maplocalleader = ","
 
 " Automatic pane split layouts
-nnoremap <leader>3 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR>
+nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
 nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
@@ -127,6 +129,7 @@ nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Le
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
+let g:howdoi_map = '<leader>h'
 
 
 " ------------------------------------------------------------------------------
@@ -232,7 +235,7 @@ nnoremap ;; :w<CR>
 nnoremap <silent> <s-space> :noh<cr>
 
 " Help align visual blocks by delimiter
-vmap a <Plug>(EasyAlign)
+vmap <s-space> <Plug>(EasyAlign)
 
 " Things we can align on
 let g:easy_align_delimiters = {
@@ -286,6 +289,9 @@ noremap <silent> <C-F9>  :vertical resize -10<CR>
 noremap <silent> <C-F10> :resize +10<CR>
 noremap <silent> <C-F11> :resize -10<CR>
 noremap <silent> <C-F12> :vertical resize +10<CR>
+
+" Cursor binding
+nnoremap <C-c> :set cursorbind! scrollbind!<CR>
 
 " Buffer list
 nnoremap gb :ls<CR>:b<Space>
@@ -377,9 +383,9 @@ augroup END
 " <CR> maps to :, but this is shitty for quickfix windows
 augroup unmapCRInQuickfix
   au!
-  autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
-  autocmd BufReadPost quickfix nnoremap <buffer> : :
-  autocmd BufReadPost quickfix nnoremap <buffer> q <C-W><C-Q>
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> : :
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> q <C-W><C-Q>
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
   autocmd CmdwinEnter * nnoremap <buffer> : :
   autocmd CmdwinEnter * nnoremap <buffer> q <C-W><C-Q>
@@ -551,6 +557,22 @@ au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |
                 \ execute "normal! ihello\<ESC>:bw!\<CR>" |
                 \ endif
 
+
+
+" ------------------------------------------------------------------------------
+                            " Limelight Scrollbinding
+" ------------------------------------------------------------------------------
+function! s:sync_limelight(bang)
+  execute 'Limelight'.a:bang
+  augroup sync_limelight
+    autocmd!
+    if empty(a:bang)
+      autocmd CursorMoved * wincmd p | doautocmd limelight CursorMoved | wincmd p
+    endif
+  augroup END
+endfunction
+
+command! -bang SyncLimelight call s:sync_limelight('<bang>')
 
 
 " ------------------------------------------------------------------------------
