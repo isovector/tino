@@ -154,6 +154,7 @@ nnoremap <leader>pf V:! pointfree "`cat`"<CR>==
 " ------------------------------------------------------------------------------
                               " Quick Directories
 " ------------------------------------------------------------------------------
+nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>cp :cd ~/Projects/
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
@@ -203,6 +204,8 @@ nnoremap <F1> <nop>
 vnoremap <F1> <nop>
 map <t_%9> <nop>
 nnoremap Q <nop>
+nnoremap * *N
+nnoremap Y y$
 
 " Better bindings
 nnoremap : <nop>
@@ -211,7 +214,29 @@ vnoremap <CR> :B  <BS>
 nnoremap / /\v
 nnoremap <C-q> <C-W><C-q>
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+vnoremap < <gv
+vnoremap > >gv
+nnoremap go o<esc>
+nnoremap gO O<esc>
 
+" Insert mode bindings
+" inoremap <C-I> <C-O>^
+" inoremap <C-A> <C-O>$
+
+" Swap marker commands
+nnoremap `` ``
+nnoremap ' `
+nnoremap ` '
+
+" Switch to alt file
+nnoremap # :e #<CR>
+
+" Rename
+" TODO(sandy): make a bufdo version of this
+nnoremap S *N:noh<CR>:%s//
+
+" Free keys:
+" K, !?, &, \, Zx, Q
 
 
 " ------------------------------------------------------------------------------
@@ -228,8 +253,18 @@ nnoremap <C-CR> :!  <BS>
 " Close buffer without changing layout
 nnoremap :: :bp\|bd #<CR>
 
+" Delete with no yank stack
+nnoremap <silent> <leader>d "_d
+vnoremap <silent> <leader>d "_d
+
 " Save file
 nnoremap ;; :w<CR>
+inoremap <c-s> <esc>:w<CR>a
+nnoremap <c-s> :w<CR>
+vnoremap <c-s> :<c-u>w<CR>
+
+" Pop tag stack
+" nnoremap <C-[> <ESC>:po<CR>
 
 " Remove search highlighting
 nnoremap <silent> <s-space> :noh<cr>
@@ -253,8 +288,7 @@ let g:easy_align_delimiters = {
                                  " Gnarly Shit
 " ------------------------------------------------------------------------------
 " Sudo save file.
-" TODO(sandy): make this more discoverable and less shitty
-nnoremap :ws :w !sudo tee %<cr>
+cmap w!! %!sudo tee > /dev/null %
 
 " Change property to dict lookup (a.x -> a['x'])
 nmap cod mmysiw]hxlysw'`ml
@@ -334,8 +368,8 @@ else
 endif
 
 set guioptions=ac
-set background=dark
 colo railscasts
+set background=dark
 
 if g:colors_name ==# "railscasts"
   hi WildMenu guifg=Black guibg=#777700 gui=bold cterm=bold
