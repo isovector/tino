@@ -27,6 +27,7 @@ Plug 'xolox/vim-misc'
 Plug 'tomtom/tlib_vim'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'kana/vim-submode'
+Plug 'vim-scripts/ingo-library'
 
 " Silent
 Plug 'rking/ag.vim'
@@ -39,16 +40,18 @@ Plug 'ap/vim-buftabline'
 
 " Navigation
 Plug 'kien/ctrlp.vim'
+Plug 'vim-scripts/JumpToLastOccurrence'
 
 " Misc
 Plug 'mattn/gist-vim'
 Plug 'junegunn/goyo.vim'
 Plug 'Shougo/neosnippet'
 Plug 'tpope/vim-fugitive'
-Plug 'junegunn/vim-peekaboo'
+" Plug 'junegunn/vim-peekaboo'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'isovector/vim-howdoi'
+Plug 'xolox/vim-session'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -204,8 +207,7 @@ nnoremap <F1> <nop>
 vnoremap <F1> <nop>
 map <t_%9> <nop>
 nnoremap Q <nop>
-nnoremap * *N
-nnoremap Y y$
+nnoremap gh <nop>
 
 " Better bindings
 nnoremap : <nop>
@@ -213,11 +215,14 @@ nnoremap <CR> :
 vnoremap <CR> :B  <BS>
 nnoremap / /\v
 nnoremap <C-q> <C-W><C-q>
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap K <nop>
 vnoremap < <gv
 vnoremap > >gv
-nnoremap go o<esc>
-nnoremap gO O<esc>
+nnoremap zj o<esc>
+nnoremap zk O<esc>
+nnoremap * *N
+nnoremap Y y$
 
 " Insert mode bindings
 " inoremap <C-I> <C-O>^
@@ -288,7 +293,7 @@ let g:easy_align_delimiters = {
                                  " Gnarly Shit
 " ------------------------------------------------------------------------------
 " Sudo save file.
-cmap w!! %!sudo tee > /dev/null %
+" cmap w!! %!sudo tee > /dev/null %
 
 " Change property to dict lookup (a.x -> a['x'])
 nmap cod mmysiw]hxlysw'`ml
@@ -398,6 +403,92 @@ let g:rainbow#colors = {
 set cc=81
 
 
+set statusline=
+set statusline +=%1*\ %n\ %*            "buffer number
+set statusline +=%3*%y%*                "file type
+set statusline +=%4*\ %<%f%*            "full path
+set statusline +=%2*%m%*                "modified flag
+set statusline +=%1*%=%2*\ =%{v:register}
+set statusline +=%5l%*                  "current line
+set statusline +=%2*/%L%*               "total lines
+set statusline +=%1*%4v\ %*             "virtual column number
+
+hi User1 guifg=#eea040 guibg=#222222
+hi User2 guifg=#dd3333 guibg=#222222
+hi User3 guifg=#ff66ff guibg=#222222
+hi User4 guifg=#a0ee40 guibg=#222222
+hi User5 guifg=#eeee40 guibg=#222222
+
+
+
+" ------------------------------------------------------------------------------
+                                 " Switch Numbers
+" ------------------------------------------------------------------------------
+" Reverse the number row characters
+function! ReverseNumberRow()
+       " map each number to its shift-key character
+       inoremap 1 !
+       inoremap 2 @
+       inoremap 3 #
+       inoremap 4 $
+       inoremap 5 %
+       inoremap 6 ^
+       inoremap 7 &
+       inoremap 8 *
+       inoremap 9 (
+       inoremap 0 )
+       " and then the opposite
+       inoremap ! 1
+       inoremap @ 2
+       inoremap # 3
+       inoremap $ 4
+       inoremap % 5
+       inoremap ^ 6
+       inoremap & 7
+       inoremap * 8
+       inoremap ( 9
+       inoremap ) 0
+endfunction
+
+" DO the opposite to ReverseNumberRow -- give everything back
+function! NormalizeNumberRow()
+       iunmap 1
+       iunmap 2
+       iunmap 3
+       iunmap 4
+       iunmap 5
+       iunmap 6
+       iunmap 7
+       iunmap 8
+       iunmap 9
+       iunmap 0
+       "------
+       iunmap !
+       iunmap @
+       iunmap #
+       iunmap $
+       iunmap %
+       iunmap ^
+       iunmap &
+       iunmap *
+       iunmap (
+       iunmap )
+endfunction
+
+function! ToggleNumberRow()
+       if !exists("g:NumberRow") || 0 == g:NumberRow
+               let g:NumberRow = 1
+               call ReverseNumberRow()
+       else
+               let g:NumberRow = 0
+               call NormalizeNumberRow()
+       endif
+endfunction
+
+"call ToggleNumberRow()
+" nnoremap <M-n> :call ToggleNumberRow()<CR>
+" call ReverseNumberRow()
+
 
 " ------------------------------------------------------------------------------
                                  " Autocommands
@@ -436,6 +527,8 @@ au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md setfiletype ghmarkdown
 au BufRead,BufNewFile *.markdown setfiletype ghmarkdown
 au BufRead,BufNewFile *.htex setfiletype htex
+autocmd FileType cpp setlocal commentstring=//\ %s
+
 
 syntax on
 filetype on
