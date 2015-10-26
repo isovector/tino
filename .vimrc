@@ -277,6 +277,9 @@ nnoremap <silent> <s-space> :noh<cr>
 " Help align visual blocks by delimiter
 vmap <s-space> <Plug>(EasyAlign)
 
+nnoremap zj moo<esc>k`o
+nnoremap zk moO<esc>`o
+
 " Things we can align on
 let g:easy_align_delimiters = {
 \ '[': { 'pattern': '[[\]]', 'left_margin': 0, 'right_margin': 0, 'stick_to_left': 0 },
@@ -320,6 +323,10 @@ vnoremap k gk
 " Window movement
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
+" nnoremap <C-L> L
+" nnoremap <C-H> H
+nnoremap L <C-W><C-L>
+nnoremap H <C-W><C-H>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
@@ -334,6 +341,26 @@ nnoremap <C-c> :set cursorbind! scrollbind!<CR>
 
 " Buffer list
 nnoremap gb :ls<CR>:b<Space>
+
+
+
+" ------------------------------------------------------------------------------
+                                 " Experimental
+" ------------------------------------------------------------------------------
+function! SmartWordSearch(dir)
+  let hlsearch = &hlsearch
+  let search = @/
+  let @/ = "\\v<|\\u|_\\zs|\\s+\\zs\\S"
+  execute "normal! " . a:dir
+  let @/ = search
+  let &hlsearch = hlsearch
+endfunction
+
+noremap <silent> W :silent call SmartWordSearch("n")<CR>
+noremap <silent> B :silent call SmartWordSearch("N")<CR>
+
+" Delete until arguments
+nmap <silent> dua dt(lds)
 
 
 
@@ -400,7 +427,7 @@ let g:rainbow#colors = {
 \   ] }
 
 " Right-margin length indicator
-set cc=81
+syn match Error /.\%>81v/
 
 
 set statusline=
@@ -508,10 +535,10 @@ augroup END
 " <CR> maps to :, but this is shitty for quickfix windows
 augroup unmapCRInQuickfix
   au!
-  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> <CR> <CR>
   autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> : :
   autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> q <C-W><C-Q>
-  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> : :
   autocmd CmdwinEnter * nnoremap <buffer> q <C-W><C-Q>
 augroup END
@@ -523,6 +550,7 @@ augroup END
 au BufWritePre *.scala :SortScalaImports
 
 " Set filetypes
+:autocmd BufReadPre,BufNewFile * let b:did_ftplugin = 1
 au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md setfiletype ghmarkdown
 au BufRead,BufNewFile *.markdown setfiletype ghmarkdown
@@ -531,7 +559,6 @@ autocmd FileType cpp setlocal commentstring=//\ %s
 
 
 syntax on
-filetype on
 filetype plugin indent on
 
 " Markdown settings
@@ -547,7 +574,6 @@ let g:haskell_indent_let = 4
 let g:haskell_indent_case = 2
 let g:haskell_indent_where = 6
 let g:haddock_browser="/usr/bin/sensible-browser"
-au FileType haskell set cc=81
 
 let g:gist_detect_filetype = 1
 
