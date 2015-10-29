@@ -219,8 +219,6 @@ nnoremap <C-q> <C-W><C-q>
 nnoremap K <nop>
 vnoremap < <gv
 vnoremap > >gv
-nnoremap zj o<esc>
-nnoremap zk O<esc>
 nnoremap * *N
 nnoremap Y y$
 
@@ -290,6 +288,7 @@ let g:easy_align_delimiters = {
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ }
 
+cmap <expr> %% expand('%:p:h') . '/'
 
 
 " ------------------------------------------------------------------------------
@@ -431,8 +430,8 @@ syn match Error /.\%>81v/
 
 
 set statusline=
-set statusline +=%1*\ %n\ %*            "buffer number
 set statusline +=%3*%y%*                "file type
+set statusline +=%1*\ %n\ %*            "buffer number
 set statusline +=%4*\ %<%f%*            "full path
 set statusline +=%2*%m%*                "modified flag
 set statusline +=%1*%=%2*\ =%{v:register}

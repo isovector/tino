@@ -84,7 +84,7 @@ EOF
 
     p|pcfb)
         ~/.tino/bin/pcfb-show
-        timeout 4s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
+        timeout 5s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
         ;;
 
     refactor)
@@ -134,6 +134,7 @@ EOF
         TEMP=$(mktemp)
         date +%s > $TEMP
         clear
+        date +"%H:%M> " | tr -d '\n'
         echo "$@"
         eval "$@"
         while read change; do
@@ -142,6 +143,7 @@ EOF
                 THEN=$(echo "$change" | grep -o "[^:]*" | head -n1)
                 [[ "$NOW" -lt "$THEN" ]] && (
                     clear
+                    date +"%H:%M> " | tr -d '\n'
                     echo "$@"
                     eval "$@"
                     date +%s > $TEMP
