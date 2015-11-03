@@ -63,6 +63,9 @@ case "$basename" in
         fi
         ;;
 
+    l|local)
+        ~/.tino/local/g "$@"
+        ;;
 
     proxy|vpn)
         (   sleep 5 &&
@@ -170,7 +173,6 @@ EOF
 
 
     *)
-        root_init
-        as_root id -u
+        ~/.tino/local/g $basename "$@"
         ;;
 esac
