@@ -426,7 +426,7 @@ let g:rainbow#colors = {
 \   ] }
 
 " Right-margin length indicator
-syn match Error /.\%>81v/
+2mat ErrorMsg '\%>80v.\+'
 
 
 set statusline=
