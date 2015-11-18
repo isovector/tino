@@ -27,6 +27,7 @@ Plug 'xolox/vim-misc'
 Plug 'tomtom/tlib_vim'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'kana/vim-submode'
+Plug 'vim-scripts/ingo-library'
 
 " Silent
 Plug 'rking/ag.vim'
@@ -39,16 +40,18 @@ Plug 'ap/vim-buftabline'
 
 " Navigation
 Plug 'kien/ctrlp.vim'
+Plug 'vim-scripts/JumpToLastOccurrence'
 
 " Misc
 Plug 'mattn/gist-vim'
 Plug 'junegunn/goyo.vim'
 Plug 'Shougo/neosnippet'
 Plug 'tpope/vim-fugitive'
-Plug 'junegunn/vim-peekaboo'
+" Plug 'junegunn/vim-peekaboo'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'isovector/vim-howdoi'
+Plug 'xolox/vim-session'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -58,6 +61,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'raichoo/haskell-vim'
@@ -69,6 +73,7 @@ Plug 'plasticboy/vim-markdown'
 Plug 'PotatoesMaster/i3-vim-syntax'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
+Plug 'rhysd/conflict-marker.vim'
 
 " Colors
 Plug 'ptrr/phd-vim'
@@ -106,7 +111,7 @@ let mapleader = " "
 let maplocalleader = ","
 
 " Automatic pane split layouts
-nnoremap <leader>3 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR>
+nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
 nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
@@ -127,6 +132,7 @@ nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Le
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
+let g:howdoi_map = '<leader>h'
 
 
 " ------------------------------------------------------------------------------
@@ -202,8 +208,7 @@ nnoremap <F1> <nop>
 vnoremap <F1> <nop>
 map <t_%9> <nop>
 nnoremap Q <nop>
-nnoremap * *N
-nnoremap Y y$
+nnoremap gh <nop>
 
 " Better bindings
 nnoremap : <nop>
@@ -211,11 +216,12 @@ nnoremap <CR> :
 vnoremap <CR> :B  <BS>
 nnoremap / /\v
 nnoremap <C-q> <C-W><C-q>
-nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+" nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
+nnoremap K <nop>
 vnoremap < <gv
 vnoremap > >gv
-nnoremap zj o<esc>k
-nnoremap zk O<esc>j
+nnoremap * *N
+nnoremap Y y$
 
 " Insert mode bindings
 " inoremap <C-I> <C-O>^
@@ -268,7 +274,10 @@ vnoremap <c-s> :<c-u>w<CR>
 nnoremap <silent> <s-space> :noh<cr>
 
 " Help align visual blocks by delimiter
-vmap a <Plug>(EasyAlign)
+vmap <s-space> <Plug>(EasyAlign)
+
+nnoremap zj moo<esc>k`o
+nnoremap zk moO<esc>`o
 
 " Things we can align on
 let g:easy_align_delimiters = {
@@ -280,13 +289,14 @@ let g:easy_align_delimiters = {
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ }
 
+cmap <expr> %% expand('%:p:h') . '/'
 
 
 " ------------------------------------------------------------------------------
                                  " Gnarly Shit
 " ------------------------------------------------------------------------------
 " Sudo save file.
-cmap w!! %!sudo tee > /dev/null %
+" cmap w!! %!sudo tee > /dev/null %
 
 " Change property to dict lookup (a.x -> a['x'])
 nmap cod mmysiw]hxlysw'`ml
@@ -313,6 +323,10 @@ vnoremap k gk
 " Window movement
 nnoremap <C-J> <C-W><C-J>
 nnoremap <C-K> <C-W><C-K>
+" nnoremap <C-L> L
+" nnoremap <C-H> H
+nnoremap L <C-W><C-L>
+nnoremap H <C-W><C-H>
 nnoremap <C-L> <C-W><C-L>
 nnoremap <C-H> <C-W><C-H>
 
@@ -322,8 +336,31 @@ noremap <silent> <C-F10> :resize +10<CR>
 noremap <silent> <C-F11> :resize -10<CR>
 noremap <silent> <C-F12> :vertical resize +10<CR>
 
+" Cursor binding
+nnoremap <C-c> :set cursorbind! scrollbind!<CR>
+
 " Buffer list
 nnoremap gb :ls<CR>:b<Space>
+
+
+
+" ------------------------------------------------------------------------------
+                                 " Experimental
+" ------------------------------------------------------------------------------
+function! SmartWordSearch(dir)
+  let hlsearch = &hlsearch
+  let search = @/
+  let @/ = "\\v<|\\u|_\\zs|\\s+\\zs\\S"
+  execute "normal! " . a:dir
+  let @/ = search
+  let &hlsearch = hlsearch
+endfunction
+
+noremap <silent> W :silent call SmartWordSearch("n")<CR>
+noremap <silent> B :silent call SmartWordSearch("N")<CR>
+
+" Delete until arguments
+nmap <silent> dua dt(lds)
 
 
 
@@ -390,8 +427,94 @@ let g:rainbow#colors = {
 \   ] }
 
 " Right-margin length indicator
-set cc=81
+2mat ErrorMsg '\%81v'
 
+
+set statusline=
+set statusline +=%3*%y%*                "file type
+set statusline +=%1*\ %n\ %*            "buffer number
+set statusline +=%4*\ %<%f%*            "full path
+set statusline +=%2*%m%*                "modified flag
+set statusline +=%1*%=%2*\ =%{v:register}
+set statusline +=%5l%*                  "current line
+set statusline +=%2*/%L%*               "total lines
+set statusline +=%1*%4v\ %*             "virtual column number
+
+hi User1 guifg=#eea040 guibg=#222222
+hi User2 guifg=#dd3333 guibg=#222222
+hi User3 guifg=#ff66ff guibg=#222222
+hi User4 guifg=#a0ee40 guibg=#222222
+hi User5 guifg=#eeee40 guibg=#222222
+
+
+
+" ------------------------------------------------------------------------------
+                                 " Switch Numbers
+" ------------------------------------------------------------------------------
+" Reverse the number row characters
+function! ReverseNumberRow()
+       " map each number to its shift-key character
+       inoremap 1 !
+       inoremap 2 @
+       inoremap 3 #
+       inoremap 4 $
+       inoremap 5 %
+       inoremap 6 ^
+       inoremap 7 &
+       inoremap 8 *
+       inoremap 9 (
+       inoremap 0 )
+       " and then the opposite
+       inoremap ! 1
+       inoremap @ 2
+       inoremap # 3
+       inoremap $ 4
+       inoremap % 5
+       inoremap ^ 6
+       inoremap & 7
+       inoremap * 8
+       inoremap ( 9
+       inoremap ) 0
+endfunction
+
+" DO the opposite to ReverseNumberRow -- give everything back
+function! NormalizeNumberRow()
+       iunmap 1
+       iunmap 2
+       iunmap 3
+       iunmap 4
+       iunmap 5
+       iunmap 6
+       iunmap 7
+       iunmap 8
+       iunmap 9
+       iunmap 0
+       "------
+       iunmap !
+       iunmap @
+       iunmap #
+       iunmap $
+       iunmap %
+       iunmap ^
+       iunmap &
+       iunmap *
+       iunmap (
+       iunmap )
+endfunction
+
+function! ToggleNumberRow()
+       if !exists("g:NumberRow") || 0 == g:NumberRow
+               let g:NumberRow = 1
+               call ReverseNumberRow()
+       else
+               let g:NumberRow = 0
+               call NormalizeNumberRow()
+       endif
+endfunction
+
+"call ToggleNumberRow()
+" nnoremap <M-n> :call ToggleNumberRow()<CR>
+" call ReverseNumberRow()
 
 
 " ------------------------------------------------------------------------------
@@ -412,10 +535,10 @@ augroup END
 " <CR> maps to :, but this is shitty for quickfix windows
 augroup unmapCRInQuickfix
   au!
-  autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
-  autocmd BufReadPost quickfix nnoremap <buffer> : :
-  autocmd BufReadPost quickfix nnoremap <buffer> q <C-W><C-Q>
-  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR><C-W><C-J><C-W><C-Q>
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> <CR> <CR>
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> : :
+  autocmd BufReadPost,BufEnter quickfix nnoremap <buffer> q <C-W><C-Q>
+  autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> : :
   autocmd CmdwinEnter * nnoremap <buffer> q <C-W><C-Q>
 augroup END
@@ -440,13 +563,15 @@ function! MarkdownFiletype()
 endfunction
 
 " Set filetypes
+" autocmd BufReadPre,BufNewFile * let b:did_ftplugin = 1
 au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md call MarkdownFiletype()
 au BufRead,BufNewFile *.markdown call MarkdownFiletype()
 au BufRead,BufNewFile *.htex setfiletype htex
+autocmd FileType cpp setlocal commentstring=//\ %s
+
 
 syntax on
-filetype on
 filetype plugin indent on
 
 " Markdown settings
@@ -462,7 +587,6 @@ let g:haskell_indent_let = 4
 let g:haskell_indent_case = 2
 let g:haskell_indent_where = 6
 let g:haddock_browser="/usr/bin/sensible-browser"
-au FileType haskell set cc=81
 
 let g:gist_detect_filetype = 1
 
@@ -599,6 +723,22 @@ au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |
                 \ execute "normal! ihello\<ESC>:bw!\<CR>" |
                 \ endif
 
+
+
+" ------------------------------------------------------------------------------
+                            " Limelight Scrollbinding
+" ------------------------------------------------------------------------------
+function! s:sync_limelight(bang)
+  execute 'Limelight'.a:bang
+  augroup sync_limelight
+    autocmd!
+    if empty(a:bang)
+      autocmd CursorMoved * wincmd p | doautocmd limelight CursorMoved | wincmd p
+    endif
+  augroup END
+endfunction
+
+command! -bang SyncLimelight call s:sync_limelight('<bang>')
 
 
 " ------------------------------------------------------------------------------

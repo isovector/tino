@@ -53,4 +53,3 @@ write('var updateInterval;')
 write('var refresh_delay = 43733.87873;')
 write('var past_wrs = [%s];' % ", ".join(entries[:-1]))
 flush(os.path.expanduser("~/.src/percentile-feedback/data.js"))
-print pending
