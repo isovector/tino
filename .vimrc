@@ -188,6 +188,7 @@ endfunction
 " ------------------------------------------------------------------------------
 inoremap \fn <c-r>=expand('%:t:r')<cr>
 inoremap \dt <esc>:r! date "+\%Y-\%m-\%d \%H:\%m"<cr>kJA  <BS>
+inoremap <S-Tab> <esc>ma<<`aa
 
 
 
@@ -213,8 +214,8 @@ nnoremap <C-q> <C-W><C-q>
 nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
 vnoremap < <gv
 vnoremap > >gv
-nnoremap go o<esc>
-nnoremap gO O<esc>
+nnoremap zj o<esc>k
+nnoremap zk O<esc>j
 
 " Insert mode bindings
 " inoremap <C-I> <C-O>^
@@ -425,10 +426,23 @@ augroup END
 " ------------------------------------------------------------------------------
 au BufWritePre *.scala :SortScalaImports
 
+function! MarkdownFiletype()
+    setfiletype ghmarkdown
+    " Markdown link
+    imap     \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>'a$T]ys$]A
+    inoremap <C-I><C-I> **<Left>
+    inoremap <C-B><C-B> ****<Left><Left>
+    nnoremap zb z=1<CR><CR>
+
+
+    iabbrev vrc .vimrc
+    nnoremap == gqap
+endfunction
+
 " Set filetypes
 au BufRead,BufNewFile *.db setfiletype db
-au BufRead,BufNewFile *.md setfiletype ghmarkdown
-au BufRead,BufNewFile *.markdown setfiletype ghmarkdown
+au BufRead,BufNewFile *.md call MarkdownFiletype()
+au BufRead,BufNewFile *.markdown call MarkdownFiletype()
 au BufRead,BufNewFile *.htex setfiletype htex
 
 syntax on
