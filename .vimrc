@@ -28,6 +28,7 @@ Plug 'tomtom/tlib_vim'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'kana/vim-submode'
 Plug 'vim-scripts/ingo-library'
+Plug 'mattn/webapi-vim'
 
 " Silent
 Plug 'rking/ag.vim'
@@ -51,7 +52,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'isovector/vim-howdoi'
-Plug 'xolox/vim-session'
+" Plug 'xolox/vim-session'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -66,14 +67,15 @@ Plug 'scrooloose/syntastic'
 " Languages
 Plug 'raichoo/haskell-vim'
 Plug 'tristen/vim-sparkup'
+Plug 'Twinside/vim-hoogle'
 Plug 'vim-scripts/lua.vim'
 Plug 'derekwyatt/vim-scala'
 Plug 'vim-scripts/lua_indent'
 Plug 'plasticboy/vim-markdown'
+Plug 'rhysd/conflict-marker.vim'
 Plug 'PotatoesMaster/i3-vim-syntax'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
-Plug 'rhysd/conflict-marker.vim'
 
 " Colors
 Plug 'ptrr/phd-vim'
@@ -149,9 +151,6 @@ nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
 " Create banners in vimrc
 nmap <localleader>wb O<ESC>78i-<ESC>gccyyjpk<CR>center<CR>gcc
 
-" Transform haskell line into a pointfree version
-nnoremap <leader>pf V:! pointfree "`cat`"<CR>==
-
 
 
 " ------------------------------------------------------------------------------
@@ -194,6 +193,7 @@ endfunction
 " ------------------------------------------------------------------------------
 inoremap \fn <c-r>=expand('%:t:r')<cr>
 inoremap \dt <esc>:r! date "+\%Y-\%m-\%d \%H:\%m"<cr>kJA  <BS>
+inoremap <S-Tab> <esc>ma<<`aa
 
 
 
@@ -206,6 +206,7 @@ inoremap <F1> <nop>
 nnoremap <F1> <nop>
 vnoremap <F1> <nop>
 map <t_%9> <nop>
+imap <t_%9> <nop>
 nnoremap Q <nop>
 nnoremap gh <nop>
 
@@ -221,6 +222,9 @@ vnoremap < <gv
 vnoremap > >gv
 nnoremap * *N
 nnoremap Y y$
+
+vnoremap J :m '>+1<CR>gv
+vnoremap K :m '<-2<CR>gv
 
 " Insert mode bindings
 " inoremap <C-I> <C-O>^
@@ -370,6 +374,22 @@ noremap <silent> B :silent call SmartWordSearch("N")<CR>
 " Delete until arguments
 nmap <silent> dua dt(lds)
 
+function! Reg()
+    reg
+    echo "Register: "
+    let char = nr2char(getchar())
+    if char != "\<Esc>"
+        execute "normal! \"".char."p"
+    endif
+    redraw
+endfunction
+
+command! -nargs=0 Reg call Reg()
+
+noremap <up>    <C-W>+
+noremap <down>  <C-W>-
+noremap <left>  3<C-W><
+noremap <right> 3<C-W>>
 
 
 " ------------------------------------------------------------------------------
@@ -434,9 +454,7 @@ let g:rainbow#colors = {
 \     ['magenta', 'purple1'     ]
 \   ] }
 
-" Right-margin length indicator
 2mat ErrorMsg '\%81v.'
-
 
 set statusline=
 set statusline +=%3*%y%*                "file type
@@ -462,7 +480,7 @@ hi User5 guifg=#eeee40 guibg=#222222
 au VimResized * :wincmd =
 
 " On save, remove all trailing spaces
-au BufWritePre * :%s/\s\+$//e
+au BufWritePre * execute "normal! ms:%s/\\v\\s\+$//e\<CR>`s"
 
 " Re-source ~/.vimrc whenever it is saved
 augroup automaticallySourceVimrc
@@ -487,11 +505,40 @@ augroup END
 " ------------------------------------------------------------------------------
 au BufWritePre *.scala :SortScalaImports
 
+function! MarkdownFiletype()
+    setfiletype ghmarkdown
+    " Markdown link
+    imap     \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>'a$T]ys$]A
+    inoremap <C-I><C-I> **<Left>
+    inoremap <C-B><C-B> ****<Left><Left>
+    nnoremap zb z=1<CR><CR>
+
+
+    iabbrev vrc .vimrc
+    nnoremap == gqap
+endfunction
+
+function! AddHsPragma()
+    let pragma = input("LANGUAGE ")
+    execute "normal! msggO{-# LANGUAGE " . pragma . " #-}\<ESC>`s"
+endfunction
+
+function! HaskellFiletype()
+    nnoremap <buffer> <F1> :Hoogle<space>
+    nnoremap <buffer> <leader>h :Hoogle<space>
+    nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
+
+    " Transform haskell line into a pointfree version
+    nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
+    inoremap =- <space><-<space>
+endfunction
+
 " Set filetypes
-:autocmd BufReadPre,BufNewFile * let b:did_ftplugin = 1
+" autocmd BufReadPre,BufNewFile * let b:did_ftplugin = 1
 au BufRead,BufNewFile *.db setfiletype db
-au BufRead,BufNewFile *.md setfiletype ghmarkdown
-au BufRead,BufNewFile *.markdown setfiletype ghmarkdown
+au BufRead,BufNewFile *.md call MarkdownFiletype()
+au BufRead,BufNewFile *.markdown call MarkdownFiletype()
+au BufRead,BufNewFile *.hs call HaskellFiletype()
 au BufRead,BufNewFile *.htex setfiletype htex
 autocmd FileType cpp setlocal commentstring=//\ %s
 
@@ -551,6 +598,8 @@ set showcmd
 set showmatch
 set showmode
 set smartcase
+set splitbelow
+set splitright
 set softtabstop=4
 set tabstop=4
 set tags=./tags,tags,../tags

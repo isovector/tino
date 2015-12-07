@@ -17,6 +17,7 @@ vmap <c-tab> <c-o>:tabnext<cr>
 nmap <c-s-tab> :tabprevious<cr>
 imap <c-s-tab> <c-o>:tabprevious<cr>
 vmap <c-s-tab> <c-o>:tabprevious<cr>
+nnoremap ZZ <nop>
 
 " C-# switches to tab
 nmap <d-1> 1gt
