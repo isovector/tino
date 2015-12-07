@@ -377,6 +377,11 @@ endfunction
 
 command! -nargs=0 Reg call Reg()
 
+noremap <up>    <C-W>+
+noremap <down>  <C-W>-
+noremap <left>  3<C-W><
+noremap <right> 3<C-W>>
+
 
 " ------------------------------------------------------------------------------
                               " System Integration
@@ -656,6 +661,8 @@ set showcmd
 set showmatch
 set showmode
 set smartcase
+set splitbelow
+set splitright
 set softtabstop=4
 set tabstop=4
 set tags=./tags,tags,../tags
