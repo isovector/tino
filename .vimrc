@@ -232,11 +232,6 @@ vnoremap K :m '<-2<CR>gv
 " inoremap <C-I> <C-O>^
 " inoremap <C-A> <C-O>$
 
-" Swap marker commands
-nnoremap `` ``
-nnoremap ' `
-nnoremap ` '
-
 " Switch to alt file
 nnoremap # :e #<CR>
 
@@ -385,12 +380,15 @@ function! Reg()
     redraw
 endfunction
 
-command! -nargs=0 Reg call Reg()
-
 noremap <up>    <C-W>+
 noremap <down>  <C-W>-
 noremap <left>  3<C-W><
 noremap <right> 3<C-W>>
+
+nnoremap " '
+nnoremap ' "
+cnoremap '' <C-R>
+nnoremap '' :call Reg()<CR>
 
 " Experimental motions
 
