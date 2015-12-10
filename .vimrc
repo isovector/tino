@@ -87,6 +87,7 @@ Plug 'ratazzi/blackboard.vim'
 Plug 'justincampbell/vim-railscasts'
 Plug 'vim-scripts/leo256'
 Plug 'w0ng/vim-hybrid'
+Plug 'ap/vim-css-color'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -101,6 +102,7 @@ Plug 'Julian/vim-textobj-variable-segment'
 Plug 'deris/vim-shot-f'
 Plug 'wellle/targets.vim'
 Plug 'michaeljsmith/vim-indent-object'
+Plug 'justinmk/vim-sneak'
 
 call plug#end()
 
@@ -240,7 +242,7 @@ nnoremap # :e #<CR>
 
 " Rename
 " TODO(sandy): make a bufdo version of this
-nnoremap S *N:noh<CR>:%s//
+nnoremap <Leader>S *N:noh<CR>:%s//
 
 " Free keys:
 " K, !?, &, \, Zx, Q
@@ -381,6 +383,11 @@ noremap <up>    <C-W>+
 noremap <down>  <C-W>-
 noremap <left>  3<C-W><
 noremap <right> 3<C-W>>
+
+" Experimental motions
+
+let g:sneak#s_next = 1
+
 
 
 " ------------------------------------------------------------------------------
