@@ -62,7 +62,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-" Plug 'scrooloose/syntastic'
+Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'raichoo/haskell-vim'
@@ -240,9 +240,17 @@ nnoremap ` '
 " Switch to alt file
 nnoremap # :e #<CR>
 
+function! SubstituteParameter()
+  let var = expand("<cword>")
+  let result = input(var . " -> ")
+  execute "normal! v/{\<CR>%"
+  execute "normal! :s/\\v<" . var . ">/". result . "\<CR>"
+endfunction
+
 " Rename
 " TODO(sandy): make a bufdo version of this
 nnoremap <Leader>S *N:noh<CR>:%s//
+nnoremap <Leader>SP :call SubstituteParameter()<CR>
 
 " Free keys:
 " K, !?, &, \, Zx, Q
@@ -452,9 +460,7 @@ let g:rainbow#colors = {
 \     ['magenta', 'purple1'     ]
 \   ] }
 
-" Right-margin length indicator
-2mat ErrorMsg '\%81v'
-
+2mat ErrorMsg '\%81v.'
 
 set statusline=
 set statusline +=%3*%y%*                "file type
@@ -471,76 +477,6 @@ hi User2 guifg=#dd3333 guibg=#222222
 hi User3 guifg=#ff66ff guibg=#222222
 hi User4 guifg=#a0ee40 guibg=#222222
 hi User5 guifg=#eeee40 guibg=#222222
-
-
-
-" ------------------------------------------------------------------------------
-                                 " Switch Numbers
-" ------------------------------------------------------------------------------
-" Reverse the number row characters
-function! ReverseNumberRow()
-       " map each number to its shift-key character
-       inoremap 1 !
-       inoremap 2 @
-       inoremap 3 #
-       inoremap 4 $
-       inoremap 5 %
-       inoremap 6 ^
-       inoremap 7 &
-       inoremap 8 *
-       inoremap 9 (
-       inoremap 0 )
-       " and then the opposite
-       inoremap ! 1
-       inoremap @ 2
-       inoremap # 3
-       inoremap $ 4
-       inoremap % 5
-       inoremap ^ 6
-       inoremap & 7
-       inoremap * 8
-       inoremap ( 9
-       inoremap ) 0
-endfunction
-
-" DO the opposite to ReverseNumberRow -- give everything back
-function! NormalizeNumberRow()
-       iunmap 1
-       iunmap 2
-       iunmap 3
-       iunmap 4
-       iunmap 5
-       iunmap 6
-       iunmap 7
-       iunmap 8
-       iunmap 9
-       iunmap 0
-       "------
-       iunmap !
-       iunmap @
-       iunmap #
-       iunmap $
-       iunmap %
-       iunmap ^
-       iunmap &
-       iunmap *
-       iunmap (
-       iunmap )
-endfunction
-
-function! ToggleNumberRow()
-       if !exists("g:NumberRow") || 0 == g:NumberRow
-               let g:NumberRow = 1
-               call ReverseNumberRow()
-       else
-               let g:NumberRow = 0
-               call NormalizeNumberRow()
-       endif
-endfunction
-
-"call ToggleNumberRow()
-" nnoremap <M-n> :call ToggleNumberRow()<CR>
-" call ReverseNumberRow()
 
 
 " ------------------------------------------------------------------------------
