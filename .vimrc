@@ -244,8 +244,8 @@ endfunction
 
 " Rename
 " TODO(sandy): make a bufdo version of this
-nnoremap <Leader>S *N:noh<CR>:%s//
-nnoremap <Leader>SP :call SubstituteParameter()<CR>
+nnoremap <Leader>s *N:noh<CR>:%s//
+nnoremap <Leader>sp :call SubstituteParameter()<CR>
 
 " Free keys:
 " K, !?, &, \, Zx, Q
@@ -394,6 +394,38 @@ nnoremap '' :call Reg()<CR>
 
 let g:sneak#s_next = 1
 
+" paste over
+function! PasteOver(type, ...)
+    let saveSel = &selection
+    let &selection = "inclusive"
+    let saveReg = @@
+    let reg = v:register
+    let regContents = getreg(reg)
+
+    if a:0  " Invoked from Visual mode, use '< and '> marks.
+        silent exe "normal! `<" . a:type . "`>"
+    elseif a:type == 'line'
+        silent exe "normal! '[V']"
+    elseif a:type == 'block'
+        silent exe "normal! `[\<C-V>`]"
+    else
+        silent exe "normal! `[v`]"
+    endif
+
+    execute "normal! \"" . reg . "p"
+
+    let &selection = saveSel
+    let @@ = saveReg
+
+    call setreg(reg, regContents)
+endfunction
+
+function! SetPasteOver()
+    set opfunc=PasteOver
+    return "g@"
+endfunction
+
+nnoremap <expr> pp SetPasteOver()
 
 
 " ------------------------------------------------------------------------------
@@ -417,7 +449,6 @@ autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
 let g:ctrlp_custom_ignore = 'target/\|dist/\|\_site/'
-
 
 
 " ------------------------------------------------------------------------------
@@ -607,7 +638,7 @@ set splitright
 set softtabstop=4
 set tabstop=4
 set tags=./tags,tags,../tags
-set timeoutlen=500
+set timeoutlen=300
 set title
 set ttyfast
 set visualbell
