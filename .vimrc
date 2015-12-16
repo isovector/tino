@@ -801,7 +801,7 @@ endtry
 " wrong things
 
 function! IgnoreWithoutCount(command)
-  if v:count1 == 1
+  if v:count == 0
       return ""
   end
   return a:command
