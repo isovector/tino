@@ -62,7 +62,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-Plug 'scrooloose/syntastic'
+" Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'raichoo/haskell-vim'
@@ -211,6 +211,7 @@ map <t_%9> <nop>
 imap <t_%9> <nop>
 nnoremap Q <nop>
 nnoremap gh <nop>
+nnoremap <C-Q> <nop>
 
 " Better bindings
 nnoremap : <nop>
@@ -387,6 +388,8 @@ noremap <right> 3<C-W>>
 
 nnoremap " '
 nnoremap ' "
+vnoremap " '
+vnoremap ' "
 cnoremap '' <C-R>
 nnoremap '' :call Reg()<CR>
 
@@ -427,6 +430,34 @@ endfunction
 
 nnoremap <expr> pp SetPasteOver()
 
+" COLEMAK INSERT???
+" nnoremap a a
+" nnoremap b b
+" nnoremap c c
+" nnoremap s d
+" nnoremap f e
+" nnoremap t f
+" nnoremap d g
+" nnoremap h h
+" nnoremap u i
+" nnoremap n j
+" nnoremap e k
+" nnoremap i l
+" nnoremap m m
+" nnoremap k n
+" nnoremap y o
+" nnoremap ; p
+" nnoremap q q
+" nnoremap p r
+" nnoremap r s
+" nnoremap g t
+" nnoremap l u
+" nnoremap v v
+" nnoremap w w
+" nnoremap x x
+" nnoremap j y
+" nnoremap z z
+" nnoremap o ;
 
 " ------------------------------------------------------------------------------
                               " System Integration
@@ -434,7 +465,7 @@ nnoremap <expr> pp SetPasteOver()
 " Regular copy and paste
 " TODO(sandy): Maybe get rid of this and use the system clipboard?
 vnoremap <C-c> "+yi
-inoremap <C-v> <C-r><C-o>+
+lnoremap <C-v> <C-r><C-o>+
 
 " Jump back to same line when reopening
 augroup line_return
@@ -750,6 +781,7 @@ endfunction
 command! -bang SyncLimelight call s:sync_limelight('<bang>')
 
 
+
 " ------------------------------------------------------------------------------
                            " Source Local Definitions
 " ------------------------------------------------------------------------------
@@ -759,4 +791,24 @@ try
     source ~/.vimrc.local
 catch
 endtry
+
+
+
+" ------------------------------------------------------------------------------
+                                   " Training
+" ------------------------------------------------------------------------------
+" The best way to get better at things is to make it really hard to do the
+" wrong things
+
+function! IgnoreWithoutCount(command)
+  if v:count1 == 1
+      return ""
+  end
+  return a:command
+endfunction
+
+nnoremap <expr> l IgnoreWithoutCount('l')
+nnoremap <expr> h IgnoreWithoutCount('h')
+nnoremap <expr> j IgnoreWithoutCount('j')
+nnoremap <expr> k IgnoreWithoutCount('k')
 
