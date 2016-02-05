@@ -110,7 +110,7 @@ setup_env() {
 setup_extra() {
     # install pragmata pro
     as_root mkdir -p /usr/share/fonts/truetype/pragmata
-    as_root wget -O/usr/share/fonts/truetype/pragmata/PragmataPro.ttf https://github.com/xpando/Dash/raw/master/Fonts/PragmataPro.ttf
+    as_root wget -O/usr/share/fonts/truetype/pragmata/PragmataPro.ttf http://redlegion.org/font/PragmataPro.ttf
     as_root fc-cache -f -v
 
 

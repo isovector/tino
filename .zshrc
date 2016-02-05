@@ -8,6 +8,7 @@ HISTFILE=~/.histfile
 HISTSIZE=1000
 SAVEHIST=1000
 setopt extendedglob
+setopt chase_links
 unsetopt autocd
 
 for file in ~/.tino/zsh/*.zsh; do

@@ -807,8 +807,8 @@ function! IgnoreWithoutCount(command)
   return a:command
 endfunction
 
-nnoremap <expr> l IgnoreWithoutCount('l')
-nnoremap <expr> h IgnoreWithoutCount('h')
-nnoremap <expr> j IgnoreWithoutCount('j')
-nnoremap <expr> k IgnoreWithoutCount('k')
+" nnoremap <expr> l IgnoreWithoutCount('l')
+" nnoremap <expr> h IgnoreWithoutCount('h')
+" nnoremap <expr> j IgnoreWithoutCount('j')
+" nnoremap <expr> k IgnoreWithoutCount('k')
 
