@@ -320,7 +320,6 @@ nmap cop mmds'ds]i.<ESC>`mh
 " ------------------------------------------------------------------------------
 " Cursor Movement
 nnoremap <up> <nop>
-nnoremap <up> <nop>
 nnoremap <down> <nop>
 nnoremap <left> <nop>
 nnoremap <right> <nop>
@@ -381,8 +380,8 @@ function! Reg()
     redraw
 endfunction
 
-noremap <up>    <C-W>+
-noremap <down>  <C-W>-
+noremap <up>    <C-W>-
+noremap <down>  <C-W>+
 noremap <left>  3<C-W><
 noremap <right> 3<C-W>>
 
@@ -428,36 +427,7 @@ function! SetPasteOver()
     return "g@"
 endfunction
 
-nnoremap <expr> pp SetPasteOver()
-
-" COLEMAK INSERT???
-" nnoremap a a
-" nnoremap b b
-" nnoremap c c
-" nnoremap s d
-" nnoremap f e
-" nnoremap t f
-" nnoremap d g
-" nnoremap h h
-" nnoremap u i
-" nnoremap n j
-" nnoremap e k
-" nnoremap i l
-" nnoremap m m
-" nnoremap k n
-" nnoremap y o
-" nnoremap ; p
-" nnoremap q q
-" nnoremap p r
-" nnoremap r s
-" nnoremap g t
-" nnoremap l u
-" nnoremap v v
-" nnoremap w w
-" nnoremap x x
-" nnoremap j y
-" nnoremap z z
-" nnoremap o ;
+nnoremap <expr> PP SetPasteOver()
 
 " ------------------------------------------------------------------------------
                               " System Integration
@@ -465,6 +435,9 @@ nnoremap <expr> pp SetPasteOver()
 " Regular copy and paste
 " TODO(sandy): Maybe get rid of this and use the system clipboard?
 vnoremap <C-c> "+yi
+set iminsert=1
+set imsearch=1
+set imcmdline
 lnoremap <C-v> <C-r><C-o>+
 
 " Jump back to same line when reopening
@@ -751,17 +724,12 @@ let g:buftabline_numbers = 1
 
 " Allow switching to buffer #<n> by typing <n>e
 function! s:bufSwitch(count)
-    if count ># 1
-        return ":" . count . "b"
+    if count >=# 1
+        return ":\<C-U>" . count . "b\<CR>"
     endif
     return 'e'
 endfunction
-nnoremap <expr> e <SID>bufSwitch(v:count1)
-
-" But we need to get rid of buffer #1 so it doesn't conflict with regular e
-au VimEnter * if v:progname ==# "gvim" && expand('%') ==# "" |
-                \ execute "normal! ihello\<ESC>:bw!\<CR>" |
-                \ endif
+nnoremap <expr> e <SID>bufSwitch(v:count)
 
 
 
@@ -807,8 +775,8 @@ function! IgnoreWithoutCount(command)
   return a:command
 endfunction
 
-nnoremap <expr> l IgnoreWithoutCount('l')
-nnoremap <expr> h IgnoreWithoutCount('h')
-nnoremap <expr> j IgnoreWithoutCount('j')
-nnoremap <expr> k IgnoreWithoutCount('k')
+" nnoremap <expr> l IgnoreWithoutCount('l')
+" nnoremap <expr> h IgnoreWithoutCount('h')
+" nnoremap <expr> j IgnoreWithoutCount('j')
+" nnoremap <expr> k IgnoreWithoutCount('k')
 

@@ -19,3 +19,5 @@ alias :e='vim'
 alias gs='git status'
 alias ga='git add'
 alias gc='git commit'
+
+a() { alias $1="cd $PWD"; }

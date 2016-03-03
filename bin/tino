@@ -101,7 +101,7 @@ EOF
         done
         CMDS=()
         for CMD in $*; do
-          CMDS+=("'"'+argdo execute "normal '"$CMD"'"'"'")
+          CMDS+=("'"'+argdo execute "normal '"/$SEARCH\<CR>$CMD"'"'"'")
         done
         CMDS+=('+xa')
 
