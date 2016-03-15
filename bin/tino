@@ -63,6 +63,23 @@ case "$basename" in
         fi
         ;;
 
+    import)
+        FILE=$(ls -t ~/Downloads/* | head -1)
+        LOCATION=$(mktemp -d)
+        case "$FILE" in
+            *.zip)
+                unzip "$FILE" -d "$LOCATION"
+                ;;
+        esac
+        beet import "$LOCATION"
+        echo "add ~/music" | cmus-remote
+        sleep 1s
+        echo "refresh"     | cmus-remote
+        sleep 1s
+        echo "save"        | cmus-remote
+        # rm "$FILE"
+        ;;
+
     l|local)
         ~/.tino/local/g "$@"
         ;;

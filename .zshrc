@@ -17,4 +17,3 @@ export PROMPT_COMMAND='history -a; history -r'
 for file in ~/.tino/zsh/*.zsh; do
     source $file
 done
-

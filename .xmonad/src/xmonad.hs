@@ -23,6 +23,7 @@ import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops (ewmh)
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
+import XMonad.Hooks.Place (placeHook, fixed)
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Prompt
@@ -47,10 +48,11 @@ setWallpaper :: String -> X ()
 setWallpaper strWallpaper = spawn $ "feh --bg-fill $HOME/" ++ strWallpaper
 
 myManageHook = fullscreenManageHook <+> manageSpawn <+> manageDocks <+> composeAll
-   [ className =? "Gvim"    --> viewShift "2"
-   , role =? "conversation" --> doFloat
-   , role =? "pop-up"       --> doFloat
-   , isFullscreen           --> doFullFloat
+   [ className =? "Gvim"      --> viewShift "2"
+   , className =? "Screenkey" --> placeHook( fixed(0,1) ) <+> doFloat <+> doF W.focusDown
+   , role =? "conversation"   --> doFloat
+   , role =? "pop-up"         --> doFloat
+   , isFullscreen             --> doFullFloat
    ]
      where viewShift = doF . liftM2 (.) W.greedyView W.shift
            role = stringProperty "WM_WINDOW_ROLE"
@@ -178,5 +180,7 @@ myKeys =
         , ((mod .|. shiftMask, xK_h),    sendMessage Shrink)
         , ((mod .|. shiftMask, xK_l),    sendMessage Expand)
         , ((mod, xK_v),                  spawn "$HOME/.tino/bin/tino pcfb")
+        , ((mod, xK_F11),                safeSpawn "redshift" ["-x"])
+        , ((mod, xK_F12),                safeSpawn "redshift" ["-O2500"])
         ]
 

@@ -3,7 +3,7 @@ alias diff='git diff --'
 alias diffp='git diff --patience --'
 alias pacman='sudo pacman'
 
-alias calc='python'
+alias calc='ghci'
 
 alias ec2-serenade="ssh -i ~/.ssh/santino.pem ubuntu@$SERENADE"
 alias ec2-haystack='ssh -i ~/.ssh/Haystack.pem ubuntu@52.10.229.25'
@@ -21,3 +21,8 @@ alias ga='git add'
 alias gc='git commit'
 
 a() { alias $1="cd $PWD"; }
+
+alias gp='git push'
+
+alias rs='redshift -O2500'
+alias xs='redshift -x'
