@@ -22,7 +22,8 @@ alias gc='git commit'
 
 a() { alias $1="cd $PWD"; }
 
-alias gp='git push'
+alias up='git push'
 
 alias rs='redshift -O2500'
 alias xs='redshift -x'
+

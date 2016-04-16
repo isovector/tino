@@ -159,7 +159,7 @@ EOF
         eval "$@"
         while read change; do
             read NOW < $TEMP
-            ! [[ "$change" =~ .swp$ ]] && (
+            ! [[ "$change" =~ ".sw[po]$" ]] && (
                 THEN=$(echo "$change" | grep -o "[^:]*" | head -n1)
                 [[ "$NOW" -lt "$THEN" ]] && (
                     clear
@@ -170,7 +170,7 @@ EOF
                     echo ""
                 )
             )
-        done < <(inotifywait --quiet --recursive --monitor --event modify --format "%T:%w%f" --timefmt="%s" .)
+        done < <(inotifywait --exclude '^\./\.' --quiet --recursive --monitor --event modify --format "%T:%w%f" --timefmt="%s" .)
         ;;
 
 

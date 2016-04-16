@@ -160,6 +160,7 @@ nmap <localleader>wb O<ESC>78i-<ESC>gccyyjpk<CR>center<CR>gcc
 " ------------------------------------------------------------------------------
 nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>cp :cd ~/Projects/
+nnoremap <leader>cg :cd ~/Projects/
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
 
@@ -296,6 +297,7 @@ let g:easy_align_delimiters = {
 \ ')': { 'pattern': '[()]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '<': { 'pattern': '[<]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
+\ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ }
 
 cmap <expr> %% expand('%:p:h') . '/'
@@ -429,6 +431,15 @@ endfunction
 
 nnoremap <expr> PP SetPasteOver()
 
+function! AlignWithAbove()
+    let c = nr2char(getchar())
+    exec "-t-"
+    exec "normal! f" . c . "D0v$r \<ESC>"
+    startinsert!
+endfunction
+
+nnoremap <silent> ga :call AlignWithAbove()<CR>
+
 " ------------------------------------------------------------------------------
                               " System Integration
 " ------------------------------------------------------------------------------
@@ -554,12 +565,14 @@ function! MarkdownFiletype()
 
 
     iabbrev vrc .vimrc
-    nnoremap == gqap
+    nnoremap == gqip
 endfunction
 
 function! AddHsPragma()
     let pragma = input("LANGUAGE ")
-    execute "normal! msggO{-# LANGUAGE " . pragma . " #-}\<ESC>`s"
+    if pragma != ""
+        execute "normal! msggO{-# LANGUAGE " . pragma . " #-}\<ESC>`s"
+    endif
 endfunction
 
 function! HaskellFiletype()
