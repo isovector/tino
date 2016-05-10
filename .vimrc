@@ -88,6 +88,11 @@ Plug 'justincampbell/vim-railscasts'
 Plug 'vim-scripts/leo256'
 Plug 'w0ng/vim-hybrid'
 Plug 'ap/vim-css-color'
+Plug 'Valloric/vim-valloric-colorscheme'
+Plug 'lanox/lanox-vim-theme'
+Plug 'pkukulak/idle'
+Plug 'mhartington/oceanic-next'
+Plug 'geetarista/ego.vim'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -438,7 +443,8 @@ function! AlignWithAbove()
     startinsert!
 endfunction
 
-nnoremap <silent> ga :call AlignWithAbove()<CR>
+nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+
 
 " ------------------------------------------------------------------------------
                               " System Integration
@@ -478,7 +484,7 @@ else
 endif
 
 set guioptions=ac
-colo railscasts
+colo ego
 set background=dark
 
 if g:colors_name ==# "railscasts"
@@ -504,7 +510,7 @@ let g:rainbow#colors = {
 \     ['magenta', 'purple1'     ]
 \   ] }
 
-2mat ErrorMsg '\%81v.'
+" 2mat ErrorMsg '\%81v.'
 
 set statusline=
 set statusline +=%3*%y%*                "file type
@@ -559,7 +565,6 @@ function! MarkdownFiletype()
     setfiletype ghmarkdown
     " Markdown link
     imap     \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>'a$T]ys$]A
-    inoremap <C-I><C-I> **<Left>
     inoremap <C-B><C-B> ****<Left><Left>
     nnoremap zb z=1<CR><CR>
 
@@ -583,6 +588,20 @@ function! HaskellFiletype()
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
     inoremap =- <space><-<space>
+    inoremap +_ <space><=<space>
+    inoremap _+ <space>=><space>
+
+    syntax keyword haskellTodo showTrace error undefined traceChanges
+    syntax keyword haskellNumber sample pick scanle newCollection center tags tagging getTag tag change foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run
+    syntax keyword haskellIdentifier return fmap map id forM_ mapM_ join ap pure ask filter foldl foldr flip not maybe fst snd curry uncurry negate abs fromInteger div mod toInteger round truncate ceiling floor mempty mappend mconcat sequence null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords read show putStrLn print getChar getLine readFile writeFile isJust fromJust makeLenses const view set first second get put local liftIO def when runReader runState runReaderT runStateT runWriter runWriterT
+    syntax match haskellIdentifier /\vM\.(singleton|empty|insert|contains)/
+    syntax match haskellIdentifier /\vT\.(pack|unpack)/
+
+    " syntax region haskellDefinition start=/\v^[^ ]/ end='=' oneline contains=haskellStart,haskellArg
+    " syntax match haskellStart "\v^[^ ]+" contained
+    " syntax match haskellArg "\v [^ ]+"  contained
+    " highlight def link haskellStart haskellNumber
+    " highlight def link haskellArg haskellNumber
 endfunction
 
 " Set filetypes
@@ -793,3 +812,4 @@ endfunction
 " nnoremap <expr> j IgnoreWithoutCount('j')
 " nnoremap <expr> k IgnoreWithoutCount('k')
 
+nnoremap <silent> ga :call AlignWithAbove()<CR>

@@ -27,3 +27,4 @@ alias up='git push'
 alias rs='redshift -O2500'
 alias xs='redshift -x'
 
+alias twsb='t w stack build'
