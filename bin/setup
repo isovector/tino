@@ -46,6 +46,7 @@ case "$1" in
         attach xmodmaprc
         attach xmonad
         attach zshrc
+        attach tmux.conf
         ln -s "$HOME/.tino/luakit" "$HOME/.config/luakit"
         ;;
 
