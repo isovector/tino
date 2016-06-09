@@ -42,6 +42,7 @@ Plug 'ap/vim-buftabline'
 " Navigation
 Plug 'kien/ctrlp.vim'
 Plug 'vim-scripts/JumpToLastOccurrence'
+Plug 'christoomey/vim-tmux-navigator'
 
 " Misc
 Plug 'mattn/gist-vim'
@@ -65,7 +66,7 @@ Plug 'michaeljsmith/vim-indent-object'
 " Plug 'scrooloose/syntastic'
 
 " Languages
-Plug 'raichoo/haskell-vim'
+Plug 'neovimhaskell/haskell-vim'
 Plug 'tristen/vim-sparkup'
 Plug 'Twinside/vim-hoogle'
 Plug 'vim-scripts/lua.vim'
@@ -242,6 +243,7 @@ function! SubstituteParameter()
   let result = input(var . " -> ")
   execute "normal! v/{\<CR>%"
   execute "normal! :s/\\v<" . var . ">/". result . "\<CR>"
+  execute "normal! \<C-O>"
 endfunction
 
 " Rename
@@ -331,14 +333,8 @@ vnoremap j gj
 vnoremap k gk
 
 " Window movement
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-" nnoremap <C-L> L
-" nnoremap <C-H> H
 nnoremap L <C-W><C-L>
 nnoremap H <C-W><C-H>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
 
 " Window resizing
 noremap <silent> <C-F9>  :vertical resize -10<CR>
