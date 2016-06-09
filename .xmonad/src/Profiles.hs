@@ -85,7 +85,7 @@ browserProgram :: String
 browserProgram = "chromium-browser"
 
 browserTitle :: String
-browserTitle = "Chromium-browser"
+browserTitle = "chromium-browser"
 
 trayHeight :: Int
 trayHeight
