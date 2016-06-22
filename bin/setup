@@ -59,10 +59,8 @@ case "$1" in
 
         # build xmonad
         cd ~/.tino/.xmonad
-        ~/.cabal/bin/cabal sandbox init
-        ~/.cabal/bin/cabal install xmonad xmonad-contrib xmonad-extras
         make
-        as_root ln -s "$HOME/.tino/.xmonad/.cabal-sandbox/bin/xmonad" /usr/local/bin/xmonad
+        as_root ln -s "$HOME/.tino/.xmonad/xmonad-x86_64-linux" /usr/local/bin/xmonad
 
         # setup desktop env for it
         read -r -d '' XMONAD <<'EOF'
@@ -70,7 +68,6 @@ case "$1" in
 Name=XMonad
 Comment=Log in using XMonad
 Exec=/usr/local/bin/xmonad
-TryExec=/usr/local/bin/xmonad
 Icon=xmonad
 Type=Application
 EOF

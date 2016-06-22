@@ -63,7 +63,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-" Plug 'scrooloose/syntastic'
+Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
@@ -314,7 +314,7 @@ cmap <expr> %% expand('%:p:h') . '/'
                                  " Gnarly Shit
 " ------------------------------------------------------------------------------
 " Sudo save file.
-" cmap w!! %!sudo tee > /dev/null %
+cmap w!! %!sudo tee > /dev/null %
 
 " Change property to dict lookup (a.x -> a['x'])
 nmap cod mmysiw]hxlysw'`ml
@@ -482,13 +482,6 @@ endif
 set guioptions=ac
 colo ego
 set background=dark
-
-if g:colors_name ==# "railscasts"
-  hi WildMenu guifg=Black guibg=#777700 gui=bold cterm=bold
-  hi Tabline guibg=#000000 guifg=#999999
-  hi TablineFill guibg=#777700 guifg=#000000
-  hi StatusLine guibg=#000000 guifg=#FFFFFF
-endif
 
 " Rainbow colored parentheses
 let g:rainbow#max_level = 16

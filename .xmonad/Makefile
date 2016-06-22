@@ -1,8 +1,8 @@
 SRC:=$(shell find src -iname '*.hs')
 
 xmonad-x86_64-linux: ${SRC}
-	cabal build exe:xmonad-tino
-	mv dist/build/xmonad-tino/xmonad-tino xmonad-x86_64-linux
+	stack build
+	cp .stack-work/install/x86_64-linux/lts-5.2/7.10.3/bin/xmonad-tino xmonad-x86_64-linux
 
 .PHONY: replace
 

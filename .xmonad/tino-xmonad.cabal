@@ -20,7 +20,7 @@ executable xmonad-tino
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.8 && <4.9
-                     , xmonad == 0.11.1
+                     , xmonad
                      , xmonad-contrib
                      , xmonad-extras
                      , X11
