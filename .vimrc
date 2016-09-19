@@ -42,6 +42,7 @@ Plug 'ap/vim-buftabline'
 " Navigation
 Plug 'kien/ctrlp.vim'
 Plug 'vim-scripts/JumpToLastOccurrence'
+Plug 'christoomey/vim-tmux-navigator'
 
 " Misc
 Plug 'mattn/gist-vim'
@@ -62,11 +63,10 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-" Plug 'scrooloose/syntastic'
+Plug 'scrooloose/syntastic'
 
 " Languages
-Plug 'raichoo/haskell-vim'
-" Plug 'tristen/vim-sparkup'
+Plug 'neovimhaskell/haskell-vim'
 Plug 'Twinside/vim-hoogle'
 Plug 'vim-scripts/lua.vim'
 Plug 'derekwyatt/vim-scala'
@@ -247,6 +247,7 @@ function! SubstituteParameter()
   let result = input(var . " -> ")
   execute "normal! v/{\<CR>%"
   execute "normal! :s/\\v<" . var . ">/". result . "\<CR>"
+  execute "normal! \<C-O>"
 endfunction
 
 " Rename
@@ -313,7 +314,7 @@ cmap <expr> %% expand('%:p:h') . '/'
                                  " Gnarly Shit
 " ------------------------------------------------------------------------------
 " Sudo save file.
-" cmap w!! %!sudo tee > /dev/null %
+cmap w!! %!sudo tee > /dev/null %
 
 " Change property to dict lookup (a.x -> a['x'])
 nmap cod mmysiw]hxlysw'`ml
@@ -337,14 +338,8 @@ vnoremap j gj
 vnoremap k gk
 
 " Window movement
-nnoremap <C-J> <C-W><C-J>
-nnoremap <C-K> <C-W><C-K>
-" nnoremap <C-L> L
-" nnoremap <C-H> H
 nnoremap L <C-W><C-L>
 nnoremap H <C-W><C-H>
-nnoremap <C-L> <C-W><C-L>
-nnoremap <C-H> <C-W><C-H>
 
 " Window resizing
 noremap <silent> <C-F9>  :vertical resize -10<CR>
