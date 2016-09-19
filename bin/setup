@@ -46,7 +46,7 @@ case "$1" in
         attach xmodmaprc
         attach xmonad
         attach zshrc
-        ln -s "$HOME/.tino/luakit" "$HOME/.config/luakit"
+        attach places
         ;;
 
     vim)

@@ -188,6 +188,23 @@ EOF
         chromium-browser --app="$RESULT" $@
         ;;
 
+    place)
+        while read line; do
+            if [[ $(echo $line | cut -d' ' -f1) == "$1" ]]; then
+                echo $line | tr -s ' ' | cut -d' ' -f2
+                exit 0
+            fi
+        done < ~/.places
+        if [[ -e ~/.places.local ]]; then
+            while read line; do
+                if [[ $(echo $line | cut -d' ' -f1) == "$1" ]]; then
+                    echo $line | tr -s ' ' | cut -d' ' -f2
+                    exit 0
+                fi
+            done < ~/.places.local
+        fi
+        exit 1
+        ;;
 
     *)
         ~/.tino/local/g $basename "$@"

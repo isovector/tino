@@ -28,3 +28,17 @@ alias rs='redshift -O2500'
 alias xs='redshift -x'
 
 alias twsb='t w stack build'
+
+function go() {
+    for PIECE in "$@"; do
+        if [[ -e "$PIECE" ]]; then
+            cd $PIECE
+        else
+            WHERE=$(~/.tino/bin/tino place $PIECE)
+            if [[ $? == 0 ]]; then
+                eval WHERE=$WHERE
+                cd $WHERE
+            fi
+        fi
+    done
+}

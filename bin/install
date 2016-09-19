@@ -158,7 +158,7 @@ setup_gui() {
     install feh dzen2 conky scrot trayer
     # install synapse
     install thunar evince gpicview vim-gtk lxrandr
-    install pidgin cmus luakit chromium-browser vlc deluge-gtk
+    install pidgin cmus chromium-browser vlc deluge-gtk
 
     install libgtkhotkey1
     cd ~/Downloads
