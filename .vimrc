@@ -66,16 +66,16 @@ Plug 'michaeljsmith/vim-indent-object'
 
 " Languages
 Plug 'raichoo/haskell-vim'
-Plug 'tristen/vim-sparkup'
+" Plug 'tristen/vim-sparkup'
 Plug 'Twinside/vim-hoogle'
 Plug 'vim-scripts/lua.vim'
 Plug 'derekwyatt/vim-scala'
 Plug 'vim-scripts/lua_indent'
 Plug 'plasticboy/vim-markdown'
 Plug 'rhysd/conflict-marker.vim'
-Plug 'PotatoesMaster/i3-vim-syntax'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
+Plug 'derekelkins/agda-vim'
 
 " Colors
 Plug 'ptrr/phd-vim'
@@ -303,6 +303,7 @@ let g:easy_align_delimiters = {
 \ '<': { 'pattern': '[<]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
+\ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ }
 
 cmap <expr> %% expand('%:p:h') . '/'
@@ -479,6 +480,16 @@ if has("gui_running")
     set guitablabel=%-0.12t%M
     set showtabline=2
     au BufAdd * :RainbowParentheses
+
+    try
+    if g:colors_name ==# "railscasts"
+        hi WildMenu guifg=Black guibg=#777700 gui=bold cterm=bold
+        hi Tabline guibg=#000000 guifg=#999999
+        hi TablineFill guibg=#777700 guifg=#000000
+        hi StatusLine guibg=#000000 guifg=#FFFFFF
+    endif
+    catch
+    endtry
 else
     set t_Co=256
 endif
@@ -486,13 +497,6 @@ endif
 set guioptions=ac
 colo ego
 set background=dark
-
-if g:colors_name ==# "railscasts"
-  hi WildMenu guifg=Black guibg=#777700 gui=bold cterm=bold
-  hi Tabline guibg=#000000 guifg=#999999
-  hi TablineFill guibg=#777700 guifg=#000000
-  hi StatusLine guibg=#000000 guifg=#FFFFFF
-endif
 
 " Rainbow colored parentheses
 let g:rainbow#max_level = 16
@@ -564,13 +568,11 @@ au BufWritePre *.scala :SortScalaImports
 function! MarkdownFiletype()
     setfiletype ghmarkdown
     " Markdown link
-    imap     \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>'a$T]ys$]A
-    inoremap <C-B><C-B> ****<Left><Left>
-    nnoremap zb z=1<CR><CR>
+    imap     <buffer> \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>`a$T]ys$]A
+    inoremap <buffer> <C-B><C-B> ****<Left><Left>
+    nnoremap <buffer> zb z=1<CR><CR>
 
-
-    iabbrev vrc .vimrc
-    nnoremap == gqip
+    nnoremap <buffer> == gqip
 endfunction
 
 function! AddHsPragma()
@@ -591,9 +593,10 @@ function! HaskellFiletype()
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
-    syntax keyword haskellTodo showTrace error undefined traceChanges
-    syntax keyword haskellNumber sample pick scanle newCollection center tags tagging getTag tag change foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run
-    syntax keyword haskellIdentifier return fmap map id forM_ mapM_ join ap pure ask filter foldl foldr flip not maybe fst snd curry uncurry negate abs fromInteger div mod toInteger round truncate ceiling floor mempty mappend mconcat sequence null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords read show putStrLn print getChar getLine readFile writeFile isJust fromJust makeLenses const view set first second get put local liftIO def when runReader runState runReaderT runStateT runWriter runWriterT
+    syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce
+    syntax keyword haskellNumber sample pick scanle newCollection center tags tagging findTag tag foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run uniform uniformIn listOf uniformly filled styled mag distance posDif circle polygon runLift group go fcata acata rcata
+    syntax keyword haskellIdentifier return fmap map id forM_ mapM_ join ap pure ask filter foldl foldr flip not maybe fst snd curry uncurry negate abs fromInteger div mod toInteger round truncate ceiling floor mempty mappend mconcat sequence null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords read show putStrLn print getChar getLine readFile writeFile isJust makeLenses const view set first second get put local liftIO def when runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF fix runFree cata ana forall
+    syntax match haskellIdentifier /\vS\.(singleton|empty|insert|contains)/
     syntax match haskellIdentifier /\vM\.(singleton|empty|insert|contains)/
     syntax match haskellIdentifier /\vT\.(pack|unpack)/
 
