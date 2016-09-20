@@ -38,6 +38,7 @@ Plug 'tpope/vim-characterize'
 Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
+Plug 'Shougo/vimproc'
 
 " Navigation
 Plug 'kien/ctrlp.vim'
@@ -47,13 +48,10 @@ Plug 'christoomey/vim-tmux-navigator'
 " Misc
 Plug 'mattn/gist-vim'
 Plug 'junegunn/goyo.vim'
-Plug 'Shougo/neosnippet'
-Plug 'tpope/vim-fugitive'
-" Plug 'junegunn/vim-peekaboo'
+" Plug 'Shougo/neosnippet'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'isovector/vim-howdoi'
-" Plug 'xolox/vim-session'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -67,9 +65,9 @@ Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
+" Plug 'eagletmt/ghcmod-vim'
 Plug 'Twinside/vim-hoogle'
 Plug 'vim-scripts/lua.vim'
-Plug 'derekwyatt/vim-scala'
 Plug 'vim-scripts/lua_indent'
 Plug 'plasticboy/vim-markdown'
 Plug 'rhysd/conflict-marker.vim'
@@ -163,9 +161,22 @@ nmap <localleader>wb O<ESC>78i-<ESC>gccyyjpk<CR>center<CR>gcc
 " ------------------------------------------------------------------------------
                               " Quick Directories
 " ------------------------------------------------------------------------------
+function! Go()
+  let where = input("go ")
+  let dir = system("~/.tino/bin/tino where " . where)
+  execute ":cd " . dir
+endfunction
+
+function! EditGo()
+  let where = input("edit go ")
+  let where = split(system("~/.tino/bin/tino where " . where), "\n")[0]
+  return ":e " . where . "/"
+endfunction
+nnoremap <expr> <leader>eg EditGo()
+
 nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>cp :cd ~/Projects/
-nnoremap <leader>cg :cd ~/Projects/
+nnoremap <leader>cg :call Go()<CR>
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
 
@@ -558,7 +569,6 @@ augroup END
 " ------------------------------------------------------------------------------
                               " Filetype Settings
 " ------------------------------------------------------------------------------
-au BufWritePre *.scala :SortScalaImports
 
 function! MarkdownFiletype()
     setfiletype ghmarkdown

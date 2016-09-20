@@ -206,6 +206,21 @@ EOF
         exit 1
         ;;
 
+    where)
+        for PIECE in "$@"; do
+            if [[ -e "$PIECE" ]]; then
+                cd $PIECE
+            else
+                WHERE=$(~/.tino/bin/tino place $PIECE)
+                if [[ $? == 0 ]]; then
+                    eval WHERE=$WHERE
+                    cd $WHERE
+                fi
+            fi
+        done
+        echo $PWD
+        ;;
+
     *)
         ~/.tino/local/g $basename "$@"
         ;;
