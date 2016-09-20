@@ -32,14 +32,14 @@ parse_git_dirty() {
 }
 
 PROMPT='
-%{$fg_bold[red]%}➜%{$reset_color%}  %{$fg[yellow]%}$(places)$(git_prompt_info)%{$reset_color%} '
+%{$fg_bold[red]%}➜%{$reset_color%}  $(git_prompt_info)%{$fg[yellow]%}$(places)%{$reset_color%} '
 
 RPROMPT='%{$fg[green]%}%T%{$reset_color%}'
 
-ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[red]%}@%{$reset_color%}%{$fg[green]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%}!%{$reset_color%}"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%}"
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[red]%}%{$reset_color%}%{$fg[green]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%}+"
+ZSH_THEME_GIT_PROMPT_CLEAN=""
 
 if [ -e "$HOME/.zshrc.theme.local" ]; then
     source ~/.zshrc.theme.local
