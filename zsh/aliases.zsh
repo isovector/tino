@@ -12,9 +12,8 @@ alias xcopy='xclip -selection c'
 
 alias t='tino'
 alias o='gnome-open'
-alias v='vim'
-alias e='vim'
-alias :e='vim'
+alias e='nvim'
+alias :e='nvim'
 
 alias gs='git status'
 alias ga='git add'

@@ -61,7 +61,7 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-Plug 'scrooloose/syntastic'
+" Plug 'scrooloose/syntastic'
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
@@ -97,7 +97,7 @@ Plug 'tmhedberg/matchit'
 Plug 'tpope/vim-surround'
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-syntax'
-Plug 'Lokaltog/vim-easymotion'
+" Plug 'Lokaltog/vim-easymotion'
 Plug 'junegunn/vim-after-object'
 Plug 'terryma/vim-expand-region'
 Plug 'rbonvall/vim-textobj-latex'
@@ -185,7 +185,7 @@ nnoremap <leader>cz :cd ~/.tino/zsh/
 " ------------------------------------------------------------------------------
                                  " Quick Edits
 " ------------------------------------------------------------------------------
-nnoremap <leader>ev :e $MYVIMRC<cr>
+nnoremap <leader>ev :e ~/.vimrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
@@ -298,7 +298,7 @@ vnoremap <c-s> :<c-u>w<CR>
 " nnoremap <C-[> <ESC>:po<CR>
 
 " Remove search highlighting
-nnoremap <silent> <s-space> :noh<cr>
+nnoremap <silent> <leader><space> :noh<cr>
 
 " Help align visual blocks by delimiter
 vmap <s-space> <Plug>(EasyAlign)
@@ -594,6 +594,7 @@ function! HaskellFiletype()
 
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
+    inoremap -= <space>-><space>
     inoremap =- <space><-<space>
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
@@ -650,7 +651,6 @@ set autoindent
 set backspace=indent,eol,start
 set backupskip=/tmp/*,/private/tmp/*"
 set dictionary=/usr/share/dict/words
-set encoding=utf-8
 set expandtab
 set formatoptions=qrn1
 set gdefault
@@ -821,3 +821,36 @@ endfunction
 " nnoremap <expr> k IgnoreWithoutCount('k')
 
 nnoremap <silent> ga :call AlignWithAbove()<CR>
+
+" ------------------------------------------------------------------------------
+                                    " Neovim
+" ------------------------------------------------------------------------------
+
+if has("nvim")
+
+tnoremap <ESC> <C-\><C-n>:set relativenumber<CR>
+highlight TermCursor ctermfg=red guifg=red
+
+func! MaybeInsertMode(direction)
+    stopinsert
+    if &buftype == 'terminal'
+       set norelativenumber
+    endif
+    execute "wincmd " . a:direction
+    if &buftype == 'terminal'
+        startinsert!
+        set norelativenumber
+    endif
+endfunc
+
+tnoremap <silent> <c-h> <c-\><c-n>:call MaybeInsertMode("h")<cr>
+tnoremap <silent> <c-j> <c-\><c-n>:call MaybeInsertMode("j")<cr>
+tnoremap <silent> <c-k> <c-\><c-n>:call MaybeInsertMode("k")<cr>
+tnoremap <silent> <c-l> <c-\><c-n>:call MaybeInsertMode("l")<cr>
+nnoremap <silent> <c-h> :call MaybeInsertMode("h")<cr>
+nnoremap <silent> <c-j> :call MaybeInsertMode("j")<cr>
+nnoremap <silent> <c-k> :call MaybeInsertMode("k")<cr>
+nnoremap <silent> <c-l> :call MaybeInsertMode("l")<cr>
+
+endif
+
