@@ -51,7 +51,7 @@ Plug 'junegunn/goyo.vim'
 " Plug 'Shougo/neosnippet'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
-Plug 'isovector/vim-howdoi'
+" Plug 'isovector/vim-howdoi'
 
 " Formatting
 Plug 'vim-scripts/vis'
