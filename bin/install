@@ -93,6 +93,7 @@ setup_basic() {
     git config --global credential.helper cache
     git config --global credential.helper 'cache --timeout=3600'
     git config --global push.default matching
+    git config --global core.excludesfile ~/.gitignore
 
     # setup ssh and net
     cd

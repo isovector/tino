@@ -34,7 +34,6 @@ Plug 'mattn/webapi-vim'
 Plug 'rking/ag.vim'
 Plug 'tpope/vim-repeat'
 Plug 'majutsushi/tagbar'
-Plug 'tpope/vim-characterize'
 Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
@@ -51,7 +50,7 @@ Plug 'junegunn/goyo.vim'
 " Plug 'Shougo/neosnippet'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
-" Plug 'isovector/vim-howdoi'
+Plug 'tpope/vim-fugitive'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -76,6 +75,7 @@ Plug 'jtratner/vim-flavored-markdown'
 Plug 'derekelkins/agda-vim'
 
 " Colors
+Plug 'altercation/vim-colors-solarized'
 Plug 'ptrr/phd-vim'
 Plug 'ciaranm/inkpot'
 Plug 'ajh17/Spacegray.vim'
@@ -109,6 +109,12 @@ Plug 'justinmk/vim-sneak'
 
 call plug#end()
 
+syntax on
+let g:solarized_termcolors=256
+set t_Co=256
+set background=dark
+colorscheme solarized
+
 
 
 " ------------------------------------------------------------------------------
@@ -134,10 +140,11 @@ nnoremap <silent> <leader>wtd :lgrep! TODO.sandy<CR>:lw<CR>
 
 " New functionality
 noremap  <leader>mv :call RenameFile()<cr>
-vnoremap <leader><leader>c :!octave --silent \| cut -c8-<cr>
 nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Left>
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
+
+nnoremap <leader>b :Gblame<CR>
 
 let g:howdoi_map = '<leader>h'
 
@@ -301,7 +308,7 @@ vnoremap <c-s> :<c-u>w<CR>
 nnoremap <silent> <leader><space> :noh<cr>
 
 " Help align visual blocks by delimiter
-vmap <s-space> <Plug>(EasyAlign)
+vmap <leader><space> <Plug>(EasyAlign)
 
 nnoremap zj moo<esc>k`o
 nnoremap zk moO<esc>`o
@@ -316,6 +323,9 @@ let g:easy_align_delimiters = {
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
+\ '#': { 'pattern': '#', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
+\ 'q': { 'pattern': '\(qualified\)\?\ze ', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
+\ 'c': { 'pattern': '.\zs--', 'left_margin': 2, 'right_margin': 1, 'stick_to_left': 0, 'ignore_groups': [] },
 \ }
 
 cmap <expr> %% expand('%:p:h') . '/'
@@ -588,12 +598,15 @@ function! AddHsPragma()
 endfunction
 
 function! HaskellFiletype()
+    " set formatprg=stylish-haskell
+
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
     nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
 
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
+    inoremap ,. <space>~><space>
     inoremap -= <space>-><space>
     inoremap =- <space><-<space>
     inoremap +_ <space><=<space>
@@ -672,15 +685,15 @@ set relativenumber
 set ruler
 set scrolloff=8
 set shiftround
-set shiftwidth=4
+set shiftwidth=2
 set showcmd
 set showmatch
 set showmode
 set smartcase
 set splitbelow
 set splitright
-set softtabstop=4
-set tabstop=4
+set softtabstop=2
+set tabstop=2
 set tags=./tags,tags,../tags
 set timeoutlen=300
 set title

@@ -42,12 +42,12 @@ case "$1" in
         attach vim
         attach vimrc
         attach gvimrc
-        attach gvimrc
         attach xmodmaprc
         attach xmonad
         attach zshrc
         attach places
         attach tmux.conf
+        attach gitignore
         ;;
 
     vim)
