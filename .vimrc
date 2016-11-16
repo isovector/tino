@@ -591,6 +591,7 @@ function! MarkdownFiletype()
 endfunction
 
 function! AddHsPragma()
+    " Add a new HS pragma, and sort the list so it's pretty
     let pragma = input("LANGUAGE ")
     normal! ms
     if pragma != ""
@@ -609,14 +610,18 @@ function! HaskellFiletype()
 
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
+
+    " Easy-to-type haskell digraphs
     inoremap ,. <space>~><space>
     inoremap -= <space>-><space>
     inoremap =- <space><-<space>
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
+    " Quick alignment of imports
     nnoremap <silent><buffer> <leader>si gg/import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>
 
+    " Better syntax highlighting
     syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce trace
 
     syntax keyword haskellNumber sample pick scanle newCollection center tags tagging findTag tag foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run uniform uniformIn listOf uniformly filled styled mag distance posDif circle polygon runLift group go fcata acata rcata
@@ -632,12 +637,6 @@ function! HaskellFiletype()
     syntax keyword haskellDecl Show Read Dict1 Dict2 Monad Num Fractional Real Floating Integral Eq Ord Applicative Functor
     syntax keyword haskellBottom DemoteRep Proxy Type Typeable
     syntax keyword haskellKeyword m
-
-    " syntax region haskellDefinition start=/\v^[^ ]/ end='=' oneline contains=haskellStart,haskellArg
-    " syntax match haskellStart "\v^[^ ]+" contained
-    " syntax match haskellArg "\v [^ ]+"  contained
-    " highlight def link haskellStart haskellNumber
-    " highlight def link haskellArg haskellNumber
 endfunction
 
 " Set filetypes
