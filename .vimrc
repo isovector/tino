@@ -134,6 +134,8 @@ nnoremap <leader>g :grep!  <BS>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
+nnoremap <leader>wc :! wc %<CR>
+
 " Todo management
 nmap     <leader>td OTODO(sandy): <ESC>gccA
 nnoremap <silent> <leader>wtd :lgrep! TODO.sandy<CR>:lw<CR>
@@ -586,8 +588,6 @@ function! MarkdownFiletype()
     imap     <buffer> \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>`a$T]ys$]A
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
-
-    nnoremap <buffer> == gqip
 endfunction
 
 function! AddHsPragma()
