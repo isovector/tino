@@ -591,10 +591,14 @@ function! MarkdownFiletype()
 endfunction
 
 function! AddHsPragma()
+    " Add a new HS pragma, and sort the list so it's pretty
     let pragma = input("LANGUAGE ")
+    normal! ms
     if pragma != ""
-        execute "normal! msggO{-# LANGUAGE " . pragma . " #-}\<ESC>`s"
+        execute "normal! ggO{-# LANGUAGE " . pragma . " #-}\<ESC>"
     endif
+    execute "normal! ggvip:sort\<CR>gv:EasyAlign -#\<CR>"
+    normal `s
 endfunction
 
 function! HaskellFiletype()
@@ -606,24 +610,33 @@ function! HaskellFiletype()
 
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
+
+    " Easy-to-type haskell digraphs
     inoremap ,. <space>~><space>
     inoremap -= <space>-><space>
     inoremap =- <space><-<space>
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
-    syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce
+    " Quick alignment of imports
+    nnoremap <silent><buffer> <leader>si gg/import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>
+
+    " Better syntax highlighting
+    syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce trace
+
     syntax keyword haskellNumber sample pick scanle newCollection center tags tagging findTag tag foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run uniform uniformIn listOf uniformly filled styled mag distance posDif circle polygon runLift group go fcata acata rcata
-    syntax keyword haskellIdentifier return fmap map id forM_ mapM_ join ap pure ask filter foldl foldr flip not maybe fst snd curry uncurry negate abs fromInteger div mod toInteger round truncate ceiling floor mempty mappend mconcat sequence null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords read show putStrLn print getChar getLine readFile writeFile isJust makeLenses const view set first second get put local liftIO def when runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF fix runFree cata ana forall
-    syntax match haskellIdentifier /\vS\.(singleton|empty|insert|contains)/
-    syntax match haskellIdentifier /\vM\.(singleton|empty|insert|contains)/
+
+    syntax keyword haskellPragma load require fromConfig enter serve yield sinkList concatMap runConduit yieldMany iterM
+
+    syntax keyword haskellKeyword when unless flip const id maybe fmap map pure return sequence fst snd curry uncurry show read view set first second toS either forM_ mapM_ forM mapM join mempty mappend mconcat mzero fix traverse traverse_
+    syntax keyword haskellPragma ap ask filter foldl foldr not negate abs fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust makeLenses get put local liftIO def runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF runFree cata ana forall evalStateT execStateT evalState runState Just Nothing Left Right
+    syntax match haskellIdentifier /\v(S|M)\.(singleton|empty|insert|contains)/
     syntax match haskellIdentifier /\vT\.(pack|unpack)/
 
-    " syntax region haskellDefinition start=/\v^[^ ]/ end='=' oneline contains=haskellStart,haskellArg
-    " syntax match haskellStart "\v^[^ ]+" contained
-    " syntax match haskellArg "\v [^ ]+"  contained
-    " highlight def link haskellStart haskellNumber
-    " highlight def link haskellArg haskellNumber
+    syntax match haskellDecl /\v<(Has|To|From|Known|Monad|Sing)[A-Z][A-Za-z0-9'_]*>/
+    syntax keyword haskellDecl Show Read Dict1 Dict2 Monad Num Fractional Real Floating Integral Eq Ord Applicative Functor
+    syntax keyword haskellBottom DemoteRep Proxy Type Typeable
+    syntax keyword haskellKeyword m
 endfunction
 
 " Set filetypes
