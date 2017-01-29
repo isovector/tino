@@ -44,9 +44,9 @@ Plug 'justinmk/vim-sneak'
 let g:sneak#s_next = 1
 Plug '~/Projects/ghci.vim'
 
-Plug 'takac/vim-hardtime'
-let g:hardtime_default_on = 1
-let g:list_of_normal_keys = ["h", "j", "k", "l", "{", "}"]
+" Plug 'takac/vim-hardtime'
+" let g:hardtime_default_on = 1
+" let g:list_of_normal_keys = ["h", "j", "k", "l", "{", "}"]
 
 call plug#end()
 
