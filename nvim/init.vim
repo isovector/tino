@@ -42,16 +42,25 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-surround'
 Plug 'justinmk/vim-sneak'
 let g:sneak#s_next = 1
+Plug '~/Projects/ghci.vim'
+
+Plug 'takac/vim-hardtime'
+let g:hardtime_default_on = 1
+let g:list_of_normal_keys = ["h", "j", "k", "l", "{", "}"]
+
 call plug#end()
 
 let mapleader = " "
 
+nnoremap [[ :call searchpair('\[', '', '\]', 'bW')<CR>
+nnoremap ]] :call searchpair('\[', '', '\]', 'W')<CR>
 nnoremap ;; :w<CR>
 nnoremap <cr> :
 nnoremap # :e #<CR>
 inoremap <C-X> <C-X><C-O>
 
-nnoremap <Leader>ev :e ~/.vimrc<CR>
+nnoremap <Leader>evv :e ~/.vimrc<CR>
+nnoremap <Leader>ev :e ~/.config/nvim/init.vim<CR>
 
 colo ego
 
@@ -62,6 +71,7 @@ augroup END
 
 set hidden
 set wildmenu
+set shiftwidth=2
 set wildmode=list:longest
 
 au BufWritePre * execute "normal! ms:%s/\\v\\s\+$//e\<CR>`s"
@@ -212,6 +222,10 @@ set statusline +=%1*%=%2*\ =%{v:register}
 set statusline +=%5l%*                  "current line
 set statusline +=%2*/%L%*               "total lines
 set statusline +=%1*%4v\ %*             "virtual column number
+
+augroup removeftplugin
+  au!
+augroup END
 
 augroup unmapCRInQuickfix
   au!
