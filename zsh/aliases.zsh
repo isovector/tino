@@ -39,3 +39,5 @@ function go() {
         fi
     done
 }
+
+alias nix='nix-shell --run zsh'

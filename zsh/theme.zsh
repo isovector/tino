@@ -31,8 +31,17 @@ parse_git_dirty() {
   fi
 }
 
+function nix_enabled() {
+  if [ -z ${IN_NIX_SHELL+x} ]; then
+    echo -n "%{$fg_bold[red]%}➜"
+  else
+    echo -n "%{$fg_bold[blue]%}❄"
+  fi
+  echo "%{$reset_color%}"
+}
+
 PROMPT='
-%{$fg_bold[red]%}➜%{$reset_color%}  $(git_prompt_info)%{$fg[yellow]%}$(places)%{$reset_color%} '
+$(nix_enabled)  $(git_prompt_info)%{$fg[yellow]%}$(places)%{$reset_color%} '
 
 RPROMPT='%{$fg[green]%}%T%{$reset_color%}'
 
