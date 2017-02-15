@@ -134,6 +134,8 @@ nnoremap <leader>g :grep!  <BS>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
+nnoremap <leader>wc :! wc %<CR>
+
 " Todo management
 nmap     <leader>td OTODO(sandy): <ESC>gccA
 nnoremap <silent> <leader>wtd :lgrep! TODO.sandy<CR>:lw<CR>
@@ -183,6 +185,7 @@ nnoremap <expr> <leader>eg EditGo()
 
 nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>cp :cd ~/Projects/
+nnoremap <leader>cj :cd ~/Projects/time2jam/<CR>
 nnoremap <leader>cg :call Go()<CR>
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
@@ -320,9 +323,11 @@ let g:easy_align_delimiters = {
 \ ']': { 'pattern': '[[\]]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ ')': { 'pattern': '[()]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '<': { 'pattern': '[<]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
+\ '.': { 'pattern': '\.', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
+\ '~': { 'pattern': '\.\~', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '#': { 'pattern': '#', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ 'q': { 'pattern': '\(qualified\)\?\ze ', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ 'c': { 'pattern': '.\zs--', 'left_margin': 2, 'right_margin': 1, 'stick_to_left': 0, 'ignore_groups': [] },
@@ -586,14 +591,15 @@ function! MarkdownFiletype()
     imap     <buffer> \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>`a$T]ys$]A
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
-
-    nnoremap <buffer> == gqip
 endfunction
 
 function! AddHsPragma()
     " Add a new HS pragma, and sort the list so it's pretty
     let pragma = input("LANGUAGE ")
     normal! ms
+    if match(getline(1), "module") == 0
+      execute "normal! ggO\<ESC>"
+    endif
     if pragma != ""
         execute "normal! ggO{-# LANGUAGE " . pragma . " #-}\<ESC>"
     endif
@@ -618,8 +624,10 @@ function! HaskellFiletype()
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
+    nnoremap -- O<esc>78i-<esc>o<esc>i-- \|<space>
+
     " Quick alignment of imports
-    nnoremap <silent><buffer> <leader>si gg/import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>
+    nnoremap <silent><buffer> <leader>si magg/^import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>:noh<CR>`a
 
     " Better syntax highlighting
     syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce trace
@@ -629,7 +637,7 @@ function! HaskellFiletype()
     syntax keyword haskellPragma load require fromConfig enter serve yield sinkList concatMap runConduit yieldMany iterM
 
     syntax keyword haskellKeyword when unless flip const id maybe fmap map pure return sequence fst snd curry uncurry show read view set first second toS either forM_ mapM_ forM mapM join mempty mappend mconcat mzero fix traverse traverse_
-    syntax keyword haskellPragma ap ask filter foldl foldr not negate abs fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust makeLenses get put local liftIO def runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF runFree cata ana forall evalStateT execStateT evalState runState Just Nothing Left Right
+    syntax keyword haskellPragma ap ask filter foldl foldr not negate abs fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust makePrisms makeLenses get put local liftIO def runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF runFree cata ana forall evalStateT execStateT evalState runState Just Nothing Left Right
     syntax match haskellIdentifier /\v(S|M)\.(singleton|empty|insert|contains)/
     syntax match haskellIdentifier /\vT\.(pack|unpack)/
 

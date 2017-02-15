@@ -4,7 +4,12 @@ setopt PROMPT_SUBST
 
 function places() {
   NAME=${PWD/$HOME/'~'}
-  cat ~/.places ~/.places.local | awk '{ print length(), $0 | "sort -rn | cut -d\\  -f2-" }' | \
+  if [[ -e ~/.places.local ]]; then
+    PLACES=$(cat ~/.places ~/.places.local)
+  else
+    PLACES=$(cat ~/.places)
+  fi
+  echo $PLACES | awk '{ print length(), $0 | "sort -rn | cut -d\\  -f2-" }' | \
   while read LINE; do
       SUB=$(echo $LINE | tr -s ' ' | cut -d' ' -f2)
       WITH=%{${fg[blue]}%}$(echo $LINE | tr -s ' ' | cut -d' ' -f1)%{$reset_color$fg[yellow]%}

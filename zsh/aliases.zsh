@@ -27,6 +27,7 @@ alias xs='redshift -x'
 alias twsb='t w stack build'
 
 function go() {
+  cd $(
     for PIECE in "$@"; do
         if [[ -e "$PIECE" ]]; then
             cd $PIECE
@@ -38,6 +39,7 @@ function go() {
             fi
         fi
     done
+    pwd)
 }
 
 alias nix='nix-shell --run zsh'
