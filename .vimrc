@@ -91,6 +91,8 @@ Plug 'lanox/lanox-vim-theme'
 Plug 'pkukulak/idle'
 Plug 'mhartington/oceanic-next'
 Plug 'geetarista/ego.vim'
+Plug 'monkoose/boa.vim'
+Plug 'euclio/vim-nocturne'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -113,7 +115,6 @@ syntax on
 let g:solarized_termcolors=256
 set t_Co=256
 set background=dark
-colorscheme solarized
 
 
 
@@ -516,7 +517,7 @@ else
 endif
 
 set guioptions=ac
-colo ego
+colo boa
 set background=dark
 
 " Rainbow colored parentheses
@@ -524,15 +525,15 @@ let g:rainbow#max_level = 16
 let g:rainbow#pairs = [['(', ')'], ['[', ']']]
 let g:rainbow#colors = {
 \   'dark': [
-\     ['yellow',  'orange1'     ],
-\     ['green',   'yellow1'     ],
-\     ['cyan',    'greenyellow' ],
-\     ['magenta', 'green1'      ],
-\     ['red',     'springgreen1'],
-\     ['yellow',  'cyan1'       ],
-\     ['green',   'slateblue1'  ],
+\     ['magenta', 'purple1'     ],
 \     ['cyan',    'magenta1'    ],
-\     ['magenta', 'purple1'     ]
+\     ['green',   'slateblue1'  ],
+\     ['yellow',  'cyan1'       ],
+\     ['red',     'springgreen1'],
+\     ['magenta', 'green1'      ],
+\     ['cyan',    'greenyellow' ],
+\     ['green',   'yellow1'     ],
+\     ['yellow',  'orange1'     ]
 \   ] }
 
 " 2mat ErrorMsg '\%81v.'
@@ -613,6 +614,17 @@ function! HaskellFiletype()
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
     nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
+
+    syntax match haskellKeyword /\\/ conceal cchar=λ
+    syntax match haskellKeyword / \zs\.\ze / conceal cchar=∙
+    syntax match haskellKeyword /\zs-\ze>/ conceal cchar=─
+    syntax match haskellKeyword />/ conceal cchar=►
+    syntax match haskellKeyword /\// conceal cchar=÷
+
+    " syntax match haskellKeyword /\zs=\ze>/ conceal cchar=≍
+    hi clear Conceal
+    setlocal conceallevel=2
+    setlocal concealcursor=nvic
 
     " Transform haskell line into a pointfree version
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==

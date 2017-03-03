@@ -9,7 +9,6 @@ import System.IO
 import System.IO.Unsafe (unsafePerformIO)
 
 import Profiles
-import XPcfb
 
 import XMonad
 import XMonad.Actions.CycleWS
@@ -82,7 +81,6 @@ myLogHook h = dynamicLogWithPP $ defaultPP
     , ppWsSep           = ""
     , ppSep             = "  "
     , ppOutput          = hPutStrLn h
-    , ppExtras          = [ pcfbLogger ]
     }
 
 myLayoutHook = avoidStruts $ tall
@@ -92,7 +90,7 @@ myLayoutHook = avoidStruts $ tall
 
 main = do d <- spawnPipe
              $ mconcat
-                [ "dzen2 "
+                [ "dzen2 -x 0 -y 0 "
                 , "-p -ta l -h '"
                 , show trayHeight
                 , "' "
@@ -155,7 +153,6 @@ main = do d <- spawnPipe
                                 ]
 
                             `additionalKeys` myKeys
-                            `additionalKeys` pcfbKeys mod
 
 myKeys =
         [ ((mod .|. shiftMask, xK_f),    runOrRaise "luakit" $ className =? "luakit")
@@ -179,7 +176,6 @@ myKeys =
         , ((mod, xK_h),                  prevScreen)
         , ((mod .|. shiftMask, xK_h),    sendMessage Shrink)
         , ((mod .|. shiftMask, xK_l),    sendMessage Expand)
-        , ((mod, xK_v),                  spawn "$HOME/.tino/bin/tino pcfb")
         , ((mod, xK_F11),                safeSpawn "redshift" ["-x"])
         , ((mod, xK_F12),                safeSpawn "redshift" ["-O2500"])
         ]

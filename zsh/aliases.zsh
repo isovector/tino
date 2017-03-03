@@ -41,3 +41,5 @@ function go() {
     done
     pwd)
 }
+
+alias nix='nix-shell --run zsh'
