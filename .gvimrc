@@ -34,7 +34,8 @@ nmap <d-9> 9gt
 set guifont=PragmataPro\ 22
 set guifont=PragmataPro\ 16
 " set guifont=DejaVu\ Sans\ Mono\ 14
-" set guifont=PragmataPro\ 10
+set guifont=PragmataPro\ 9
+set guifont=Monospace\ 8
 
 nnoremap ZZ <nop>
 vnoremap ZZ <nop>
