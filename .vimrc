@@ -38,6 +38,7 @@ Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
 Plug 'Shougo/vimproc'
+Plug 'yssl/QFEnter'
 
 " Navigation
 Plug 'kien/ctrlp.vim'
@@ -131,7 +132,8 @@ nnoremap <leader>sv :vert sb  <BS>
 
 " Easier access to commands
 nnoremap <leader>m :make<CR>
-nnoremap <leader>g :grep!  <BS>
+nnoremap <leader>g :silent! grep!  <BS>
+nnoremap K :silent! grep! <cword><CR>:copen<CR>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
@@ -158,7 +160,7 @@ let g:howdoi_map = '<leader>h'
 " TODO(sandy): Add infrastructure to only enable these in certain filetypes
 
 " No distractions for writing
-nnoremap <leader>gy :Goyo<CR>
+" nnoremap <leader>gy :Goyo<CR>
 
 " Insert new vim plugin line from system clipboard
 nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
@@ -248,7 +250,6 @@ vnoremap <CR> :B  <BS>
 nnoremap / /\v
 nnoremap <C-q> <C-W><C-q>
 " nnoremap K :grep! "\b<C-R><C-W>\b"<CR>:cw<CR>
-nnoremap K <nop>
 vnoremap < <gv
 vnoremap > >gv
 nnoremap * *N
@@ -374,8 +375,7 @@ noremap <silent> <C-F10> :resize +10<CR>
 noremap <silent> <C-F11> :resize -10<CR>
 noremap <silent> <C-F12> :vertical resize +10<CR>
 
-" Cursor binding
-nnoremap <C-c> :set cursorbind! scrollbind!<CR>
+nnoremap <silent> <C-c> :copen<CR>
 
 " Buffer list
 nnoremap gb :ls<CR>:b<Space>
@@ -517,7 +517,7 @@ else
 endif
 
 set guioptions=ac
-colo boa
+colo phd
 set background=dark
 
 " Rainbow colored parentheses
@@ -579,6 +579,7 @@ augroup unmapCRInQuickfix
   autocmd CmdwinEnter * nnoremap <buffer> <CR> <CR>
   autocmd CmdwinEnter * nnoremap <buffer> : :
   autocmd CmdwinEnter * nnoremap <buffer> q <C-W><C-Q>
+  autocmd WinLeave * cclose
 augroup END
 
 
@@ -606,6 +607,11 @@ function! AddHsPragma()
     endif
     execute "normal! ggvip:sort\<CR>gv:EasyAlign -#\<CR>"
     normal `s
+endfunction
+
+function! RstFiletype()
+  nnoremap <buffer> -- 2o<ESC>4i-<ESC>2o<ESC>
+  nnoremap <buffer> == yypVr=
 endfunction
 
 function! HaskellFiletype()
@@ -742,6 +748,7 @@ set wildignore+=*.pyc
 set wildignore+=*.spl
 set wildignore+=*.sw?
 set wildignore+=.hg,.git,.svn
+set wildignore+=tags
 set wildmenu
 set wildmode=list:longest
 set wrap
