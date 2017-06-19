@@ -2,13 +2,14 @@ module Main where
 
 import           Graphics.X11.ExtraTypes.XF86
 import           XMonad
-import           XMonad.Actions.WindowGo (runOrRaise)
+import           XMonad.Actions.WindowGo (raiseMaybe)
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn)
 
 
-
+runOrRaise :: String -> [String] -> Query Bool -> X ()
+runOrRaise = (raiseMaybe .) . safeSpawn
 
 alt  = mod1Mask
 modk = mod4Mask
@@ -25,8 +26,8 @@ keysToUnbind =
 safeSpawn' p = safeSpawn p . words
 
 keysToBind =
-  [ ((modk, xK_f),                 runOrRaise "chromium-browser" $ className =? "chromium-browser")
-  , ((modk, xK_g),                 runOrRaise "gvim" $ className =? "Gvim")
+  [ ((modk, xK_f),                 runOrRaise "chromium-browser" ["--force-device-scale-factor=0.5"] $ className =? "chromium-browser")
+  , ((modk, xK_g),                 runOrRaise "gvim" [] $ className =? "Gvim")
   , ((modk, xK_d),                 safeSpawnProg "synapse")
   , ((modk, xK_x),                 safeSpawnProg "terminator")
   , ((modk, xK_t),                 safeSpawnProg "thunar")
