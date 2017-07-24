@@ -4,10 +4,11 @@ import           Graphics.X11.ExtraTypes.XF86
 import           XMonad
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
-import           XMonad.Hooks.ManageDocks (avoidStruts, docks)
+import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook)
+import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
 import           XMonad.Hooks.SetWMName (setWMName)
-import           XMonad.Layout.Fullscreen
+import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spiral
 import           XMonad.Layout.ThreeColumns
@@ -18,8 +19,9 @@ import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn
 myManageHook = composeAll
     [ resource  =? "desktop_window" --> doIgnore
     , className =? "stalonetray"    --> doIgnore
-    , className =? "xmobar"    --> doIgnore
-    , isFullscreen --> (doF W.focusDown <+> doFullFloat)
+    , className =? "xmobar"         --> doIgnore
+    , className =? "vlc"            --> doFloat
+    , isFullscreen                  --> doFullFloat
     ]
 
 
@@ -96,8 +98,8 @@ main = do
   xmonad $ docks def
     { borderWidth        = 2
     , terminal           = "terminator"
-    , normalBorderColor  = "#cccccc"
-    , focusedBorderColor = "#cd8b00"
+    , normalBorderColor  = "#000000"
+    , focusedBorderColor = "#770077"
     , modMask = modk
     , logHook = dynamicLogWithPP $ xmobarPP
       { ppOutput = hPutStrLn xmproc
@@ -107,7 +109,8 @@ main = do
       }
     , startupHook = setWMName "LG3D"
     , layoutHook  = smartBorders myLayout
-    , manageHook  = myManageHook
+    , manageHook  = manageDocks <+> myManageHook <+> manageHook def
+    , handleEventHook = fullscreenEventHook
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind
