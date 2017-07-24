@@ -3,9 +3,35 @@ module Main where
 import           Graphics.X11.ExtraTypes.XF86
 import           XMonad
 import           XMonad.Actions.WindowGo (raiseMaybe)
+import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.ManageDocks (avoidStruts, docks)
+import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
+import           XMonad.Hooks.SetWMName (setWMName)
+import           XMonad.Layout.Fullscreen
+import           XMonad.Layout.NoBorders
+import           XMonad.Layout.Spiral
+import           XMonad.Layout.ThreeColumns
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
-import           XMonad.Util.Run (safeSpawnProg, safeSpawn)
+import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn)
+
+myManageHook = composeAll
+    [ resource  =? "desktop_window" --> doIgnore
+    , className =? "stalonetray"    --> doIgnore
+    , className =? "xmobar"    --> doIgnore
+    , isFullscreen --> (doF W.focusDown <+> doFullFloat)
+    ]
+
+
+
+myLayout = avoidStruts (
+    ThreeColMid 1 (3/100) (1/2) |||
+    Tall 1 (3/100) (1/2) |||
+    Mirror (Tall 1 (3/100) (1/2)) |||
+    Full |||
+    spiral (6/7)) |||
+    noBorders (fullscreenFull Full)
+
 
 
 runOrRaise :: String -> [String] -> Query Bool -> X ()
@@ -24,6 +50,12 @@ keysToUnbind =
   ]
 
 safeSpawn' p = safeSpawn p . words
+
+-- Color of current window title in xmobar.
+xmobarTitleColor = "#FFAA44"
+
+-- Color of current workspace in xmobar.
+xmobarCurrentWorkspaceColor = "#aa33aa"
 
 keysToBind =
   [ ((modk, xK_f),                 runOrRaise "chromium-browser" ["--force-device-scale-factor=0.5"] $ className =? "chromium-browser")
@@ -58,13 +90,24 @@ buttonsToBind =
 
 main = do
   spawn "xmodmap ~/.xmodmaprc"
+  xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
 
-  xmonad $ def
+
+  xmonad $ docks def
     { borderWidth        = 2
     , terminal           = "terminator"
     , normalBorderColor  = "#cccccc"
     , focusedBorderColor = "#cd8b00"
     , modMask = modk
+    , logHook = dynamicLogWithPP $ xmobarPP
+      { ppOutput = hPutStrLn xmproc
+      , ppTitle = xmobarColor xmobarTitleColor "" . shorten 100
+      , ppCurrent = xmobarColor xmobarCurrentWorkspaceColor ""
+      , ppSep = "   "
+      }
+    , startupHook = setWMName "LG3D"
+    , layoutHook  = smartBorders myLayout
+    , manageHook  = myManageHook
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind
