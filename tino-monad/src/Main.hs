@@ -2,6 +2,7 @@ module Main where
 
 import           Graphics.X11.ExtraTypes.XF86
 import           XMonad
+import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook)
@@ -15,12 +16,22 @@ import           XMonad.Layout.ThreeColumns
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn)
+import           XMonad.Util.WindowProperties (getProp32s)
+import           Log
+
+
 
 myManageHook = composeAll
     [ resource  =? "desktop_window" --> doIgnore
     , className =? "stalonetray"    --> doIgnore
     , className =? "xmobar"         --> doIgnore
     , className =? "vlc"            --> doFloat
+    , kdeOverride                   --> doFloat
+    , do
+        c <- className
+        if c == "zoom"
+           then doF copyToAll
+           else mempty
     , isFullscreen                  --> doFullFloat
     ]
 
@@ -90,7 +101,13 @@ buttonsToBind =
   , ((alt, button3), \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
   ]
 
+kdeOverride = ask >>= \w -> liftX $ do
+  override <- getAtom "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE"
+  wt <- getProp32s "_NET_WM_WINDOW_TYPE" w
+  return $ maybe False (elem $ fromIntegral override) wt
+
 main = do
+  setupLogger DEBUG "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
 
