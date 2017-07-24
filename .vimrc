@@ -644,7 +644,7 @@ function! HaskellFiletype()
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
-    nnoremap -- O<esc>78i-<esc>o<esc>i-- \|<space>
+    nnoremap <buffer> -- O<esc>78i-<esc>o<esc><<A \|<space>
 
     " Quick alignment of imports
     nnoremap <silent><buffer> <leader>si magg/^import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>:noh<CR>`a
