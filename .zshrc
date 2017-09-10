@@ -18,3 +18,4 @@ for file in ~/.tino/zsh/*.zsh; do
     source $file
 done
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+eval $(thefuck --alias)

@@ -590,7 +590,6 @@ augroup END
 function! MarkdownFiletype()
     setfiletype ghmarkdown
     " Markdown link
-    imap     <buffer> \m <ESC>maT]y$}}O<ESC>p0ys$]A:<ESC>`a$T]ys$]A
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
 endfunction
