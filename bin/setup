@@ -43,7 +43,6 @@ case "$1" in
         attach vimrc
         attach gvimrc
         attach xmodmaprc
-        attach xmonad
         attach zshrc
         attach places
         attach tmux.conf

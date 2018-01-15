@@ -204,7 +204,7 @@ nnoremap <leader>ev :e ~/.vimrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
-nnoremap <leader>ex :e ~/.xmonad/src/xmonad.hs<cr>
+nnoremap <leader>ex :e ~/.tino/tino-monad/src/Main.hs<cr>
 nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -622,11 +622,11 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader>h :Hoogle<space>
     nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
 
-    syntax match haskellKeyword /\\/ conceal cchar=λ
-    syntax match haskellKeyword / \zs\.\ze / conceal cchar=∙
-    syntax match haskellKeyword /\zs-\ze>/ conceal cchar=─
-    syntax match haskellKeyword />/ conceal cchar=►
-    syntax match haskellKeyword /\// conceal cchar=÷
+    syntax match haskellKeyword "/\\/ conceal cchar=λ"
+    syntax match haskellKeyword "/ \zs\.\ze / conceal cchar=∙"
+    syntax match haskellKeyword "/\zs-\ze>/ conceal cchar=─"
+    syntax match haskellKeyword "/>/ conceal cchar=►"
+    syntax match haskellKeyword "/\// conceal cchar=÷"
 
     " syntax match haskellKeyword /\zs=\ze>/ conceal cchar=≍
     hi clear Conceal
@@ -714,7 +714,8 @@ set ignorecase
 set incsearch
 set laststatus=2
 set lazyredraw
-set list listchars=tab:»·,trail:·
+set list
+set listchars="tab:��,trail:�"
 set matchtime=3
 set modeline
 set modelines=2

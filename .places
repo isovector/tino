@@ -1,6 +1,6 @@
 d       ~/Downloads
 t       ~/.tino
-p       ~/Projects
-rpg     ~/Projects/rpg-gen
-janky   ~/Projects/janky
-httw    ~/Projects/blog/reasonably-polymorphic/httw
+p       ~/prj
+rpg     ~/prj/rpg-gen
+janky   ~/prj/janky
+httw    ~/prj/blog/reasonably-polymorphic/httw

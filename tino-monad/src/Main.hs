@@ -65,28 +65,30 @@ keysToUnbind =
 safeSpawn' p = safeSpawn p . words
 
 -- Color of current window title in xmobar.
-xmobarTitleColor = "#FFAA44"
+xmobarTitleColor = "#daa520"
 
 -- Color of current workspace in xmobar.
-xmobarCurrentWorkspaceColor = "#aa33aa"
+xmobarCurrentWorkspaceColor = "#daa520"
 
 keysToBind =
-  [ ((modk, xK_f),                 runOrRaise "chromium-browser" ["--force-device-scale-factor=0.5"] $ className =? "chromium-browser")
-  , ((modk, xK_g),                 runOrRaise "gvim" [] $ className =? "Gvim")
-  , ((modk, xK_d),                 safeSpawnProg "synapse")
-  , ((modk, xK_x),                 safeSpawnProg "terminator")
-  , ((modk, xK_t),                 safeSpawnProg "thunar")
-  , ((modk .|. shiftMask, xK_q),   kill)
-  , ((modk, xK_p),                 safeSpawnProg "scrot")
-  , ((modk .|. shiftMask, xK_p),   spawn "sleep 0.2; scrot -s")
-  , ((0, xF86XK_AudioRaiseVolume), safeSpawn' "amixer" "-q set Master 2dB+")
-  , ((0, xF86XK_AudioLowerVolume), safeSpawn' "amixer" "-q set Master 2dB-")
-  , ((modk .|. shiftMask, xK_h),   sendMessage Shrink)
-  , ((modk .|. shiftMask, xK_l),   sendMessage Expand)
-  , ((modk, xK_F11),               safeSpawn' "redshift" "-x")
-  , ((modk, xK_F12),               safeSpawn' "redshift" "-O2500")
-  , ((modk .|. controlMask, xK_l), safeSpawn' "dm-tool" "lock")
-  , ((modk .|. controlMask, xK_f), withFocused $ windows . W.sink)
+  [ ((modk, xK_f),                  runOrRaise "firefox" ["--force-device-scale-factor=0.5"] $ className =? "Firefox")
+  , ((modk, xK_g),                  runOrRaise "gvim" [] $ className =? "Gvim")
+  , ((modk, xK_d),                  safeSpawnProg "synapse")
+  , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
+  , ((modk, xK_t),                  safeSpawnProg "thunar")
+  , ((modk .|. shiftMask, xK_q),    kill)
+  , ((modk, xK_p),                  safeSpawnProg "scrot")
+  , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
+  , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-q set Master 2dB+")
+  , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-q set Master 2dB-")
+  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 5")
+  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 5")
+  , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
+  , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
+  , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
+  , ((modk, xK_F12),                safeSpawn' "redshift" "-O2500")
+  , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
+  , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
   ]
 
 buttonsToUnbind =
@@ -114,7 +116,7 @@ main = do
 
   xmonad $ docks def
     { borderWidth        = 2
-    , terminal           = "terminator"
+    , terminal           = "xfce4-terminal"
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#770077"
     , modMask = modk
