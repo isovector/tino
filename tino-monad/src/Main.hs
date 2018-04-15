@@ -9,7 +9,7 @@ import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
-import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen)
+import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Accordion
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
@@ -28,8 +28,11 @@ myManageHook = composeAll
     , className =? "stalonetray"    --> doIgnore
     , className =? "xmobar"         --> doIgnore
     , className =? "vlc"            --> doFloat
+    , role      =? "conversation"   --> doSideFloat SE
     , isFullscreen                  --> doFullFloat
     ]
+  where
+    role = stringProperty "WM_WINDOW_ROLE"
 
 
 
@@ -50,6 +53,7 @@ runOrRaise :: String -> [String] -> Query Bool -> X ()
 runOrRaise = (raiseMaybe .) . safeSpawn
 
 alt  = mod1Mask
+musk = mod3Mask
 modk = mod4Mask
 
 keysToUnbind =
@@ -88,6 +92,9 @@ keysToBind =
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
   , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
+  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous")
+  , ((musk, xK_Right),              safeSpawn' "playerctl" "next")
+  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause")
   ]
 
 buttonsToUnbind =
