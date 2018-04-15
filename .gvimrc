@@ -35,7 +35,10 @@ nmap <d-9> 9gt
 " set guifont=PragmataPro\ 16
 " " set guifont=DejaVu\ Sans\ Mono\ 14
 " set guifont=PragmataPro\ 9
-" set guifont=Inconsolata\ 8
+
+function SetStreaming()
+  set guifont=Inconsolata\ 14
+endfunction
 
 nnoremap ZZ <nop>
 vnoremap ZZ <nop>

@@ -3,7 +3,5 @@ add mod3 = Print
 remove Lock = Caps_Lock
 keysym Caps_Lock = Escape
 
-! keysym 4 = dollar 4
-! keysym 9 = parenleft 9
-! keysym 0 = parenright 0
-! keycode 47 = colon semicolon
+keycode 108 = Multi_key
+remove mod1 = 108

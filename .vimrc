@@ -52,6 +52,7 @@ Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'tpope/vim-fugitive'
+Plug 'beloglazov/vim-online-thesaurus'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -74,6 +75,9 @@ Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
 Plug 'derekelkins/agda-vim'
+Plug 'leafo/moonscript-vim'
+Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
+Plug 'purescript-contrib/purescript-vim'
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -94,6 +98,7 @@ Plug 'mhartington/oceanic-next'
 Plug 'geetarista/ego.vim'
 Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
+Plug 'fenetikm/falcon'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -130,14 +135,17 @@ nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
 nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
+nnoremap zh :OnlineThesaurusCurrentWord<CR>
+
 " Easier access to commands
-nnoremap <leader>m :make<CR>
+nnoremap <leader>m :! (cd `git rev-parse --show-toplevel`; make)<CR>
 nnoremap <leader>g :silent! grep!  <BS>
 nnoremap K :silent! grep! <cword><CR>:copen<CR>
 nnoremap <leader>f :CtrlP<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
 nnoremap <leader>wc :! wc %<CR>
+nnoremap zb z=1<CR><CR>
 
 " Todo management
 nmap     <leader>td OTODO(sandy): <ESC>gccA
@@ -149,7 +157,7 @@ nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Le
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
-nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/tags<CR>
+nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 nnoremap <leader>b :Gblame<CR>
 
@@ -189,8 +197,8 @@ endfunction
 nnoremap <expr> <leader>eg EditGo()
 
 nnoremap <leader>cd :cd %:p:h<CR>
-nnoremap <leader>cp :cd ~/Projects/
-nnoremap <leader>cj :cd ~/Projects/time2jam/<CR>
+nnoremap <leader>cp :cd ~/prj/
+nnoremap <leader>cj :cd ~/prj/time2jam/<CR>
 nnoremap <leader>cg :call Go()<CR>
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
@@ -494,7 +502,7 @@ augroup END
 autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|\_site/'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|\_site/\|lua$'
 
 
 " ------------------------------------------------------------------------------
@@ -519,7 +527,7 @@ else
 endif
 
 set guioptions=ac
-colo phd
+colo falcon
 set background=dark
 
 " Rainbow colored parentheses
@@ -594,6 +602,13 @@ function! MarkdownFiletype()
     " Markdown link
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
+endfunction
+
+function! LatexFiletype()
+    setfiletype tex
+    nnoremap <buffer> zb z=1<CR><CR>
+    set tw=80
+    set cc=81
 endfunction
 
 function! AddHsPragma()
@@ -671,6 +686,7 @@ endfunction
 au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md call MarkdownFiletype()
 au BufRead,BufNewFile *.markdown call MarkdownFiletype()
+au BufRead,BufNewFile *.tex call LatexFiletype()
 au BufRead,BufNewFile *.hs call HaskellFiletype()
 au BufRead,BufNewFile *.htex setfiletype htex
 autocmd FileType cpp setlocal commentstring=//\ %s
