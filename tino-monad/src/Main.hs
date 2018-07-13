@@ -3,6 +3,7 @@ module Main where
 import           Data.Monoid ((<>))
 import           Graphics.X11.ExtraTypes.XF86
 import           Log
+import           System.Directory (setCurrentDirectory)
 import           XMonad
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.WindowGo (raiseMaybe)
@@ -111,7 +112,7 @@ buttonsToBind =
   ]
 
 main = do
-  setupLogger DEBUG "/home/sandy"
+  setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
   spawn "feh --bg-fill wp.jpg"
