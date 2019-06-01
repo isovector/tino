@@ -6,8 +6,8 @@ autoload -U add-zsh-hook
 compinit
 
 HISTFILE=~/.histfile
-HISTSIZE=1000
-SAVEHIST=1000
+HISTSIZE=1000000
+SAVEHIST=1000000
 setopt extendedglob
 setopt chaselinks
 unsetopt autocd
@@ -19,3 +19,10 @@ for file in ~/.tino/zsh/*.zsh; do
 done
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 eval $(thefuck --alias)
+eval "$(jump shell)"
+
+case $TERM in
+    xterm*)
+        precmd () {print -Pn "\e]0;${PWD}\a"}
+        ;;
+esac

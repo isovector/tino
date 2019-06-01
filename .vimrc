@@ -35,7 +35,7 @@ Plug 'rking/ag.vim'
 Plug 'tpope/vim-repeat'
 Plug 'majutsushi/tagbar'
 Plug 'vim-scripts/vim-lamdify'
-Plug 'junegunn/rainbow_parentheses.vim'
+" Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
 Plug 'Shougo/vimproc'
 Plug 'yssl/QFEnter'
@@ -47,7 +47,6 @@ Plug 'christoomey/vim-tmux-navigator'
 
 " Misc
 Plug 'mattn/gist-vim'
-Plug 'junegunn/goyo.vim'
 " Plug 'Shougo/neosnippet'
 Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
@@ -76,8 +75,9 @@ Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
 Plug 'derekelkins/agda-vim'
 Plug 'leafo/moonscript-vim'
-Plug 'xuhdev/vim-latex-live-preview', { 'for': 'tex' }
+Plug 'xuhdev/vim-latex-live-preview'
 Plug 'purescript-contrib/purescript-vim'
+" Plug 'rstacruz/sparkup'
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -137,6 +137,8 @@ nnoremap <leader>sv :vert sb  <BS>
 
 nnoremap zh :OnlineThesaurusCurrentWord<CR>
 
+nnoremap zC zc
+
 " Easier access to commands
 nnoremap <leader>m :! (cd `git rev-parse --show-toplevel`; make)<CR>
 nnoremap <leader>g :silent! grep!  <BS>
@@ -157,6 +159,7 @@ nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Le
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
+nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 nnoremap <leader>b :Gblame<CR>
@@ -283,9 +286,19 @@ function! SubstituteParameter()
   execute "normal! \<C-O>"
 endfunction
 
+function! Rename()
+  let var = expand("<cword>")
+  let result = input(var . " -> ")
+  if result != ""
+    set noignorecase
+    execute "normal! :%s//" . result . "\<CR>"
+    set ignorecase
+  endif
+endfunction
+
 " Rename
 " TODO(sandy): make a bufdo version of this
-nnoremap <Leader>s *N:noh<CR>:%s//
+nnoremap <Leader>s *N:noh<CR>:call Rename()<CR>
 nnoremap <Leader>sp :call SubstituteParameter()<CR>
 
 " Free keys:
@@ -336,7 +349,7 @@ let g:easy_align_delimiters = {
 \ ')': { 'pattern': '[()]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '<': { 'pattern': '[<]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '.': { 'pattern': '\.', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ '>': { 'pattern': '[->]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
+\ '>': { 'pattern': '->', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '~': { 'pattern': '\.\~', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
@@ -502,7 +515,7 @@ augroup END
 autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|\_site/\|lua$'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$'
 
 
 " ------------------------------------------------------------------------------
@@ -511,7 +524,7 @@ let g:ctrlp_custom_ignore = 'target/\|dist/\|\_site/\|lua$'
 if has("gui_running")
     set guitablabel=%-0.12t%M
     set showtabline=2
-    au BufAdd * :RainbowParentheses
+    " au BufAdd * :RainbowParentheses
 
     try
     if g:colors_name ==# "railscasts"
@@ -527,7 +540,7 @@ else
 endif
 
 set guioptions=ac
-colo falcon
+colo nocturne
 set background=dark
 
 " Rainbow colored parentheses
@@ -609,6 +622,9 @@ function! LatexFiletype()
     nnoremap <buffer> zb z=1<CR><CR>
     set tw=80
     set cc=81
+    set isk+==
+    iabbrev <buffer> ==r \begin{repl}<CR>\end{repl}<C-O>O
+    nnoremap <buffer> <silent> <leader>wtd :lgrep! todo<CR>:lw<CR>
 endfunction
 
 function! AddHsPragma()
@@ -923,4 +939,11 @@ nnoremap <silent> <c-k> :call MaybeInsertMode("k")<cr>
 nnoremap <silent> <c-l> :call MaybeInsertMode("l")<cr>
 
 endif
+
+function! NewPost()
+  let slug = input("new slug: ")
+  cd ~/prj/sandymaguire.me
+  execute "normal! \<CR>!make newpost\<CR>"
+  execute ":e wip/"  . slug . ".markdown"
+endfunction
 

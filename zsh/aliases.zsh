@@ -3,7 +3,7 @@ alias diff='git diff --'
 alias diffp='git diff --patience --'
 alias pacman='sudo pacman'
 
-alias calc='ghci'
+alias calc='stack ghci'
 
 alias ec2-serenade="ssh -i ~/.ssh/santino.pem ubuntu@$SERENADE"
 alias ec2-haystack='ssh -i ~/.ssh/Haystack.pem ubuntu@52.10.229.25'

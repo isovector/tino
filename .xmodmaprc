@@ -1,4 +1,5 @@
 add mod3 = Print
+add mod3 = Menu
 
 remove Lock = Caps_Lock
 keysym Caps_Lock = Escape

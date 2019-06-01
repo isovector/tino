@@ -8,7 +8,7 @@ import           XMonad
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
-import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook)
+import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
 import           XMonad.Hooks.SetWMName (setWMName)
@@ -28,8 +28,11 @@ myManageHook = composeAll
     [ resource  =? "desktop_window" --> doIgnore
     , className =? "stalonetray"    --> doIgnore
     , className =? "xmobar"         --> doIgnore
+    , className =? "anki"           --> doFloat
+    , className =? "Anki"           --> doFloat
     , className =? "vlc"            --> doFloat
     , role      =? "conversation"   --> doSideFloat SE
+    , kdeOverride                   --> doFloat
     , isFullscreen                  --> doFullFloat
     ]
   where
@@ -69,13 +72,14 @@ keysToUnbind =
 safeSpawn' p = safeSpawn p . words
 
 -- Color of current window title in xmobar.
-xmobarTitleColor = "#daa520"
+xmobarTitleColor = "#770077"
 
 -- Color of current workspace in xmobar.
-xmobarCurrentWorkspaceColor = "#daa520"
+xmobarCurrentWorkspaceColor = "#ffffff"
 
 keysToBind =
-  [ ((modk, xK_f),                  runOrRaise "firefox" ["--force-device-scale-factor=0.5"] $ className =? "Firefox")
+  [ ((modk, xK_f),                  runOrRaise "luakit" [] $ className =? "Luakit")
+  -- [ ((modk, xK_f),                  runOrRaise "tabbed" ["-c", "vimb", "-e"] $ className =? "tabbed")
   , ((modk, xK_g),                  runOrRaise "gvim" [] $ className =? "Gvim")
   , ((modk, xK_d),                  safeSpawnProg "synapse")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
@@ -111,26 +115,33 @@ buttonsToBind =
   , ((modk, button3), \w -> focus w >> withFocused (windows . W.sink))
   ]
 
+kdeOverride = ask >>= \w -> liftX $ do
+  override <- getAtom "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE"
+  wt <- getProp32s "_NET_WM_WINDOW_TYPE" w
+  return $ maybe False (elem $ fromIntegral override) wt
+
 main = do
   setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
   spawn "feh --bg-fill wp.jpg"
+  spawn "arbtt-capture"
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
 
 
-  xmonad $ docks def
-    { borderWidth        = 2
+  xmonad $ ewmh $ docks def
+    { borderWidth        = 1
     , terminal           = "xfce4-terminal"
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#770077"
     , modMask = modk
     , logHook = dynamicLogWithPP $
         xmobarPP
-        { ppOutput  = hPutStrLn xmproc
-        , ppTitle   = xmobarColor xmobarTitleColor "" . shorten 100
+        { ppOutput  = hPutStrLn xmproc . ("  " ++)
+        , ppTitle   = const ""
         , ppCurrent = xmobarColor xmobarCurrentWorkspaceColor ""
         , ppSep     = "   "
+        , ppLayout  = const ""
         }
     , startupHook = setWMName "LG3D"
     , layoutHook  = smartBorders myLayout

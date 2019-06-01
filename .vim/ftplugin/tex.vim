@@ -116,18 +116,6 @@ else
   exec "setlocal makeprg=make\\ -f\\ ~/.dotfiles/vim/latex.mk\\ " . substitute(bufname("%"),"tex$","pdf", "")
 endif
 
-noremap       <leader>m :make<CR>
-inoremap VV   <ESC>bi\value{<ESC>ea}<ESC>a
-inoremap TT   <ESC>b~bi\type{<ESC>ea}<ESC>a
-inoremap TP   <ESC>b~bi\type{<ESC>ea[]}<ESC>hi
-inoremap PT   <ESC>i\type{<ESC>ea}<ESC>a
-inoremap FF   <ESC>bi\func{<ESC>ea}<ESC>a
-inoremap CC   <ESC>bi\<ESC>ea{}<ESC>i
-inoremap BB   <ESC>yyp^i\end{<ESC>A}<ESC>k^i\begin{<ESC>A}<ESC>o
-inoremap SS   <ESC>^i\section{<ESC>A}<ESC>o
-inoremap SSS  <ESC>^i\subsection{<ESC>A}<ESC>o
-inoremap SSSS <ESC>^i\subsubsection{<ESC>A}<ESC>o
-
 set cc=121 tw=120 fo=cqt
 setlocal spell spelllang=en_us
 
