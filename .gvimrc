@@ -1,11 +1,6 @@
 set anti
 set lines=999 columns=84
-
-" Command + t to :CommandT
-if has("gui_macvim")
-  macmenu &File.New\ Tab key=<nop>
-  map <D-t> :CommandT<CR>
-endif
+colo vice
 
 " Open Command+T in a new tab
 let g:CommandTAcceptSelectionTabMap='<CR>'
@@ -34,6 +29,7 @@ nmap <d-9> 9gt
 " set guifont=PragmataPro\ 22
 " set guifont=PragmataPro\ 16
 " " set guifont=DejaVu\ Sans\ Mono\ 14
+set guifont=Monospace\ 11
 set guifont=Monospace\ 9
 
 function! SetStreaming()

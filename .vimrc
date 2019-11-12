@@ -99,6 +99,7 @@ Plug 'geetarista/ego.vim'
 Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
+Plug 'fielding/vice'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -135,6 +136,9 @@ nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
 nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
+nnoremap <leader>zl :silent! s/-- $> /<cr>:noh<cr>I-- $> <esc>:w<cr>02w
+nnoremap <leader>zr O <c-u>-- $>  <bs>
+
 nnoremap zh :OnlineThesaurusCurrentWord<CR>
 
 nnoremap zC zc
@@ -161,8 +165,12 @@ vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -
 
 nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
+nnoremap <silent> <leader>sgt :! (cd `git rev-parse --show-toplevel`; hasktags compiler/**/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 nnoremap <leader>b :Gblame<CR>
+
+" things i stole from chris penner
+nnoremap c "_c
 
 let g:howdoi_map = '<leader>h'
 
@@ -220,10 +228,6 @@ nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
-
-" Switch to header or c file
-nnoremap gH :e %<.h<CR>
-nnoremap gC :e %<.cc<CR>
 
 function! EditPcfbFile()
   let file = system("date +'%Y-%m-%d'")
@@ -338,8 +342,8 @@ nnoremap <silent> <leader><space> :noh<cr>
 " Help align visual blocks by delimiter
 vmap <leader><space> <Plug>(EasyAlign)
 
-nnoremap zj moo<esc>k`o
-nnoremap zk moO<esc>`o
+nnoremap zj moo <c-u><esc>k`o
+nnoremap zk moO <c-u><esc>`o
 
 " Things we can align on
 let g:easy_align_delimiters = {
@@ -351,6 +355,7 @@ let g:easy_align_delimiters = {
 \ '.': { 'pattern': '\.', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '>': { 'pattern': '->', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
+\ '@': { 'pattern': '@', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
 \ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '~': { 'pattern': '\.\~', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
 \ '#': { 'pattern': '#', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
@@ -540,7 +545,7 @@ else
 endif
 
 set guioptions=ac
-colo nocturne
+colo vice
 set background=dark
 
 " Rainbow colored parentheses
@@ -615,6 +620,7 @@ function! MarkdownFiletype()
     " Markdown link
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
+    imap <buffer> \ann <ESC>maysiv]%a(Ann)<space><esc>a
 endfunction
 
 function! LatexFiletype()
@@ -652,6 +658,10 @@ function! HaskellFiletype()
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
     nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
+    " setlocal formatprg=floskell
+
+    nnoremap <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
+    nnoremap <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
 
     syntax match haskellKeyword "/\\/ conceal cchar=λ"
     syntax match haskellKeyword "/ \zs\.\ze / conceal cchar=∙"

@@ -1,11 +1,16 @@
+{-# LANGUAGE NumDecimals #-}
+
 module Main where
 
+import           Control.Concurrent
+import           Control.Monad (forever)
 import           Data.Monoid ((<>))
 import           Graphics.X11.ExtraTypes.XF86
 import           Log
 import           System.Directory (setCurrentDirectory)
 import           XMonad
 import           XMonad.Actions.CopyWindow (copyToAll)
+import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
@@ -17,6 +22,7 @@ import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spiral
 import           XMonad.Layout.ThreeColumns
+import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn)
@@ -78,8 +84,8 @@ xmobarTitleColor = "#770077"
 xmobarCurrentWorkspaceColor = "#ffffff"
 
 keysToBind =
-  [ ((modk, xK_f),                  runOrRaise "luakit" [] $ className =? "Luakit")
-  -- [ ((modk, xK_f),                  runOrRaise "tabbed" ["-c", "vimb", "-e"] $ className =? "tabbed")
+  [ ((modk .|. shiftMask, xK_f),                  runOrRaise "luakit" [] $ className =? "Luakit")
+  , ((modk, xK_f),    runOrRaise "firefox" [] $ className =? "Navigator")
   , ((modk, xK_g),                  runOrRaise "gvim" [] $ className =? "Gvim")
   , ((modk, xK_d),                  safeSpawnProg "synapse")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
@@ -97,10 +103,17 @@ keysToBind =
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
   , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
-  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous")
-  , ((musk, xK_Right),              safeSpawn' "playerctl" "next")
-  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause")
+  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotify")
+  , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotify")
+  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
+  , ((musk, xK_g),                  promptSearch greenXPConfig' $ intelligent google)
+  , ((musk, xK_h),                  promptSearch greenXPConfig' stackage)
+  , ((musk, xK_w),                  promptSearch greenXPConfig' wikipedia)
+  , ((musk, xK_d),                  promptSearch greenXPConfig' dictionary)
+  , ((musk, xK_t),                  promptSearch greenXPConfig' thesaurus)
+  , ((musk, xK_y),                  promptSearch greenXPConfig' youtube)
   ]
+  where greenXPConfig' = greenXPConfig { font = "xft:Bitstream Vera Sans Mono:pixelsize=10" }
 
 buttonsToUnbind =
   [ (modk, button1)
@@ -124,9 +137,15 @@ main = do
   setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
-  spawn "feh --bg-fill wp.jpg"
+  -- spawn "feh --bg-fill wp.jpg"
+  -- spawn "komorebi"
   spawn "arbtt-capture"
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
+
+  forkIO $ forever $ do
+    spawn "pscircle --output-width=1600 --output-height=900 --dot-radius=2 --link-width=1.25 --tree-font-size=10 --tree-radius-increment=80 --cpulist-center=475:-300 --memlist-center=475:300 --link-convexity=0.4 --collapse-threads=1"
+    threadDelay 3e6
+
 
 
   xmonad $ ewmh $ docks def

@@ -6,3 +6,6 @@ keysym Caps_Lock = Escape
 
 keycode 108 = Multi_key
 remove mod1 = 108
+
+! keycode 105 = Return
+! remove mod1 = 105
