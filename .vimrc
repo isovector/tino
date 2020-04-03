@@ -226,6 +226,7 @@ nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.tino/tino-monad/src/Main.hs<cr>
 nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
+nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
 
@@ -236,13 +237,6 @@ function! EditPcfbFile()
 endfunction
 
 
-
-" ------------------------------------------------------------------------------
-                                " Quick Inserts
-" ------------------------------------------------------------------------------
-inoremap \fn <c-r>=expand('%:t:r')<cr>
-inoremap \dt <esc>:r! date "+\%Y-\%m-\%d \%H:\%m"<cr>kJA  <BS>
-inoremap <S-Tab> <esc>ma<<`aa
 
 
 
@@ -520,7 +514,7 @@ augroup END
 autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$'
 
 
 " ------------------------------------------------------------------------------
@@ -621,6 +615,7 @@ function! MarkdownFiletype()
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
     imap <buffer> \ann <ESC>maysiv]%a(Ann)<space><esc>a
+    set cc=58,81
 endfunction
 
 function! LatexFiletype()
@@ -633,15 +628,15 @@ function! LatexFiletype()
     nnoremap <buffer> <silent> <leader>wtd :lgrep! todo<CR>:lw<CR>
 endfunction
 
-function! AddHsPragma()
+function! AddHsPragma(kind, more)
     " Add a new HS pragma, and sort the list so it's pretty
-    let pragma = input("LANGUAGE ")
+    let pragma = input(a:kind . " ")
     normal! ms
     if match(getline(1), "module") == 0
       execute "normal! ggO\<ESC>"
     endif
     if pragma != ""
-        execute "normal! ggO{-# LANGUAGE " . pragma . " #-}\<ESC>"
+        execute "normal! ggO{-# " . a:kind . " " . a:more . pragma . " #-}\<ESC>"
     endif
     execute "normal! ggvip:sort\<CR>gv:EasyAlign -#\<CR>"
     normal `s
@@ -657,7 +652,8 @@ function! HaskellFiletype()
 
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
-    nnoremap <buffer> <leader>l :call AddHsPragma()<CR>
+    nnoremap <buffer> <leader>l :call AddHsPragma("LANGUAGE", "")<CR>
+    nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS_GHC", "-")<CR>
     " setlocal formatprg=floskell
 
     nnoremap <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
@@ -684,7 +680,18 @@ function! HaskellFiletype()
     inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
+    nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
+
     nnoremap <buffer> -- O<esc>78i-<esc>o<esc><<A \|<space>
+    nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>cm magg/^import<CR>Oimport Control.Monad<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>dm magg/^import<CR>Oimport qualified Data.Map as M<CR>import Data.Map (Map)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>ds magg/^import<CR>Oimport qualified Data.Set as S<CR>import Data.Set (Set)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>dt magg/^import<CR>Oimport Data.Traversable<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>df magg/^import<CR>Oimport Data.Foldable<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>p magg/^import<CR>Oimport Polysemy<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>ps magg/^import<CR>Oimport Polysemy.State<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>pe magg/^import<CR>Oimport Polysemy.Error<ESC>`a:noh<CR>
 
     " Quick alignment of imports
     nnoremap <silent><buffer> <leader>si magg/^import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>:noh<CR>`a
@@ -783,6 +790,7 @@ set ttyfast
 set visualbell
 set wildignore+=*.aux,*.out,*.toc
 set wildignore+=*.hi
+set wildignore+=*.ogg
 set wildignore+=*.jpg,*.bmp,*.gif,*.png,*.jpeg
 set wildignore+=*.luac
 set wildignore+=*.o,*.obj,*.exe,*.dll,*.manifest

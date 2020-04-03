@@ -5,9 +5,6 @@ alias pacman='sudo pacman'
 
 alias calc='stack ghci'
 
-alias ec2-serenade="ssh -i ~/.ssh/santino.pem ubuntu@$SERENADE"
-alias ec2-haystack='ssh -i ~/.ssh/Haystack.pem ubuntu@52.10.229.25'
-
 alias xcopy='xclip -selection c'
 
 alias t='tino'
@@ -21,10 +18,6 @@ alias gc='git commit'
 
 a() { alias $1="cd $PWD"; }
 
-alias rs='redshift -O2500'
-alias xs='redshift -x'
-
-alias twsb='t w stack build'
 
 function go() {
   cd $(
@@ -42,4 +35,6 @@ function go() {
     pwd)
 }
 
-alias nix='nix-shell --run zsh'
+alias arbtt-today='arbtt-stats --filter='"'"'$sampleage <24:00'"'"
+alias arbtt-week='arbtt-stats --filter='"'"'$sampleage <168:00'"'"
+alias arbtt-help='arbtt-stats --exclude scholarship --exclude call --exclude music: --exclude reddit: --exclude pp --exclude prj: --exclude comm: --exclude tv: --exclude security --m=0 --filter='"'"'$sampleage <24:00'"'"' --dump-samples | fgrep '"'"'(*)'"'"'| uniq --count | sort --general-numeric-sort'

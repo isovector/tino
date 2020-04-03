@@ -37,6 +37,7 @@ myManageHook = composeAll
     , className =? "anki"           --> doFloat
     , className =? "Anki"           --> doFloat
     , className =? "vlc"            --> doFloat
+    , title     =? "New entry"      --> doFloat
     , role      =? "conversation"   --> doSideFloat SE
     , kdeOverride                   --> doFloat
     , isFullscreen                  --> doFullFloat
@@ -96,7 +97,7 @@ keysToBind =
   , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-c 0 -q set Master 2dB+")
   , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-c 0 -q set Master 2dB-")
   , ((0, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 15")
-  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 15")
+  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 5")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
@@ -133,18 +134,19 @@ kdeOverride = ask >>= \w -> liftX $ do
   wt <- getProp32s "_NET_WM_WINDOW_TYPE" w
   return $ maybe False (elem $ fromIntegral override) wt
 
+main :: IO ()
 main = do
   setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
-  -- spawn "feh --bg-fill wp.jpg"
+  spawn "feh --bg-fill wp.jpg"
   -- spawn "komorebi"
   spawn "arbtt-capture"
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
 
-  forkIO $ forever $ do
-    spawn "pscircle --output-width=1600 --output-height=900 --dot-radius=2 --link-width=1.25 --tree-font-size=10 --tree-radius-increment=80 --cpulist-center=475:-300 --memlist-center=475:300 --link-convexity=0.4 --collapse-threads=1"
-    threadDelay 3e6
+--   forkIO $ forever $ do
+--     spawn "pscircle --output-width=1600 --output-height=900 --dot-radius=2 --link-width=1.25 --tree-font-size=10 --tree-radius-increment=80 --cpulist-center=475:-300 --memlist-center=475:300 --link-convexity=0.4 --collapse-threads=1"
+--     threadDelay 3e6
 
 
 
