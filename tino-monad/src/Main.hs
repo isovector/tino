@@ -30,6 +30,11 @@ import           XMonad.Util.WindowProperties (getProp32s)
 
 
 
+myExtraWorkspaces = [(xK_0, "0"),(xK_minus, "cite"),(xK_equal, "learn")]
+
+myWorkspaces = ["www","work","side","read","5","6","7","8","music"] ++ (map snd myExtraWorkspaces)
+
+
 myManageHook = composeAll
     [ resource  =? "desktop_window" --> doIgnore
     , className =? "stalonetray"    --> doIgnore
@@ -40,6 +45,11 @@ myManageHook = composeAll
     , title     =? "New entry"      --> doFloat
     , role      =? "conversation"   --> doSideFloat SE
     , kdeOverride                   --> doFloat
+    , do
+        c <- className
+        if c == "zoom"
+           then doF copyToAll
+           else mempty
     , isFullscreen                  --> doFullFloat
     ]
   where
@@ -113,6 +123,10 @@ keysToBind =
   , ((musk, xK_d),                  promptSearch greenXPConfig' dictionary)
   , ((musk, xK_t),                  promptSearch greenXPConfig' thesaurus)
   , ((musk, xK_y),                  promptSearch greenXPConfig' youtube)
+  ] ++ [ ((modk, key), (windows $ W.greedyView ws))
+  | (key,ws) <- myExtraWorkspaces
+  ] ++ [ ((modk .|. shiftMask, key), (windows $ W.shift ws))
+  | (key,ws) <- myExtraWorkspaces
   ]
   where greenXPConfig' = greenXPConfig { font = "xft:Bitstream Vera Sans Mono:pixelsize=10" }
 
@@ -138,6 +152,7 @@ main :: IO ()
 main = do
   setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
+  spawn "/home/sandy/.tino/bin/monitor"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
   spawn "feh --bg-fill wp.jpg"
   -- spawn "komorebi"
@@ -155,6 +170,7 @@ main = do
     , terminal           = "xfce4-terminal"
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#770077"
+    , workspaces = myWorkspaces
     , modMask = modk
     , logHook = dynamicLogWithPP $
         xmobarPP

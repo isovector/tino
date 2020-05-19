@@ -214,8 +214,6 @@ nnoremap <leader>cg :call Go()<CR>
 nnoremap <leader>ct :cd ~/.tino/
 nnoremap <leader>cz :cd ~/.tino/zsh/
 
-
-
 " ------------------------------------------------------------------------------
                                  " Quick Edits
 " ------------------------------------------------------------------------------
@@ -683,6 +681,7 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
     nnoremap <buffer> -- O<esc>78i-<esc>o<esc><<A \|<space>
+    nnoremap <buffer> <leader><leader>db magg/^import<CR>Oimport Data.Bool<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>cm magg/^import<CR>Oimport Control.Monad<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>dm magg/^import<CR>Oimport qualified Data.Map as M<CR>import Data.Map (Map)<ESC>`a:noh<CR>

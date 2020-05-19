@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# setting up new mode for my VGA
+# xrandr --newmode "1920x1080" 148.5 1920 2008 2052 2200 1080 1089 1095 1125 +hsync +vsync
+# xrandr --addmode HDMI1 1920x1080
+
+# default monitor is LVDS1
+MONITOR=LVDS1
+
+# functions to switch from LVDS1 to VGA and vice versa
+function ActivateVGA {
+    echo "Switching to HDMI1"
+    xrandr --auto --output HDMI1 --mode 1920x1080 --left-of LVDS1
+    MONITOR=HDMI1
+}
+function DeactivateVGA {
+    echo "Switching to LVDS1"
+    xrandr --output HDMI1 --off
+    MONITOR=LVDS1
+}
+
+# functions to check if VGA is connected and in use
+function VGAActive {
+    [ $MONITOR = "HDMI1" ]
+}
+function VGAConnected {
+    ! xrandr | grep "^HDMI1" | grep disconnected &> /dev/null
+}
+
+# actual script
+while true
+do
+    if ! VGAActive && VGAConnected
+    then
+        ActivateVGA
+    fi
+
+    if VGAActive && ! VGAConnected
+    then
+        DeactivateVGA
+    fi
+
+    sleep 1s
+done
