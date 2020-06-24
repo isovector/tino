@@ -2,18 +2,15 @@
 
 module Main where
 
-import           Control.Concurrent
-import           Control.Monad (forever)
-import           Data.Monoid ((<>))
+import           Data.Foldable
+import           Data.Monoid (Endo (..))
 import           Graphics.X11.ExtraTypes.XF86
-import           Log
 import           System.Directory (setCurrentDirectory)
 import           XMonad
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
-import           XMonad.Hooks.DynamicBars
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
@@ -31,12 +28,29 @@ import           XMonad.Util.WindowProperties (getProp32s)
 
 
 
-myExtraWorkspaces = [(xK_0, "0"),(xK_minus, "cite"),(xK_equal, "learn")]
+myExtraWorkspaces :: [(KeySym, String)]
+myExtraWorkspaces =
+  [ (xK_0, "0")
+  , (xK_minus, "cite")
+  , (xK_equal, "learn")
+  ]
 
-myWorkspaces = ["www","work","side","read","5","6","7","8","music"] ++ fmap snd myExtraWorkspaces
+myWorkspaces :: [String]
+myWorkspaces =
+  [ "www"
+  , "work"
+  , "side"
+  , "read"
+  , "5"
+  , "6"
+  , "7"
+  , "8"
+  , "music"
+  ] ++ fmap snd myExtraWorkspaces
 
 
-myManageHook = composeAll
+myManageHook :: Query (Endo WindowSet)
+myManageHook = fold
     [ resource  =? "desktop_window" --> doIgnore
     , className =? "stalonetray"    --> doIgnore
     , className =? "xmobar"         --> doIgnore
@@ -53,9 +67,10 @@ myManageHook = composeAll
            else mempty
     , isFullscreen                  --> doFullFloat
     ]
-  where
-    role = stringProperty "WM_WINDOW_ROLE"
 
+
+role :: Query String
+role = stringProperty "WM_WINDOW_ROLE"
 
 
 myLayout =
@@ -74,10 +89,16 @@ myLayout =
 runOrRaise :: String -> [String] -> Query Bool -> X ()
 runOrRaise = (raiseMaybe .) . safeSpawn
 
+alt :: KeyMask
 alt  = mod1Mask
+
+musk :: KeyMask
 musk = mod3Mask
+
+modk :: KeyMask
 modk = mod4Mask
 
+keysToUnbind :: [(KeyMask, KeySym)]
 keysToUnbind =
   [ (modk, xK_p)
   , (modk .|. shiftMask, xK_p)
@@ -87,14 +108,17 @@ keysToUnbind =
   , (modk, xK_l)
   ]
 
+
+safeSpawn' :: MonadIO m => FilePath -> String -> m ()
 safeSpawn' p = safeSpawn p . words
 
--- Color of current window title in xmobar.
+xmobarTitleColor :: String
 xmobarTitleColor = "#770077"
 
--- Color of current workspace in xmobar.
+xmobarCurrentWorkspaceColor :: String
 xmobarCurrentWorkspaceColor = "#ffffff"
 
+keysToBind :: [((KeyMask, KeySym), X ())]
 keysToBind =
   [ ((modk .|. shiftMask, xK_f),                  runOrRaise "luakit" [] $ className =? "Luakit")
   , ((modk, xK_f),    runOrRaise "firefox" [] $ className =? "Navigator")
@@ -131,12 +155,14 @@ keysToBind =
   ]
   where greenXPConfig' = greenXPConfig { font = "xft:Bitstream Vera Sans Mono:pixelsize=10" }
 
+buttonsToUnbind :: [(KeyMask, Button)]
 buttonsToUnbind =
   [ (modk, button1)
   , (modk, button2)
   , (modk, button3)
   ]
 
+buttonsToBind :: [((KeyMask, Button), Window -> X ())]
 buttonsToBind =
   [ ((alt, button1),  \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
   , ((alt, button2),  windows . (W.shiftMaster .) . W.focusWindow)
@@ -144,6 +170,7 @@ buttonsToBind =
   , ((modk, button3), \w -> focus w >> withFocused (windows . W.sink))
   ]
 
+kdeOverride :: Query Bool
 kdeOverride = ask >>= \w -> liftX $ do
   override <- getAtom "_KDE_NET_WM_WINDOW_TYPE_OVERRIDE"
   wt <- getProp32s "_NET_WM_WINDOW_TYPE" w
@@ -152,20 +179,12 @@ kdeOverride = ask >>= \w -> liftX $ do
 main :: IO ()
 main = do
   setCurrentDirectory "/home/sandy"
-  spawn "xmodmap ~/.xmodmaprc"
   spawn "/home/sandy/.tino/bin/monitor"
   spawn "/home/sandy/.tino/bin/dockd"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
   spawn "feh --bg-fill wp.jpg"
-  -- spawn "komorebi"
   spawn "arbtt-capture"
   xmproc <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobar.hs"
-
---   forkIO $ forever $ do
---     spawn "pscircle --output-width=1600 --output-height=900 --dot-radius=2 --link-width=1.25 --tree-font-size=10 --tree-radius-increment=80 --cpulist-center=475:-300 --memlist-center=475:300 --link-convexity=0.4 --collapse-threads=1"
---     threadDelay 3e6
-
-
 
   xmonad $ ewmh $ docks def
     { borderWidth        = 1
