@@ -5,7 +5,7 @@ Config
   , position = Static
       { xpos = 0
       , ypos = 0
-      , width = 1600
+      , width = 1599
       , height = 11
       }
   , lowerOnStart = True,

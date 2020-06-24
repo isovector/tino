@@ -112,9 +112,11 @@ Plug 'terryma/vim-expand-region'
 Plug 'rbonvall/vim-textobj-latex'
 Plug 'Julian/vim-textobj-variable-segment'
 Plug 'deris/vim-shot-f'
-Plug 'wellle/targets.vim'
+" Plug 'wellle/targets.vim'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
+
+Plug 'junkblocker/git-time-lapse'
 
 call plug#end()
 
@@ -167,12 +169,27 @@ nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplev
 nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 nnoremap <silent> <leader>sgt :! (cd `git rev-parse --show-toplevel`; hasktags compiler/**/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
+function! MkHsModuleName(dir, path)
+  return substitute(a:path[strlen(a:dir . "src/"):-4], '/', '.', '')
+endfunction
+
+function! HsModuleName()
+  return MkHsModuleName(system("git rev-parse --show-toplevel"), expand('%:p'))
+endfunction
+
+nnoremap <silent> <leader>mk :normal! ggimodule <C-R>=HsModuleName()<CR> where<CR>
+
+
+
+
+
 nnoremap <leader>b :Gblame<CR>
 
 " things i stole from chris penner
 nnoremap c "_c
 
 let g:howdoi_map = '<leader>h'
+let g:vim_markdown_folding_disabled=1
 
 
 " ------------------------------------------------------------------------------
@@ -681,6 +698,7 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
     nnoremap <buffer> -- O<esc>78i-<esc>o<esc><<A \|<space>
+    nnoremap <buffer> <leader><leader>gg magg/^import<CR>Oimport GHC.Generics<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>db magg/^import<CR>Oimport Data.Bool<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>cm magg/^import<CR>Oimport Control.Monad<ESC>`a:noh<CR>
@@ -711,6 +729,7 @@ function! HaskellFiletype()
     syntax keyword haskellDecl Show Read Dict1 Dict2 Monad Num Fractional Real Floating Integral Eq Ord Applicative Functor
     syntax keyword haskellBottom DemoteRep Proxy Type Typeable
     syntax keyword haskellKeyword m
+
 endfunction
 
 " Set filetypes
@@ -864,6 +883,7 @@ call <SID>goyo_leave()
 " ------------------------------------------------------------------------------
 " Turn on buffer numbers in the tabline
 let g:buftabline_numbers = 1
+set showtabline=2
 
 " Allow switching to buffer #<n> by typing <n>e
 function! s:bufSwitch(count)
@@ -963,4 +983,114 @@ function! NewPost()
   execute "normal! \<CR>!make newpost\<CR>"
   execute ":e wip/"  . slug . ".markdown"
 endfunction
+
+
+function! GetLeftDict()
+  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# '('
+    normal! hmx
+  endif
+
+  let llpar_pos = FindNearest('(', 'b')
+  let lrpar_pos = FindNearest(')', 'b')
+  let larr_pos = FindNearest('->', 'b')
+  let lstart_pos = FindNearest('::', 'b')
+  let lpos = max([llpar_pos, lrpar_pos, larr_pos, lstart_pos])
+
+  let llpar  = lpos ==# llpar_pos
+  let lrpar  = lpos ==# lrpar_pos
+  let larr   = lpos ==# larr_pos
+  let lstart = lpos ==# lstart_pos
+
+  if lrpar
+    echo "lrpar"
+    call setpos(".", Unpack(lpos))
+    normal! %
+    let res = GetLeftDict()
+    normal! `x
+    return res
+  else
+    let what = llpar ? "par" : larr ? "arr" : "start"
+    let diff = llpar ? 1 : lstart ? 2 : 0
+    return [what, Unpack(lpos + diff), diff !=# 0]
+  endif
+endfunction
+
+function! GetRightDict(del)
+  let rlpar_pos = FindNearest('(', '')
+  let rrpar_pos = FindNearest(')', '')
+  let rarr_pos = FindNearest('->', '')
+  let rend_pos = FindNearest('^[a-z_]', '')
+  let rpos = min(filter([rlpar_pos, rrpar_pos, rarr_pos, rend_pos], 'v:val !=# 0'))
+
+  let rlpar = rpos ==# rlpar_pos
+  let rrpar = rpos ==# rrpar_pos
+  let rarr  = rpos ==# rarr_pos
+  let rend  = rpos ==# rend_pos
+
+  if rlpar
+    call setpos(".", Unpack(rpos))
+    normal! %
+    let res = GetRightDict(a:del)
+    normal! `x
+    return res
+  else
+    let what = rrpar ? "par" : rarr ? "arr" : "end"
+    let diff = rarr ? 2 : 0
+    return [what, Unpack(rpos - 1 + (a:del ? diff : 0))]
+  endif
+endfunction
+
+function! MatchLeft()
+  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# ')'
+    normal! %
+  endif
+
+  if col(".") ==# col("$")-1
+    normal! h
+  end
+
+  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# ')'
+    normal! %
+  endif
+
+  let view = winsaveview()
+  normal! mx
+  let [start, start_pos, del_end] = GetLeftDict()
+  let [end,   end_pos] = GetRightDict(del_end)
+
+  if start ==# "start" && end ==# "end"
+    return
+  end
+
+  if end ==# "end"
+    call setpos(".", end_pos)
+    normal! k
+    let end_pos = Unpack(FindNearest('$', '')-1)
+  endif
+
+  call winrestview(view)
+  return ['v', start_pos, end_pos]
+endfunction
+
+function! FindNearest(pat, dir)
+  let [line, col] = searchpos(a:pat, a:dir . 'nW')
+  return Pack(line, col)
+endfunction
+
+function! Pack(line, col)
+  return a:line * 1000 + a:col
+endfunction
+
+function! Unpack(pos)
+  return [0, a:pos / 1000, a:pos % 1000, 0]
+endfunction
+
+
+call textobj#user#plugin('haskell', {
+\   'blah': {
+\     'select-a-function': 'MatchLeft',
+\     'select-a': 'al',
+\   },
+\ })
+
 

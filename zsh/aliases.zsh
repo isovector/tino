@@ -37,4 +37,4 @@ function go() {
 
 alias arbtt-today='arbtt-stats --filter='"'"'$sampleage <24:00'"'"
 alias arbtt-week='arbtt-stats --filter='"'"'$sampleage <168:00'"'"
-alias arbtt-help='arbtt-stats --exclude web: --exclude slack: --exclude scholarship --exclude call --exclude music: --exclude reddit: --exclude pp --exclude prj: --exclude comm: --exclude tv: --exclude security --m=0 --filter='"'"'$sampleage <24:00'"'"' --dump-samples | fgrep '"'"'(*)'"'"'| uniq --count | sort --general-numeric-sort'
+alias arbtt-help='arbtt-stats --exclude web: --exclude slack: --exclude thinking --exclude scholarship --exclude call --exclude music: --exclude reddit: --exclude pp --exclude prj: --exclude comm: --exclude tv: --exclude security --m=0 --filter='"'"'$sampleage <24:00'"'"' --dump-samples | fgrep '"'"'(*)'"'"'| uniq --count | sort --general-numeric-sort'

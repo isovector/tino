@@ -13,6 +13,7 @@ import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.DynamicBars
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
@@ -32,7 +33,7 @@ import           XMonad.Util.WindowProperties (getProp32s)
 
 myExtraWorkspaces = [(xK_0, "0"),(xK_minus, "cite"),(xK_equal, "learn")]
 
-myWorkspaces = ["www","work","side","read","5","6","7","8","music"] ++ (map snd myExtraWorkspaces)
+myWorkspaces = ["www","work","side","read","5","6","7","8","music"] ++ fmap snd myExtraWorkspaces
 
 
 myManageHook = composeAll
@@ -153,11 +154,12 @@ main = do
   setCurrentDirectory "/home/sandy"
   spawn "xmodmap ~/.xmodmaprc"
   spawn "/home/sandy/.tino/bin/monitor"
+  spawn "/home/sandy/.tino/bin/dockd"
   spawn "/usr/lib/xfce4/notifyd/xfce4-notifyd"
   spawn "feh --bg-fill wp.jpg"
   -- spawn "komorebi"
   spawn "arbtt-capture"
-  xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
+  xmproc <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobar.hs"
 
 --   forkIO $ forever $ do
 --     spawn "pscircle --output-width=1600 --output-height=900 --dot-radius=2 --link-width=1.25 --tree-font-size=10 --tree-radius-increment=80 --cpulist-center=475:-300 --memlist-center=475:300 --link-convexity=0.4 --collapse-threads=1"

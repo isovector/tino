@@ -10,7 +10,7 @@ MONITOR=LVDS1
 # functions to switch from LVDS1 to VGA and vice versa
 function ActivateVGA {
     echo "Switching to HDMI1"
-    xrandr --auto --output HDMI1 --mode 1920x1080 --left-of LVDS1
+    xrandr --auto --output HDMI1 --mode 1920x1080 --right-of LVDS1
     MONITOR=HDMI1
 }
 function DeactivateVGA {
