@@ -1,6 +1,5 @@
 set anti
 set lines=999 columns=84
-colo vice
 
 " Open Command+T in a new tab
 let g:CommandTAcceptSelectionTabMap='<CR>'

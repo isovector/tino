@@ -100,6 +100,7 @@ Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
 Plug 'fielding/vice'
+Plug 'dylanaraps/wal.vim'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -243,7 +244,7 @@ nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
-nnoremap <leader>ep :call EditPcfbFile()<cr>
+nnoremap <leader>ep :e ~/.config/polybar/config<cr>
 
 function! EditPcfbFile()
   let file = system("date +'%Y-%m-%d'")
@@ -555,7 +556,7 @@ endif
 
 set guioptions=ac
 colo vice
-set background=dark
+" set background=light
 
 " Rainbow colored parentheses
 let g:rainbow#max_level = 16

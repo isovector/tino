@@ -1,3 +1,5 @@
+cat ~/.cache/wal/sequences
+
 zstyle ':completion:*' completer _complete _ignored _approximate
 zstyle :compinstall filename "$HOME/.zshrc"
 
@@ -26,3 +28,4 @@ case $TERM in
         precmd () {print -Pn "\e]0;${PWD}\a"}
         ;;
 esac
+

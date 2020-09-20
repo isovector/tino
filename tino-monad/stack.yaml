@@ -1,9 +1,10 @@
 
-resolver: lts-14.0
+resolver: lts-16.0
 
 packages:
 - '.'
-extra-deps: []
+extra-deps:
+- io-capture-1.0.0
 
 flags: {}
 

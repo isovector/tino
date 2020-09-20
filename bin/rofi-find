@@ -1,0 +1,1 @@
+xdg-open $(locate -e -i --regex "/home/sandy/[^\.]+" | rofi -location 0 -p "find" -threads 0 -dmenu -i)

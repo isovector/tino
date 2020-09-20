@@ -1,0 +1,7 @@
+urlencode() {
+ echo -n "$1" | python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read()))"
+}
+
+ROFI=$(rofi -location 0 -p 'hackage' -threads 0 -dmenu -i)
+
+xdg-open $(printf "https://www.stackage.org/lts/hoogle?q=%s" $(urlencode "$ROFI"))

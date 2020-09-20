@@ -1,12 +1,12 @@
 Config
-  { font = "-misc-fixed-*-*-*-*-9-*-*-*-*-*-*-*"
-  , bgColor = "#000000"
-  , fgColor = "#770077"
+  { font = "Bitstream Vera Sans Mono:size=16:antialias=true"
+  , bgColor = "#555555"
+  , fgColor = "#cccccc"
   , position = Static
       { xpos = 0
       , ypos = 0
-      , width = 1599
-      , height = 11
+      , width = 1920
+      , height = 16
       }
   , lowerOnStart = True,
   , commands =
