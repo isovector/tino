@@ -2,7 +2,7 @@
 
 module Main where
 
-
+import XMonad.Layout.BinarySpacePartition
 import qualified Codec.Binary.UTF8.String as UTF8
 import qualified DBus as D
 import qualified DBus.Client as D
@@ -17,6 +17,7 @@ import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.DynamicProperty
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
@@ -41,7 +42,7 @@ myWorkspaces =
   , "side"
   , "read"
   , "5"
-  , "6"
+  , "comm"
   , "7"
   , "8"
   , "music"
@@ -55,6 +56,8 @@ myManageHook = fold
     , className =? "anki"           --> doFloat
     , className =? "Anki"           --> doFloat
     , className =? "vlc"            --> doFloat
+    , className =? "Spotify"        --> doShift "music"
+    , className =? "Signal"         --> doShift "comm"
     , title     =? "New entry"      --> doFloat
     , role      =? "conversation"   --> doSideFloat SE
     , kdeOverride                   --> doFloat
@@ -64,6 +67,12 @@ myManageHook = fold
            then doF copyToAll
            else mempty
     , isFullscreen                  --> doFullFloat
+    ]
+
+myDynamicManageHook :: Query (Endo WindowSet)
+myDynamicManageHook = fold
+    [ className =? "Spotify" --> doShift "music"
+    , className =? "Signal"  --> doShift "comm"
     ]
 
 
@@ -79,6 +88,7 @@ myLayout =
   ||| Mirror (Tall 1 (3/100) (1/2))
   ||| Full
   ||| spiral (6/7)
+  ||| emptyBSP
     )
   ||| noBorders (fullscreenFull Full)
 
@@ -108,22 +118,14 @@ keysToUnbind =
 safeSpawn' :: MonadIO m => FilePath -> String -> m ()
 safeSpawn' p = safeSpawn p . words
 
-xmobarTitleColor :: String
-xmobarTitleColor = "#770077"
-
-xmobarCurrentWorkspaceColor :: String
-xmobarCurrentWorkspaceColor = "#ff8800"
-
-xmobarVisibleWorkspaceColor :: String
-xmobarVisibleWorkspaceColor = "#0088ff"
-
 keysToBind :: [((KeyMask, KeySym), X ())]
 keysToBind =
-  [ ((modk .|. shiftMask, xK_f),                  runOrRaise "luakit" [] $ className =? "Luakit")
-  , ((modk, xK_f),    runOrRaise "firefox" [] $ className =? "Navigator")
-  , ((modk, xK_g),                  runOrRaise "gvim" [] $ className =? "Gvim")
+  [ ((modk, xK_f),                  runOrRaise "firefox" [] $ className =? "firefox")
+  , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
+  , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
+  , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
-  , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
+  -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  safeSpawn' "/home/sandy/.tino/bin/rofi-hackage" "")
   , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
@@ -131,19 +133,27 @@ keysToBind =
   , ((modk .|. shiftMask, xK_q),    kill)
   , ((modk, xK_p),                  safeSpawnProg "scrot")
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
-  , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-c 0 -q set Master 2dB+")
-  , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-c 0 -q set Master 2dB-")
-  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 15")
-  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 5")
+  , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
+  , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
+  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 1")
+  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 1")
+  , ((shiftMask, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 15")
+  , ((shiftMask, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 15")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
+  , ((modk, xK_F10), do
+        safeSpawn' "xrandr" "--output HDMI1 --mode 1920x1080 --left-of eDP1"
+        safeSpawn' "polybar" "example"
+    )
+  , ((modk, xK_F9),                 safeSpawn' "xrandr" "--output HDMI1 --off")
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
+  , ((modk .|. controlMask, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
-  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotifyd")
-  , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotifyd")
-  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotifyd")
+  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotify")
+  , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotify")
+  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
   ] ++ fmap (uncurry mkShortcut) shortcuts
 
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
@@ -152,9 +162,12 @@ mkShortcut ks url =
 
 shortcuts :: [(KeySym, String)]
 shortcuts =
-  [ (xK_m, "gmail.com")
+  [ (xK_g, "gmail.com")
   , (xK_r, "reddit.com")
-  , (xK_f, "feedreader.com/online")
+  , (xK_d, "feedreader.com/online")
+  , (xK_f, "functionalprogramming.slack.com")
+  , (xK_y, "youtube.com/feed/subscriptions")
+  , (xK_m, "g.page/anytimefitnessvictoriadowntown")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -203,7 +216,7 @@ main = do
                             , myManageHook
                             , manageHook def
                             ]
-    , handleEventHook = fullscreenEventHook
+    , handleEventHook = dynamicPropertyChange "WM_CLASS" myDynamicManageHook <> fullscreenEventHook
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind

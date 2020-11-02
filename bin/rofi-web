@@ -2,6 +2,6 @@ urlencode() {
  echo -n "$1" | python3 -c "import urllib.parse, sys; print(urllib.parse.quote(sys.stdin.read()))"
 }
 
-ROFI=$(rofi -location 0 -p 'web search' -threads 0 -dmenu -i)
+ROFI=$(rofi -location 0 -p 'web search' -threads 0 -dmenu -i) || exit
 
 xdg-open $(printf "https://www.google.com/search?q=%s" $(urlencode "$ROFI"))

@@ -32,7 +32,7 @@ set guifont=Monospace\ 11
 set guifont=Monospace\ 9
 
 function! SetStreaming()
-  set guifont=Inconsolata\ 16
+  set guifont=Inconsolata:h16
 endfunction
 
 nnoremap ZZ <nop>

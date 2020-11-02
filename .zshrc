@@ -1,4 +1,4 @@
-cat ~/.cache/wal/sequences
+# cat ~/.cache/wal/sequences
 
 zstyle ':completion:*' completer _complete _ignored _approximate
 zstyle :compinstall filename "$HOME/.zshrc"

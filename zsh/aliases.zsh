@@ -15,6 +15,8 @@ alias :e=$EDITOR
 alias gs='git status'
 alias ga='git add'
 alias gc='git commit'
+alias git-ignore='git update-index --skip-worktree'
+alias git-unignore='git update-index --no-skip-worktree'
 
 a() { alias $1="cd $PWD"; }
 

@@ -41,7 +41,7 @@ Plug 'Shougo/vimproc'
 Plug 'yssl/QFEnter'
 
 " Navigation
-Plug 'kien/ctrlp.vim'
+Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-scripts/JumpToLastOccurrence'
 Plug 'christoomey/vim-tmux-navigator'
 
@@ -119,6 +119,8 @@ Plug 'justinmk/vim-sneak'
 
 Plug 'junkblocker/git-time-lapse'
 
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+
 call plug#end()
 
 syntax on
@@ -150,7 +152,7 @@ nnoremap zC zc
 nnoremap <leader>m :! (cd `git rev-parse --show-toplevel`; make)<CR>
 nnoremap <leader>g :silent! grep!  <BS>
 nnoremap K :silent! grep! <cword><CR>:copen<CR>
-nnoremap <leader>f :CtrlP<CR>
+nnoremap <leader>f ::CtrlP<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
 nnoremap <leader>wc :! wc %<CR>
@@ -166,8 +168,8 @@ nnoremap <leader>sla V:s/\(\)/\1\r/<Left><Left><Left><Left><Left><Left><Left><Le
 nnoremap <leader>slb V:s/\(\)/\r\1/<Left><Left><Left><Left><Left><Left><Left><Left>
 vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -d\\  -f2-" }'<CR>
 
-nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
-nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
+nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/tags<CR>
+nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/tags<CR>
 nnoremap <silent> <leader>sgt :! (cd `git rev-parse --show-toplevel`; hasktags compiler/**/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 function! MkHsModuleName(dir, path)
@@ -346,8 +348,6 @@ vnoremap <c-s> :<c-u>w<CR>
 " Pop tag stack
 " nnoremap <C-[> <ESC>:po<CR>
 
-" Remove search highlighting
-nnoremap <silent> <leader><space> :noh<cr>
 
 " Help align visual blocks by delimiter
 vmap <leader><space> <Plug>(EasyAlign)
@@ -530,7 +530,8 @@ augroup END
 autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata'
+let g:ctrlp_by_filename = 1
 
 
 " ------------------------------------------------------------------------------
@@ -819,6 +820,8 @@ set wildignore+=*.spl
 set wildignore+=*.sw?
 set wildignore+=.hg,.git,.svn
 set wildignore+=tags
+set wildignore+=ghcide
+set wildignore+=testdata
 set wildmenu
 set wildmode=list:longest
 set wrap
@@ -888,8 +891,8 @@ set showtabline=2
 
 " Allow switching to buffer #<n> by typing <n>e
 function! s:bufSwitch(count)
-    if count >=# 1
-        return ":\<C-U>" . count . "b\<CR>"
+    if a:count >=# 1
+        return ":\<C-U>" . a:count . "b\<CR>"
     endif
     return 'e'
 endfunction
@@ -1094,4 +1097,39 @@ call textobj#user#plugin('haskell', {
 \   },
 \ })
 
+" COC stuff
+
+xmap <leader>xa  <Plug>(coc-codeaction-selected)
+nmap <leader>xa  <Plug>(coc-codeaction-selected)
+nmap <c-space> <space>xal
+nmap <silent> [g <Plug>(coc-diagnostic-prev)
+nmap <silent> ]g <Plug>(coc-diagnostic-next)
+nmap <silent> gd <Plug>(coc-definition)
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+" Remove search highlighting
+nnoremap <silent> <leader><space>  :noh<cr>
+
+if exists('*complete_info')
+  inoremap <expr> <cr> complete_info()["selected"] != "-1" ? "\<C-y>" : "\<C-g>u\<CR>"
+else
+  inoremap <expr> <cr> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+endif
+
+set updatetime=300
+
+if has("patch-8.1.1564")
+  " Recently vim can merge signcolumn and number column into one
+  set signcolumn=number
+else
+  set signcolumn=yes
+endif
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
 
