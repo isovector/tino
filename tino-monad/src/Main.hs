@@ -1,17 +1,21 @@
+{-# LANGUAGE LambdaCase  #-}
 {-# LANGUAGE NumDecimals #-}
 
 module Main where
 
-import XMonad.Layout.BinarySpacePartition
+import System.FilePath
+import Control.Exception
 import qualified Codec.Binary.UTF8.String as UTF8
 import qualified DBus as D
 import qualified DBus.Client as D
 import           Data.Foldable
 import           Data.Monoid (Endo (..))
 import           Graphics.X11.ExtraTypes.XF86
-import           System.Directory (setCurrentDirectory)
+import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
+import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
 import           System.IO (hGetContents)
 import           System.IO.Capture (capture)
+import           System.Process (readProcessWithExitCode, readProcess)
 import           XMonad
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.Search hiding (Query)
@@ -23,6 +27,7 @@ import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Accordion
+import           XMonad.Layout.BinarySpacePartition
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spacing
@@ -33,6 +38,10 @@ import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn)
 import           XMonad.Util.WindowProperties (getProp32s)
+import System.Exit
+import Control.Monad
+import GHC.Exts (fromString)
+
 
 
 myWorkspaces :: [String]
@@ -49,6 +58,26 @@ myWorkspaces =
   ]
 
 
+getDirectories :: MonadIO m => FilePath -> m [String]
+getDirectories fp = liftIO $ do
+  files <- fmap (fp </>) <$> listDirectory fp
+  let is_dir = fmap (fileTypeIsDirectory . fileTypeFromMetadata) . getFileMetadata
+  filterM is_dir files
+
+
+
+rofi :: MonadIO m => [String] -> [String] -> m (Maybe String)
+rofi args options = do
+  (code, out, _) <- liftIO $
+    readProcessWithExitCode
+      "rofi"
+      (["-dmenu", "-i", "-location", "0", "-threads", "1"] ++ args)
+      (unlines options)
+  pure $ case code of
+    ExitSuccess -> Just $ init out
+    _ -> Nothing
+
+
 myManageHook :: Query (Endo WindowSet)
 myManageHook = fold
     [ resource  =? "desktop_window" --> doIgnore
@@ -57,7 +86,9 @@ myManageHook = fold
     , className =? "Anki"           --> doFloat
     , className =? "vlc"            --> doFloat
     , className =? "Spotify"        --> doShift "music"
-    , className =? "Signal"         --> doShift "comm"
+    , className =? "Signal"         --> do
+        doSink
+        doShift "comm"
     , title     =? "New entry"      --> doFloat
     , role      =? "conversation"   --> doSideFloat SE
     , kdeOverride                   --> doFloat
@@ -68,6 +99,10 @@ myManageHook = fold
            else mempty
     , isFullscreen                  --> doFullFloat
     ]
+
+
+doSink :: ManageHook
+doSink = ask >>= doF . W.sink
 
 myDynamicManageHook :: Query (Endo WindowSet)
 myDynamicManageHook = fold
@@ -127,6 +162,7 @@ keysToBind =
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  safeSpawn' "/home/sandy/.tino/bin/rofi-hackage" "")
+  , ((modk, xK_e),                  haskellProject)
   , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
@@ -135,10 +171,8 @@ keysToBind =
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
   , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
   , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
-  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 1")
-  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 1")
-  , ((shiftMask, xF86XK_MonBrightnessDown), safeSpawn' "xbacklight" "-dec 15")
-  , ((shiftMask, xF86XK_MonBrightnessUp),   safeSpawn' "xbacklight" "-inc 15")
+  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "/home/sandy/.tino/bin/backlight" "-10")
+  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
@@ -156,6 +190,24 @@ keysToBind =
   , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
   ] ++ fmap (uncurry mkShortcut) shortcuts
 
+
+haskellProject :: MonadIO m => m ()
+haskellProject = do
+  dirs <- getDirectories "/home/sandy/prj"
+  x <- rofi ["-p", "Project"] dirs
+  safeSpawn "notify-send" [show x]
+  case x of
+    Just prj -> do
+      safeSpawn "notify-send" ["prj"]
+      liftIO $ withCurrentDirectory prj $ do
+        safeSpawn "notify-send" ["inside prj"]
+        safeSpawn "neovide" []
+        safeSpawn "xfce4-terminal" ["--command", "tmux -c 'stack repl'"]
+    Nothing -> pure ()
+
+
+
+
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
 mkShortcut ks url =
   ((modk .|. alt, ks),          safeSpawn' "xdg-open" $ "https://" <> url)
@@ -165,9 +217,12 @@ shortcuts =
   [ (xK_g, "gmail.com")
   , (xK_r, "reddit.com")
   , (xK_d, "feedreader.com/online")
-  , (xK_f, "functionalprogramming.slack.com")
-  , (xK_y, "youtube.com/feed/subscriptions")
+  -- , (xK_f, "functionalprogramming.slack.com")
+  -- , (xK_y, "youtube.com/feed/subscriptions")
   , (xK_m, "g.page/anytimefitnessvictoriadowntown")
+  , (xK_2, "docs.google.com/spreadsheets/d/1g-uY0BjO0yNiID6obpDuj8uEeaqW3MExF_PfhqVYRXg/edit#gid=0")
+  , (xK_c, "reserve.anytimefitness.com/clubs/4726")
+  , (xK_h, "github.com/pulls")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -202,7 +257,8 @@ main = do
   let space = 5
       border = Border space space space space
 
-  xmonad $ ewmh $ docks def
+  xmonad $ ewmh $
+    docks def
     { borderWidth        = 1
     , terminal           = "xfce4-terminal"
     , normalBorderColor  = "#000000"
@@ -214,9 +270,8 @@ main = do
     , layoutHook  = spacingRaw True border True border True $ smartBorders myLayout
     , manageHook  = mconcat [ manageDocks
                             , myManageHook
-                            , manageHook def
                             ]
-    , handleEventHook = dynamicPropertyChange "WM_CLASS" myDynamicManageHook <> fullscreenEventHook
+    , handleEventHook = dynamicPropertyChange "WM_CLASS" myDynamicManageHook
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind

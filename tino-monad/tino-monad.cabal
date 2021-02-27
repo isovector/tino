@@ -19,6 +19,6 @@ executable tino-monad
   main-is:             Main.hs
   other-modules: Log
   -- other-extensions:
-  build-depends:       base >=4.9 && <5, xmonad, xmonad-contrib, X11, filepath, hslogger, mtl, directory, dbus, utf8-string, io-capture
+  build-depends:       base >=4.9 && <5, xmonad, xmonad-contrib, X11, filepath, hslogger, mtl, directory, dbus, utf8-string, io-capture, process
   hs-source-dirs:      src
   default-language:    Haskell2010
