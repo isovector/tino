@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+udisksctl mount -b /dev/disk/by-label/iPodClassic
+cp -Rvu ~/.podcasts/* /run/media/sandy/iPodClassic/podcasts
+sync
+umount /run/media/sandy/iPodClassic
+

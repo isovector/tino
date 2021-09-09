@@ -4,7 +4,7 @@ MONITOR=NO_HUB
 
 function Dock {
     echo "Switching to HAS_HUB"
-    alsactl restore 0 --file ~/.tino/speakers.alsa
+    # alsactl restore 0 --file ~/.tino/speakers.alsa
     sleep 1s
     xkbcomp -i $(xinput | grep "Logitech USB Keyboard" | grep -v "Control" | cut -d'=' -f2 | cut -f1 | head -n1) ~/.tino/xkb-keymap :0 &> /dev/null
     MONITOR=HAS_HUB

@@ -1,0 +1,21 @@
+#!/usr/bin/bash
+
+HOURS_LEFT=$(( ( $(date +%s -d "january 1 2022 00:00") - $( date +%s ) ) / 3600 ))
+TOTAL_HOURS=8760
+
+echo -n '${font :BOLD}${alignc}${color}-'
+echo -n $HOURS_LEFT
+echo -n ' Hours Remain-${font}'
+
+echo ""
+
+echo -n '${color grey}'
+
+echo -n ' ${execbar echo '
+echo -n $(( (TOTAL_HOURS - HOURS_LEFT) * 100 / TOTAL_HOURS ))
+echo -n '}'
+
+echo -n '${color}'
+
+echo ""
+

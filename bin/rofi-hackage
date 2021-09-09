@@ -4,4 +4,4 @@ urlencode() {
 
 ROFI=$(rofi -location 0 -p 'hackage' -threads 0 -dmenu -i) || exit
 
-xdg-open $(printf "https://hackage.haskell.org/packages/search?terms=%s" $(urlencode "$ROFI"))
+xdg-open $(printf "https://hoogle.haskell.org/?hoogle=%s" $(urlencode "$ROFI"))

@@ -1,0 +1,12 @@
+#!/usr/bin/bash
+
+max_number() {
+    printf "%s\n" "$@" | sort -g -r | head -n1
+}
+
+xbacklight -time 0 -steps 1 -inc $1
+
+BRIGHTNESS=$(xbacklight | cut -d'.' -f1)
+
+xbacklight -set $(max_number $BRIGHTNESS 1)
+

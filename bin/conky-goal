@@ -1,0 +1,26 @@
+#!/usr/bin/bash
+
+for FILE in /home/sandy/.goals/*; do
+
+
+echo -n '${color grey}'
+
+sed -n 1p $FILE | tr -d \\n
+echo -n ": "
+
+echo -n '${color}'
+
+NUM=$(sed -n 3p $FILE | tr -d \\n)
+DEN=$(sed -n 2p $FILE | tr -d \\n)
+
+echo -n $NUM
+echo -n "/"
+echo -n $DEN
+
+PERC=$(( (NUM * 100) / DEN ))
+
+echo -n ' ${execbar echo '
+echo -n $PERC
+echo '}'
+
+done

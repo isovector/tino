@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+
+playerctl metadata -p spotify  -f "{{xesam:artist}} - {{xesam:title}}"
+
