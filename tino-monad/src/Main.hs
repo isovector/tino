@@ -10,7 +10,9 @@ import qualified DBus as D
 import qualified DBus.Client as D
 import           Data.Foldable
 import           Data.List (sort)
+import           Data.Maybe (fromJust)
 import           Data.Monoid (Endo (..), All(..))
+import           Data.Ratio
 import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
@@ -29,7 +31,7 @@ import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.DynamicProperty
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks, docksStartupHook, docksEventHook)
-import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
+import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE, NE), doRectFloat)
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Accordion
 import           XMonad.Layout.BinarySpacePartition
@@ -44,7 +46,7 @@ import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMou
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput)
 import           XMonad.Util.Ungrab
 import           XMonad.Util.WindowProperties (getProp32s)
-
+import           XPcfb
 
 
 myWorkspaces :: [String]
@@ -107,11 +109,15 @@ myDynamicManageHook :: Query (Endo WindowSet)
 myDynamicManageHook = fold
     [ className =? "Spotify" --> doShift "music"
     , className =? "Signal"  --> doShift "comm"
+    , name     =? "Percentile Feedback" --> doRectFloat (W.RationalRect (2%3) 0 (1%3) (3%10))
     ]
 
 
 role :: Query String
 role = stringProperty "WM_WINDOW_ROLE"
+
+name :: Query String
+name = stringProperty "WM_NAME"
 
 
 myLayout =
@@ -162,6 +168,7 @@ keysToBind =
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
   , ((modk, xK_e),                  haskellProject)
+  , ((modk, xK_backslash),          safeSpawn' "/home/sandy/.tino/bin/tino" "bar")
   , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
@@ -175,7 +182,7 @@ keysToBind =
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
-      safeSpawn' "xrandr" "--output DP-2 --mode 1920x1080 --left-of eDP-1 --output HDMI-1 --mode 1920x1080 --left-of DP-2 --rotate left"
+      safeSpawn' "xrandr" "--output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-2 --mode 1920x1080 --left-of HDMI-1 --rotate left"
       -- safeSpawn' "polybar" "example"
     )
   , ((modk, xK_F9), do
@@ -183,6 +190,10 @@ keysToBind =
     )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
+  , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
+  , ((modk, xK_v),                  safeSpawn' "/home/sandy/.tino/bin/tino" "pcfb")
+  , ((modk, xK_bracketleft),        liftIO pcfbOpen)
+  , ((modk, xK_bracketright),       liftIO pcfbClose)
   , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
   , ((modk .|. controlMask, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
@@ -282,6 +293,7 @@ main = do
     , handleEventHook = mconcat
         [ docksEventHook
         , dynamicPropertyChange "WM_CLASS" myDynamicManageHook
+        , dynamicPropertyChange "WM_NAME" myDynamicManageHook
         , fullscreenEventHook
         ]
     } `removeKeys`              keysToUnbind

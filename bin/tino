@@ -112,8 +112,15 @@ EOF
 
 
     p|pcfb)
-        ~/.tino/bin/pcfb-show
-        timeout 5s tino xul "file://$HOME/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
+        /home/sandy/.tino/bin/pcfb-show
+        timeout 5s $0 xul "file:///home/sandy/.src/percentile-feedback/index.html" --user-data-dir=/tmp/pcfb-session
+        ;;
+
+    bar)
+        pkill polybar
+        MONITOR=HDMI-1 polybar example &!
+        MONITOR=eDP-1 polybar example &!
+        MONITOR=DP-2 polybar example &!
         ;;
 
     refactor)
@@ -194,7 +201,7 @@ EOF
     xul)
         RESULT=$1
         shift
-        chromium-browser --app="$RESULT" $@
+        brave --app="$RESULT" $@
         ;;
 
     place)

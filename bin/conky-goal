@@ -3,7 +3,7 @@
 for FILE in /home/sandy/.goals/*; do
 
 
-echo -n '${color grey}'
+echo -n '${color white}'
 
 sed -n 1p $FILE | tr -d \\n
 echo -n ": "

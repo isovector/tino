@@ -9,7 +9,7 @@ echo -n ' Hours Remain-${font}'
 
 echo ""
 
-echo -n '${color grey}'
+echo -n '${color white}'
 
 echo -n ' ${execbar echo '
 echo -n $(( (TOTAL_HOURS - HOURS_LEFT) * 100 / TOTAL_HOURS ))

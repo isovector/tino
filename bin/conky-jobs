@@ -26,7 +26,7 @@ HOURS=$(( DAYS * 24 + HOURS + OFFSET ))
 TOTAL=$(sed -n 3p $FILE | tr -d \\n)
 PERC=$(( (HOURS * 60 + MINUTES) * 100 / (TOTAL * 60) ))
 
-echo -n '${color grey}'
+echo -n '${color white}'
 
 sed -n 1p $FILE | tr -d \\n
 
