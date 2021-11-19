@@ -1,6 +1,8 @@
 autocmd!
 set nocompatible
 
+" set guifont=Iosevka:h16
+
 if !has('nvim')
   set shell=/usr/bin/zsh\ -l
 endif
@@ -11,6 +13,7 @@ endif
 let $PATH = $PATH . ':' . expand('~/.local/bin')
 let $PATH = $PATH . ':' . expand('~/.cabal/bin')
 let $PATH = $PATH . ':' . expand('~/.stack/programs/x86_64-linux/ghc-7.8.4/bin')
+let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
 
 
 
@@ -35,11 +38,11 @@ Plug 'rking/ag.vim'
 Plug 'tpope/vim-repeat'
 Plug 'majutsushi/tagbar'
 Plug 'vim-scripts/vim-lamdify'
-" Plug 'junegunn/rainbow_parentheses.vim'
+Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
 Plug 'Shougo/vimproc'
 Plug 'yssl/QFEnter'
-
+::
 " Navigation
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-scripts/JumpToLastOccurrence'
@@ -48,10 +51,8 @@ Plug 'christoomey/vim-tmux-navigator'
 " Misc
 Plug 'mattn/gist-vim'
 " Plug 'Shougo/neosnippet'
-Plug 'junegunn/limelight.vim'
 Plug 'vim-scripts/tregisters'
 Plug 'tpope/vim-fugitive'
-Plug 'beloglazov/vim-online-thesaurus'
 
 " Formatting
 Plug 'vim-scripts/vis'
@@ -61,23 +62,15 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
 Plug 'michaeljsmith/vim-indent-object'
-" Plug 'scrooloose/syntastic'
+"
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
-" Plug 'eagletmt/ghcmod-vim'
-Plug 'Twinside/vim-hoogle'
-Plug 'vim-scripts/lua.vim'
-Plug 'vim-scripts/lua_indent'
 Plug 'plasticboy/vim-markdown'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
-Plug 'derekelkins/agda-vim'
-Plug 'leafo/moonscript-vim'
-Plug 'xuhdev/vim-latex-live-preview'
-Plug 'purescript-contrib/purescript-vim'
-" Plug 'rstacruz/sparkup'
+Plug 'rstacruz/sparkup'
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -118,8 +111,9 @@ Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
 
 Plug 'junkblocker/git-time-lapse'
+Plug 'norcalli/snippets.nvim'
 
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'commit': '8bc5fa2c', 'do': 'yarn install --frozen-lockfile'}
 
 call plug#end()
 
@@ -186,7 +180,7 @@ nnoremap <silent> <leader>mk :normal! ggimodule <C-R>=HsModuleName()<CR> where<C
 
 
 
-nnoremap <leader>b :Gblame<CR>
+nnoremap <leader>b :Git blame<CR>
 
 " things i stole from chris penner
 nnoremap c "_c
@@ -241,12 +235,13 @@ nnoremap <leader>ev :e ~/.vimrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
-nnoremap <leader>ex :e ~/.tino/tino-monad/src/Main.hs<cr>
+nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
 nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
-nnoremap <leader>ep :e ~/.config/polybar/config<cr>
+" nnoremap <leader>ep :e ~/.config/polybar/config<cr>
+nnoremap <leader>ep :call EditPcfbFile()<cr>
 
 function! EditPcfbFile()
   let file = system("date +'%Y-%m-%d'")
@@ -531,7 +526,7 @@ autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
 let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata'
-let g:ctrlp_by_filename = 1
+" let g:ctrlp_by_filename = 1
 
 
 " ------------------------------------------------------------------------------
@@ -556,7 +551,7 @@ else
 endif
 
 set guioptions=ac
-colo vice
+colo phd
 " set background=light
 
 " Rainbow colored parentheses
@@ -627,12 +622,12 @@ augroup END
 " ------------------------------------------------------------------------------
 
 function! MarkdownFiletype()
-    setfiletype ghmarkdown
+    setf ghmarkdown
     " Markdown link
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
     imap <buffer> \ann <ESC>maysiv]%a(Ann)<space><esc>a
-    set cc=58,81
+    set cc=81
 endfunction
 
 function! LatexFiletype()
@@ -693,8 +688,8 @@ function! HaskellFiletype()
     " Easy-to-type haskell digraphs
     inoremap ,. <space>~><space>
     inoremap -= <space>-><space>
+    inoremap 0-= <space>%1<space>-><space>
     inoremap =- <space><-<space>
-    inoremap +_ <space><=<space>
     inoremap _+ <space>=><space>
 
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
@@ -708,19 +703,12 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader><leader>ds magg/^import<CR>Oimport qualified Data.Set as S<CR>import Data.Set (Set)<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>dt magg/^import<CR>Oimport Data.Traversable<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>df magg/^import<CR>Oimport Data.Foldable<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>p magg/^import<CR>Oimport Polysemy<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>ps magg/^import<CR>Oimport Polysemy.State<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>pe magg/^import<CR>Oimport Polysemy.Error<ESC>`a:noh<CR>
 
     " Quick alignment of imports
     nnoremap <silent><buffer> <leader>si magg/^import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>:noh<CR>`a
 
     " Better syntax highlighting
     syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce trace
-
-    syntax keyword haskellNumber sample pick scanle newCollection center tags tagging findTag tag foldmp arrows keyPress onEvent poll sync async scaleRel mkRel origin move toStanza getX getY rect traced whenE run uniform uniformIn listOf uniformly filled styled mag distance posDif circle polygon runLift group go fcata acata rcata
-
-    syntax keyword haskellPragma load require fromConfig enter serve yield sinkList concatMap runConduit yieldMany iterM
 
     syntax keyword haskellKeyword when unless flip const id maybe fmap map pure return sequence fst snd curry uncurry show read view set first second toS either forM_ mapM_ forM mapM join mempty mappend mconcat mzero fix traverse traverse_
     syntax keyword haskellPragma ap ask filter foldl foldr not negate abs fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust makePrisms makeLenses get put local liftIO def runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF runFree cata ana forall evalStateT execStateT evalState runState Just Nothing Left Right
@@ -1102,6 +1090,45 @@ call textobj#user#plugin('haskell', {
 xmap <leader>xa  <Plug>(coc-codeaction-selected)
 nmap <leader>xa  <Plug>(coc-codeaction-selected)
 nmap <c-space> <space>xal
+
+nnoremap <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
+nnoremap <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
+nnoremap <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
+nnoremap <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
+nnoremap <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
+nmap <silent> <space>e  <Plug>(coc-codelens-action)
+
+function! s:GotoNextHole()
+  sleep 500m
+  normal 0
+  call CocActionAsync('diagnosticNext', 'hint')
+endfunction
+
+function! s:WingmanRefine(type)
+  call CocAction('codeAction', a:type, ['refactor.wingman.refine'])
+  call <SID>GotoNextHole()
+endfunction
+
+function! s:WingmanDestruct(type)
+  call CocAction('codeAction', a:type, ['refactor.wingman.caseSplit'])
+  call <SID>GotoNextHole()
+endfunction
+
+function! s:WingmanDestructAll(type)
+  call CocAction('codeAction', a:type, ['refactor.wingman.splitFuncArgs'])
+  call <SID>GotoNextHole()
+endfunction
+
+function! s:WingmanFillHole(type)
+  call CocAction('codeAction', a:type, ['refactor.wingman.fillHole'])
+  call <SID>GotoNextHole()
+endfunction
+
+function! s:WingmanUseCtor(type)
+  call CocAction('codeAction', a:type, ['refactor.wingman.useConstructor'])
+  call <SID>GotoNextHole()
+endfunction
+
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
@@ -1132,4 +1159,5 @@ function! s:show_documentation()
     call CocAction('doHover')
   endif
 endfunction
+
 

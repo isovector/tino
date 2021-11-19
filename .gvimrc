@@ -1,5 +1,5 @@
-set anti
-set lines=999 columns=84
+" set anti
+" set lines=999 columns=84
 
 " Open Command+T in a new tab
 let g:CommandTAcceptSelectionTabMap='<CR>'
@@ -32,7 +32,7 @@ set guifont=Monospace\ 11
 set guifont=Monospace\ 9
 
 function! SetStreaming()
-  set guifont=Inconsolata:h16
+  set guifont=Inconsolata:h20
 endfunction
 
 nnoremap ZZ <nop>

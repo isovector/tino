@@ -3,16 +3,21 @@
 
 module Main where
 
-import System.FilePath
-import Control.Exception
 import qualified Codec.Binary.UTF8.String as UTF8
+import           Control.Exception
+import           Control.Monad
 import qualified DBus as D
 import qualified DBus.Client as D
 import           Data.Foldable
-import           Data.Monoid (Endo (..))
+import           Data.List (sort)
+import           Data.Monoid (Endo (..), All(..))
+import           Data.Word (Word32)
+import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
 import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
 import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
+import           System.Exit
+import           System.FilePath
 import           System.IO (hGetContents)
 import           System.IO.Capture (capture)
 import           System.Process (readProcessWithExitCode, readProcess)
@@ -23,7 +28,7 @@ import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.DynamicProperty
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
-import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks)
+import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks, docksStartupHook, docksEventHook)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE))
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Layout.Accordion
@@ -36,11 +41,9 @@ import           XMonad.Layout.ThreeColumns
 import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
-import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn)
+import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput)
+import           XMonad.Util.Ungrab
 import           XMonad.Util.WindowProperties (getProp32s)
-import System.Exit
-import Control.Monad
-import GHC.Exts (fromString)
 
 
 
@@ -62,20 +65,16 @@ getDirectories :: MonadIO m => FilePath -> m [String]
 getDirectories fp = liftIO $ do
   files <- fmap (fp </>) <$> listDirectory fp
   let is_dir = fmap (fileTypeIsDirectory . fileTypeFromMetadata) . getFileMetadata
-  filterM is_dir files
+  filterM is_dir $ sort files
 
 
-
-rofi :: MonadIO m => [String] -> [String] -> m (Maybe String)
-rofi args options = do
-  (code, out, _) <- liftIO $
-    readProcessWithExitCode
-      "rofi"
-      (["-dmenu", "-i", "-location", "0", "-threads", "1"] ++ args)
-      (unlines options)
-  pure $ case code of
-    ExitSuccess -> Just $ init out
-    _ -> Nothing
+rofi :: String -> [String] -> X (Maybe String)
+rofi prompt actions = do
+    unGrab
+    out <- lines <$> runProcessWithInput "rofi" ["-dmenu", "-i", "-location", "0", "-p", prompt] (unlines actions)
+    pure $ case out of
+        [sel] -> Just sel
+        _ -> Nothing
 
 
 myManageHook :: Query (Endo WindowSet)
@@ -97,7 +96,7 @@ myManageHook = fold
         if c == "zoom"
            then doF copyToAll
            else mempty
-    , isFullscreen                  --> doFullFloat
+    -- , isFullscreen                  --> doFullFloat
     ]
 
 
@@ -118,12 +117,12 @@ role = stringProperty "WM_WINDOW_ROLE"
 myLayout =
     avoidStruts
     ( Tall 1 (3/100) (1/2)
-  ||| ThreeColMid 1 (3/100) (1/2)
+  -- ||| ThreeColMid 1 (3/100) (1/2)
   ||| Accordion
-  ||| Mirror (Tall 1 (3/100) (1/2))
+  -- ||| Mirror (Tall 1 (3/100) (1/2))
   ||| Full
-  ||| spiral (6/7)
-  ||| emptyBSP
+  -- ||| spiral (6/7)
+  -- ||| emptyBSP
     )
   ||| noBorders (fullscreenFull Full)
 
@@ -155,13 +154,13 @@ safeSpawn' p = safeSpawn p . words
 
 keysToBind :: [((KeyMask, KeySym), X ())]
 keysToBind =
-  [ ((modk, xK_f),                  runOrRaise "firefox" [] $ className =? "firefox")
+  [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
   , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
   , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
-  , ((modk, xK_h),                  safeSpawn' "/home/sandy/.tino/bin/rofi-hackage" "")
+  , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
   , ((modk, xK_e),                  haskellProject)
   , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
@@ -176,33 +175,39 @@ keysToBind =
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
-        safeSpawn' "xrandr" "--output HDMI1 --mode 1920x1080 --left-of eDP1"
-        safeSpawn' "polybar" "example"
+      safeSpawn' "xrandr" "--output DP-2 --mode 1920x1080 --left-of eDP-1 --output HDMI-1 --mode 1920x1080 --left-of DP-2 --rotate left"
+      -- safeSpawn' "polybar" "example"
     )
-  , ((modk, xK_F9),                 safeSpawn' "xrandr" "--output HDMI1 --off")
+  , ((modk, xK_F9), do
+      safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
+    )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
   , ((modk .|. controlMask, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
   , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotify")
+  , ((0, xF86XK_AudioPrev),         safeSpawn' "playerctl" "previous --player=spotify")
   , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotify")
+  , ((0, xF86XK_AudioNext),         safeSpawn' "playerctl" "next --player=spotify")
   , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
+  , ((0, xF86XK_AudioPlay),         safeSpawn' "playerctl" "play-pause --player=spotify")
   ] ++ fmap (uncurry mkShortcut) shortcuts
 
 
-haskellProject :: MonadIO m => m ()
+haskellProject :: X ()
 haskellProject = do
   dirs <- getDirectories "/home/sandy/prj"
-  x <- rofi ["-p", "Project"] dirs
-  safeSpawn "notify-send" [show x]
+  x <- rofi "Project" dirs
   case x of
     Just prj -> do
-      safeSpawn "notify-send" ["prj"]
       liftIO $ withCurrentDirectory prj $ do
-        safeSpawn "notify-send" ["inside prj"]
+        let target = case prj of
+                       "/home/sandy/prj/hls" -> "hls-tactics-plugin:lib"
+                       "/home/sandy/prj/wire-server" -> "spar:lib"
+                       _ -> ""
         safeSpawn "neovide" []
-        safeSpawn "xfce4-terminal" ["--command", "tmux -c 'stack repl'"]
+        safeSpawn "xfce4-terminal" ["--command", "tmux new-session 'stack repl " <> target <> "'"]
     Nothing -> pure ()
 
 
@@ -215,14 +220,17 @@ mkShortcut ks url =
 shortcuts :: [(KeySym, String)]
 shortcuts =
   [ (xK_g, "gmail.com")
-  , (xK_r, "reddit.com")
+  -- , (xK_r, "reddit.com")
   , (xK_d, "feedreader.com/online")
   -- , (xK_f, "functionalprogramming.slack.com")
   -- , (xK_y, "youtube.com/feed/subscriptions")
   , (xK_m, "g.page/anytimefitnessvictoriadowntown")
   , (xK_2, "docs.google.com/spreadsheets/d/1g-uY0BjO0yNiID6obpDuj8uEeaqW3MExF_PfhqVYRXg/edit#gid=0")
-  , (xK_c, "reserve.anytimefitness.com/clubs/4726")
   , (xK_h, "github.com/pulls")
+  , (xK_t, "trello.com/b/y2C9T3x2/copilot")
+  , (xK_i, "github.com/haskell/haskell-language-server/issues/new")
+  , (xK_c, "calendar.google.com/calendar/u/0/r")
+  , (xK_w, "workflowy.com")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -257,8 +265,8 @@ main = do
   let space = 5
       border = Border space space space space
 
-  xmonad $ ewmh $
-    docks def
+  xmonad $ docks $ ewmh $
+    def
     { borderWidth        = 1
     , terminal           = "xfce4-terminal"
     , normalBorderColor  = "#000000"
@@ -267,11 +275,15 @@ main = do
     , modMask = modk
     , logHook = dynamicLogWithPP $ myLogHook dbus
     , startupHook = setWMName "LG3D"
-    , layoutHook  = spacingRaw True border True border True $ smartBorders myLayout
+    , layoutHook  = avoidStruts $ smartBorders myLayout
     , manageHook  = mconcat [ manageDocks
                             , myManageHook
                             ]
-    , handleEventHook = dynamicPropertyChange "WM_CLASS" myDynamicManageHook
+    , handleEventHook = mconcat
+        [ docksEventHook
+        , dynamicPropertyChange "WM_CLASS" myDynamicManageHook
+        , fullscreenEventHook
+        ]
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind
@@ -301,4 +313,13 @@ dbusOutput dbus str = do
     objectPath = D.objectPath_ "/org/xmonad/Log"
     interfaceName = D.interfaceName_ "org.xmonad.Log"
     memberName = D.memberName_ "Update"
+
+setTransparentHook :: Event -> X All
+setTransparentHook ConfigureEvent{ev_event_type = createNotify, ev_window = id} = do
+  setOpacity id opacity
+  return (All True) where
+    opacityFloat = 0.9
+    opacity = floor $ fromIntegral (maxBound :: Word32) * opacityFloat
+    setOpacity id op = spawn $ "xprop -id " ++ show id ++ " -f _NET_WM_WINDOW_OPACITY 32c -set _NET_WM_WINDOW_OPACITY " ++ show op
+setTransparentHook _ = return (All True)
 

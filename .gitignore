@@ -2,6 +2,7 @@
 *.swo
 *~
 tags
+!tags/
 ctags
 TAGS
 .stack-work
