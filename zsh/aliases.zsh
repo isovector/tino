@@ -11,6 +11,7 @@ alias t='tino'
 alias o='gnome-open'
 alias e=$EDITOR
 alias :e=$EDITOR
+alias st='desklights 0 0 0; t ok stack test'
 
 alias gs='git status'
 alias gd='git diff'

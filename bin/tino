@@ -38,6 +38,26 @@ case "$basename" in
         echo "hello"
         ;;
 
+    ok)
+      ~/.tino/bin/tino desk 0 0 1 1 0 0 $*
+      ;;
+
+    desk)
+      R1="$1"
+      shift
+      G1="$1"
+      shift
+      B1="$1"
+      shift
+      R2="$1"
+      shift
+      G2="$1"
+      shift
+      B2="$1"
+      shift
+      ($* && desklights $R1 $G1 $B1) || desklights $R2 $G2 $B2
+      ;;
+
 
     e|edit)
         gvime_ok() { inpath gvim &&
