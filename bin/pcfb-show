@@ -5,7 +5,7 @@ import re
 import time
 
 files = glob.glob(os.path.expanduser("~/.tino/var/*"))
-midnight = 7
+midnight = 6
 
 def time2sec(time):
   global midnight

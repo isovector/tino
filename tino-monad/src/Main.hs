@@ -3,6 +3,7 @@
 
 module Main where
 
+import Lights
 import qualified Codec.Binary.UTF8.String as UTF8
 import           Control.Exception
 import           Control.Monad
@@ -158,6 +159,9 @@ keysToUnbind =
 safeSpawn' :: MonadIO m => FilePath -> String -> m ()
 safeSpawn' p = safeSpawn p . words
 
+polybar :: X ()
+polybar = pure () -- safeSpawn' "/home/sandy/.tino/bin/tino" "bar"
+
 keysToBind :: [((KeyMask, KeySym), X ())]
 keysToBind =
   [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
@@ -168,7 +172,7 @@ keysToBind =
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
   , ((modk, xK_e),                  haskellProject)
-  , ((modk, xK_backslash),          safeSpawn' "/home/sandy/.tino/bin/tino" "bar")
+  , ((modk, xK_backslash),          polybar)
   , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
@@ -183,14 +187,19 @@ keysToBind =
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
       safeSpawn' "xrandr" "--output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-2 --mode 1920x1080 --left-of HDMI-1 --rotate left"
-      -- safeSpawn' "polybar" "example"
+      polybar
     )
   , ((modk, xK_F9), do
       safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
+      polybar
     )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
+  , ((modk, xK_Left),               liftIO $ setDeskColor 40 0 40)
+  , ((modk, xK_Right),              liftIO $ setDeskColor 60 20 0)
+  , ((modk, xK_Down),               liftIO $ setDeskColor 0 0 0)
+  , ((modk, xK_Up),                 liftIO $ setDeskColor 0 0 80)
   , ((modk, xK_v),                  safeSpawn' "/home/sandy/.tino/bin/tino" "pcfb")
   , ((modk, xK_bracketleft),        liftIO pcfbOpen)
   , ((modk, xK_bracketright),       liftIO pcfbClose)
@@ -226,22 +235,21 @@ haskellProject = do
 
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
 mkShortcut ks url =
-  ((modk .|. alt, ks),          safeSpawn' "xdg-open" $ "https://" <> url)
+  ((modk .|. alt, ks), safeSpawn' "xdg-open" url)
 
 shortcuts :: [(KeySym, String)]
 shortcuts =
-  [ (xK_g, "gmail.com")
-  -- , (xK_r, "reddit.com")
-  , (xK_d, "feedreader.com/online")
-  -- , (xK_f, "functionalprogramming.slack.com")
-  -- , (xK_y, "youtube.com/feed/subscriptions")
-  , (xK_m, "g.page/anytimefitnessvictoriadowntown")
-  , (xK_2, "docs.google.com/spreadsheets/d/1g-uY0BjO0yNiID6obpDuj8uEeaqW3MExF_PfhqVYRXg/edit#gid=0")
-  , (xK_h, "github.com/pulls")
-  , (xK_t, "trello.com/b/y2C9T3x2/copilot")
-  , (xK_i, "github.com/haskell/haskell-language-server/issues/new")
-  , (xK_c, "calendar.google.com/calendar/u/0/r")
-  , (xK_w, "workflowy.com")
+  [ (xK_g, "https://gmail.com")
+  , (xK_r, "https://reddit.com")
+  , (xK_f, "https://riot.cofree.coffee")
+  , (xK_d, "file:///home/sandy/.rawdog/output.html")
+  , (xK_m, "https://maps.google.com")
+  , (xK_2, "https://docs.google.com/spreadsheets/d/1g-uY0BjO0yNiID6obpDuj8uEeaqW3MExF_PfhqVYRXg/edit#gid=0")
+  , (xK_h, "https://github.com/pulls")
+  , (xK_t, "https://trello.com/b/y2C9T3x2/copilot")
+  , (xK_i, "https://github.com/haskell/haskell-language-server/issues/new")
+  , (xK_c, "https://calendar.google.com/calendar/u/0/r")
+  , (xK_w, "https://workflowy.com")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]

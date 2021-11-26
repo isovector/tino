@@ -688,8 +688,9 @@ function! HaskellFiletype()
     " Easy-to-type haskell digraphs
     inoremap ,. <space>~><space>
     inoremap -= <space>-><space>
-    inoremap 0-= <space>%1<space>-><space>
+    inoremap 0- <space>-><space>
     inoremap =- <space><-<space>
+    inoremap -0 <space><-<space>
     inoremap _+ <space>=><space>
 
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
