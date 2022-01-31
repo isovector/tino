@@ -1,7 +1,7 @@
 autocmd!
 set nocompatible
 
-" set guifont=Iosevka:h16
+set guifont=Source\ Code\ Pro:h7
 
 if !has('nvim')
   set shell=/usr/bin/zsh\ -l
@@ -23,6 +23,7 @@ let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
 call plug#begin('~/.vim/plugged')
 " Development
 Plug 'isovector/ghci.vim'
+Plug 'isovector/cornelis'
 
 " Libraries
 Plug 'vim-scripts/L9'
@@ -71,6 +72,9 @@ Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'jtratner/vim-flavored-markdown'
 Plug 'rstacruz/sparkup'
+" Plug 'derekelkins/agda-vim'
+" Plug 'ashinkarov/nvim-agda'
+
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -113,7 +117,11 @@ Plug 'justinmk/vim-sneak'
 Plug 'junkblocker/git-time-lapse'
 Plug 'norcalli/snippets.nvim'
 
-Plug 'neoclide/coc.nvim', {'commit': '8bc5fa2c', 'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+
+Plug 'neovimhaskell/nvim-hs.vim'
+
+
 
 call plug#end()
 
@@ -128,7 +136,7 @@ set background=dark
                                    " Leaders
 " ------------------------------------------------------------------------------
 let mapleader = " "
-let maplocalleader = ","
+let maplocalleader = "\\"
 
 " Automatic pane split layouts
 nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
@@ -194,9 +202,6 @@ let g:vim_markdown_folding_disabled=1
 " ------------------------------------------------------------------------------
 " TODO(sandy): Add infrastructure to only enable these in certain filetypes
 
-" No distractions for writing
-" nnoremap <leader>gy :Goyo<CR>
-
 " Insert new vim plugin line from system clipboard
 nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
 
@@ -240,7 +245,6 @@ nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
-" nnoremap <leader>ep :e ~/.config/polybar/config<cr>
 nnoremap <leader>ep :call EditPcfbFile()<cr>
 
 function! EditPcfbFile()
@@ -289,14 +293,6 @@ vnoremap K :m '<-2<CR>gv
 " Switch to alt file
 nnoremap # :e #<CR>
 
-function! SubstituteParameter()
-  let var = expand("<cword>")
-  let result = input(var . " -> ")
-  execute "normal! v/{\<CR>%"
-  execute "normal! :s/\\v<" . var . ">/". result . "\<CR>"
-  execute "normal! \<C-O>"
-endfunction
-
 function! Rename()
   let var = expand("<cword>")
   let result = input(var . " -> ")
@@ -310,7 +306,6 @@ endfunction
 " Rename
 " TODO(sandy): make a bufdo version of this
 nnoremap <Leader>s *N:noh<CR>:call Rename()<CR>
-nnoremap <Leader>sp :call SubstituteParameter()<CR>
 
 " Free keys:
 " K, !?, &, \, Zx, Q
@@ -377,12 +372,6 @@ cmap <expr> %% expand('%:p:h') . '/'
 " Sudo save file.
 cmap w!! %!sudo tee > /dev/null %
 
-" Change property to dict lookup (a.x -> a['x'])
-nmap cod mmysiw]hxlysw'`ml
-
-" Change dict lookup to propert (a['x'] -> a.x)
-nmap cop mmds'ds]i.<ESC>`mh
-
 
 
 " ------------------------------------------------------------------------------
@@ -429,9 +418,6 @@ endfunction
 
 noremap <silent> W :silent call SmartWordSearch("n")<CR>
 noremap <silent> B :silent call SmartWordSearch("N")<CR>
-
-" Delete until arguments
-nmap <silent> dua dt(lds)
 
 function! Reg()
     reg
@@ -492,13 +478,6 @@ endfunction
 
 nnoremap <expr> PP SetPasteOver()
 
-function! AlignWithAbove()
-    let c = nr2char(getchar())
-    exec "-t-"
-    exec "normal! f" . c . "D0v$r \<ESC>"
-    startinsert!
-endfunction
-
 nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
 
 
@@ -525,7 +504,7 @@ augroup END
 autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs'
 " let g:ctrlp_by_filename = 1
 
 
@@ -535,7 +514,7 @@ let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata'
 if has("gui_running")
     set guitablabel=%-0.12t%M
     set showtabline=2
-    " au BufAdd * :RainbowParentheses
+    au BufAdd * :RainbowParentheses
 
     try
     if g:colors_name ==# "railscasts"
@@ -630,16 +609,6 @@ function! MarkdownFiletype()
     set cc=81
 endfunction
 
-function! LatexFiletype()
-    setfiletype tex
-    nnoremap <buffer> zb z=1<CR><CR>
-    set tw=80
-    set cc=81
-    set isk+==
-    iabbrev <buffer> ==r \begin{repl}<CR>\end{repl}<C-O>O
-    nnoremap <buffer> <silent> <leader>wtd :lgrep! todo<CR>:lw<CR>
-endfunction
-
 function! AddHsPragma(kind, more)
     " Add a new HS pragma, and sort the list so it's pretty
     let pragma = input(a:kind . " ")
@@ -654,14 +623,28 @@ function! AddHsPragma(kind, more)
     normal `s
 endfunction
 
-function! RstFiletype()
-  nnoremap <buffer> -- 2o<ESC>4i-<ESC>2o<ESC>
-  nnoremap <buffer> == yypVr=
+function! AgdaFiletype()
+    imap -= <space>\to<space>
+    inoremap )_ <space>=><space>
+    imap 0- <space>\to<space>
+    inoremap =- <space><-<space>
+    inoremap -0 <space><-<space>
+    imap \step \==\< ? \><CR><space><space>?
+    nnoremap <buffer> <leader>l :CornelisLoad<CR>
+    nnoremap <buffer> zl :CornelisLoad<CR>
+    nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS", "")<CR>
+    nnoremap <buffer> <leader>r :CornelisRefine<CR>
+    nnoremap <buffer> <leader>d :CornelisMakeCase<CR>
+    " nnoremap <buffer> <leader>e :AgdaContext<CR>
+    " nnoremap <buffer> <leader>h :AgdaHelperFun<CR>
+    nnoremap <buffer> <leader>, :CornelisTypeContext<CR>
+    " nnoremap <buffer> <leader>x :AgdaCompute<CR>
+    nnoremap <buffer> <leader>n :CornelisSolve<CR>
 endfunction
+
 
 function! HaskellFiletype()
     " set formatprg=stylish-haskell
-
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
     nnoremap <buffer> <leader>l :call AddHsPragma("LANGUAGE", "")<CR>
@@ -722,6 +705,11 @@ function! HaskellFiletype()
     syntax keyword haskellBottom DemoteRep Proxy Type Typeable
     syntax keyword haskellKeyword m
 
+    nnoremap <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
+    nnoremap <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
+    nnoremap <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
+    nnoremap <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
+    nnoremap <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
 endfunction
 
 " Set filetypes
@@ -729,9 +717,8 @@ endfunction
 au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md call MarkdownFiletype()
 au BufRead,BufNewFile *.markdown call MarkdownFiletype()
-au BufRead,BufNewFile *.tex call LatexFiletype()
 au BufRead,BufNewFile *.hs call HaskellFiletype()
-au BufRead,BufNewFile *.htex setfiletype htex
+au BufRead,BufNewFile *.agda call AgdaFiletype()
 autocmd FileType cpp setlocal commentstring=//\ %s
 
 
@@ -772,7 +759,7 @@ set hlsearch
 set ignorecase
 set incsearch
 set laststatus=2
-set lazyredraw
+set nolazyredraw
 set list
 set listchars="tab:»·,trail:·"
 set matchtime=3
@@ -808,6 +795,7 @@ set wildignore+=*.orig
 set wildignore+=*.pyc
 set wildignore+=*.spl
 set wildignore+=*.sw?
+set wildignore+=docs/
 set wildignore+=.hg,.git,.svn
 set wildignore+=tags
 set wildignore+=ghcide
@@ -841,38 +829,6 @@ endif
 
 
 " ------------------------------------------------------------------------------
-                                     " Goyo
-" ------------------------------------------------------------------------------
-" Goyo is zen-mode writing. Most of my usual settings conflict with it pretty
-" hard, so this fixes it
-function! s:goyo_enter()
-    Limelight
-    augroup relnum
-        au!
-    augroup END
-endfunction
-
-function! s:goyo_leave()
-    augroup relnum
-        au!
-        au FocusLost * :set norelativenumber
-        au FocusGained * :set relativenumber
-        au InsertEnter * :set norelativenumber
-        au InsertLeave * :set relativenumber
-    augroup END
-
-    if exists(":Limelight")
-        Limelight!
-    endif
-endfunction
-
-autocmd User GoyoEnter nested call <SID>goyo_enter()
-autocmd User GoyoLeave nested call <SID>goyo_leave()
-call <SID>goyo_leave()
-
-
-
-" ------------------------------------------------------------------------------
                             " Easy Buffer Switching
 " ------------------------------------------------------------------------------
 " Turn on buffer numbers in the tabline
@@ -887,23 +843,6 @@ function! s:bufSwitch(count)
     return 'e'
 endfunction
 nnoremap <expr> e <SID>bufSwitch(v:count)
-
-
-
-" ------------------------------------------------------------------------------
-                            " Limelight Scrollbinding
-" ------------------------------------------------------------------------------
-function! s:sync_limelight(bang)
-  execute 'Limelight'.a:bang
-  augroup sync_limelight
-    autocmd!
-    if empty(a:bang)
-      autocmd CursorMoved * wincmd p | doautocmd limelight CursorMoved | wincmd p
-    endif
-  augroup END
-endfunction
-
-command! -bang SyncLimelight call s:sync_limelight('<bang>')
 
 
 
@@ -936,8 +875,6 @@ endfunction
 " nnoremap <expr> h IgnoreWithoutCount('h')
 " nnoremap <expr> j IgnoreWithoutCount('j')
 " nnoremap <expr> k IgnoreWithoutCount('k')
-
-nnoremap <silent> ga :call AlignWithAbove()<CR>
 
 " ------------------------------------------------------------------------------
                                     " Neovim
@@ -979,125 +916,12 @@ function! NewPost()
 endfunction
 
 
-function! GetLeftDict()
-  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# '('
-    normal! hmx
-  endif
-
-  let llpar_pos = FindNearest('(', 'b')
-  let lrpar_pos = FindNearest(')', 'b')
-  let larr_pos = FindNearest('->', 'b')
-  let lstart_pos = FindNearest('::', 'b')
-  let lpos = max([llpar_pos, lrpar_pos, larr_pos, lstart_pos])
-
-  let llpar  = lpos ==# llpar_pos
-  let lrpar  = lpos ==# lrpar_pos
-  let larr   = lpos ==# larr_pos
-  let lstart = lpos ==# lstart_pos
-
-  if lrpar
-    echo "lrpar"
-    call setpos(".", Unpack(lpos))
-    normal! %
-    let res = GetLeftDict()
-    normal! `x
-    return res
-  else
-    let what = llpar ? "par" : larr ? "arr" : "start"
-    let diff = llpar ? 1 : lstart ? 2 : 0
-    return [what, Unpack(lpos + diff), diff !=# 0]
-  endif
-endfunction
-
-function! GetRightDict(del)
-  let rlpar_pos = FindNearest('(', '')
-  let rrpar_pos = FindNearest(')', '')
-  let rarr_pos = FindNearest('->', '')
-  let rend_pos = FindNearest('^[a-z_]', '')
-  let rpos = min(filter([rlpar_pos, rrpar_pos, rarr_pos, rend_pos], 'v:val !=# 0'))
-
-  let rlpar = rpos ==# rlpar_pos
-  let rrpar = rpos ==# rrpar_pos
-  let rarr  = rpos ==# rarr_pos
-  let rend  = rpos ==# rend_pos
-
-  if rlpar
-    call setpos(".", Unpack(rpos))
-    normal! %
-    let res = GetRightDict(a:del)
-    normal! `x
-    return res
-  else
-    let what = rrpar ? "par" : rarr ? "arr" : "end"
-    let diff = rarr ? 2 : 0
-    return [what, Unpack(rpos - 1 + (a:del ? diff : 0))]
-  endif
-endfunction
-
-function! MatchLeft()
-  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# ')'
-    normal! %
-  endif
-
-  if col(".") ==# col("$")-1
-    normal! h
-  end
-
-  if strcharpart(getline('.')[col('.') - 1:], 0, 1) ==# ')'
-    normal! %
-  endif
-
-  let view = winsaveview()
-  normal! mx
-  let [start, start_pos, del_end] = GetLeftDict()
-  let [end,   end_pos] = GetRightDict(del_end)
-
-  if start ==# "start" && end ==# "end"
-    return
-  end
-
-  if end ==# "end"
-    call setpos(".", end_pos)
-    normal! k
-    let end_pos = Unpack(FindNearest('$', '')-1)
-  endif
-
-  call winrestview(view)
-  return ['v', start_pos, end_pos]
-endfunction
-
-function! FindNearest(pat, dir)
-  let [line, col] = searchpos(a:pat, a:dir . 'nW')
-  return Pack(line, col)
-endfunction
-
-function! Pack(line, col)
-  return a:line * 1000 + a:col
-endfunction
-
-function! Unpack(pos)
-  return [0, a:pos / 1000, a:pos % 1000, 0]
-endfunction
-
-
-call textobj#user#plugin('haskell', {
-\   'blah': {
-\     'select-a-function': 'MatchLeft',
-\     'select-a': 'al',
-\   },
-\ })
-
 " COC stuff
 
 xmap <leader>xa  <Plug>(coc-codeaction-selected)
 nmap <leader>xa  <Plug>(coc-codeaction-selected)
 nmap <c-space> <space>xal
 
-nnoremap <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
-nnoremap <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
-nnoremap <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
-nnoremap <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
-nnoremap <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
 nmap <silent> <space>e  <Plug>(coc-codelens-action)
 
 function! s:GotoNextHole()
@@ -1134,7 +958,7 @@ endfunction
 nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> gd <Plug>(coc-definition)
-command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
 " Remove search highlighting
 nnoremap <silent> <leader><space>  :noh<cr>
 
@@ -1162,4 +986,5 @@ function! s:show_documentation()
   endif
 endfunction
 
+let g:ctrlp_working_path_mode = 'r'
 
