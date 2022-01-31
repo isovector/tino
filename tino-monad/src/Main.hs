@@ -3,12 +3,9 @@
 
 module Main where
 
-import Lights
 import qualified Codec.Binary.UTF8.String as UTF8
 import           Control.Exception
 import           Control.Monad
-import qualified DBus as D
-import qualified DBus.Client as D
 import           Data.Foldable
 import           Data.List (sort)
 import           Data.Maybe (fromJust)
@@ -17,23 +14,27 @@ import           Data.Ratio
 import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
+import           Lights
 import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
 import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
 import           System.Exit
 import           System.FilePath
-import           System.IO (hGetContents)
+import           System.IO (hGetContents, Handle)
 import           System.IO.Capture (capture)
 import           System.Process (readProcessWithExitCode, readProcess)
-import           XMonad
+import           XMonad hiding (getDirectories)
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
+import           XMonad.Actions.WorkspaceNames
 import           XMonad.Hooks.DynamicLog
 import           XMonad.Hooks.DynamicProperty
 import           XMonad.Hooks.EwmhDesktops (fullscreenEventHook, ewmh)
 import           XMonad.Hooks.ManageDocks (avoidStruts, docks, manageDocks, docksStartupHook, docksEventHook)
 import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFloat, Side (SE, NE), doRectFloat)
 import           XMonad.Hooks.SetWMName (setWMName)
+import           XMonad.Hooks.StatusBar
+import           XMonad.Hooks.StatusBar.PP
 import           XMonad.Layout.Accordion
 import           XMonad.Layout.BinarySpacePartition
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
@@ -44,6 +45,7 @@ import           XMonad.Layout.ThreeColumns
 import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
+import           XMonad.Util.Hacks
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput)
 import           XMonad.Util.Ungrab
 import           XMonad.Util.WindowProperties (getProp32s)
@@ -97,7 +99,7 @@ myManageHook = fold
     , do
         c <- className
         if c == "zoom"
-           then doF copyToAll
+           then doFloat >> doF copyToAll
            else mempty
     -- , isFullscreen                  --> doFullFloat
     ]
@@ -187,6 +189,7 @@ keysToBind =
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
       safeSpawn' "xrandr" "--output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-2 --mode 1920x1080 --left-of HDMI-1 --rotate left"
+      feh
       polybar
     )
   , ((modk, xK_F9), do
@@ -230,7 +233,21 @@ haskellProject = do
         safeSpawn "xfce4-terminal" ["--command", "tmux new-session 'stack repl " <> target <> "'"]
     Nothing -> pure ()
 
+myPP :: PP
+myPP = def
+  { ppCurrent = xmobarColor "#ff7700" "" . wrap "[" "]"
+  , ppTitle   = id
+  , ppVisible = wrap "(" ")"
+  , ppLayout  = const ""
+  , ppUrgent  = xmobarColor "red" "yellow"
+  }
 
+myStatusBar :: StatusBarConfig
+myStatusBar = mconcat
+  [ statusBarProp "xmobar -x 0" (pure myPP)
+  , statusBarProp "xmobar -x 1" (pure myPP)
+  , statusBarProp "xmobar -x 2" (pure myPP)
+  ]
 
 
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
@@ -244,12 +261,11 @@ shortcuts =
   , (xK_f, "https://riot.cofree.coffee")
   , (xK_d, "file:///home/sandy/.rawdog/output.html")
   , (xK_m, "https://maps.google.com")
-  , (xK_2, "https://docs.google.com/spreadsheets/d/1g-uY0BjO0yNiID6obpDuj8uEeaqW3MExF_PfhqVYRXg/edit#gid=0")
   , (xK_h, "https://github.com/pulls")
-  , (xK_t, "https://trello.com/b/y2C9T3x2/copilot")
-  , (xK_i, "https://github.com/haskell/haskell-language-server/issues/new")
   , (xK_c, "https://calendar.google.com/calendar/u/0/r")
   , (xK_w, "https://workflowy.com")
+  , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
+  , (xK_y, "https://www.beeminder.com/santino/")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -273,18 +289,18 @@ kdeOverride = ask >>= \w -> liftX $ do
   wt <- getProp32s "_NET_WM_WINDOW_TYPE" w
   return $ maybe False (elem $ fromIntegral override) wt
 
+feh :: X ()
+feh =
+  spawn "feh --bg-center ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg"
+
 main :: IO ()
 main = do
-  dbus <- D.connectSession
-  -- Request access to the DBus name
-  D.requestName dbus (D.busName_ "org.xmonad.Log")
-    [D.nameAllowReplacement, D.nameReplaceExisting, D.nameDoNotQueue]
 
   setCurrentDirectory "/home/sandy"
   let space = 5
       border = Border space space space space
 
-  xmonad $ docks $ ewmh $
+  xmonad $ withSB myStatusBar $ docks $ ewmh $
     def
     { borderWidth        = 1
     , terminal           = "xfce4-terminal"
@@ -292,47 +308,22 @@ main = do
     , focusedBorderColor = "#444444"
     , workspaces = myWorkspaces
     , modMask = modk
-    , logHook = dynamicLogWithPP $ myLogHook dbus
-    , startupHook = setWMName "LG3D"
+    , startupHook = setWMName "LG3D" <> feh <> docksStartupHook
     , layoutHook  = avoidStruts $ smartBorders myLayout
     , manageHook  = mconcat [ manageDocks
                             , myManageHook
                             ]
     , handleEventHook = mconcat
-        [ docksEventHook
-        , dynamicPropertyChange "WM_CLASS" myDynamicManageHook
+        [ dynamicPropertyChange "WM_CLASS" myDynamicManageHook
         , dynamicPropertyChange "WM_NAME" myDynamicManageHook
-        , fullscreenEventHook
+        , docksEventHook
+        , windowedFullscreenFixEventHook
         ]
     } `removeKeys`              keysToUnbind
       `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind
       `additionalMouseBindings` buttonsToBind
 
-
--- Override the PP values as you would otherwise, adding colors etc depending
--- on  the statusbar used
-myLogHook :: D.Client -> PP
-myLogHook dbus = def
-  { ppOutput = dbusOutput dbus
-  , ppTitle   = wrap ("%{+u} ") " %{-u}"
-  , ppCurrent = wrap ("%{+o} ") " %{-o}"
-  , ppVisible = wrap ("%{+u} ") " %{-u}"
-  , ppSep     = "   "
-  , ppLayout  = const ""
-  }
-
--- Emit a DBus signal on log updates
-dbusOutput :: D.Client -> String -> IO ()
-dbusOutput dbus str = do
-    let signal = (D.signal objectPath interfaceName memberName) {
-            D.signalBody = [D.toVariant $ UTF8.decodeString str]
-        }
-    D.emit dbus signal
-  where
-    objectPath = D.objectPath_ "/org/xmonad/Log"
-    interfaceName = D.interfaceName_ "org.xmonad.Log"
-    memberName = D.memberName_ "Update"
 
 setTransparentHook :: Event -> X All
 setTransparentHook ConfigureEvent{ev_event_type = createNotify, ev_window = id} = do

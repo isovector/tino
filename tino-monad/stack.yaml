@@ -1,11 +1,13 @@
 
-resolver: lts-16.31
+resolver: lts-18.16
 
 packages:
 - '.'
 extra-deps:
 - io-capture-1.0.0
 - serialport-0.5.3@sha256:8ccc17cfb28737508e81eb38ab232f8006e6d85ac782ef94f7dea6f9ab45e908,1703
+- xmonad-0.17.0
+- xmonad-contrib-0.17.0
 
 
 flags: {}

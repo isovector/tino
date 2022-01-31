@@ -18,9 +18,23 @@ packages:
       sha256: 0230b24e5d179a356f91faf879f91f5eeaa03052e9e28ddaa62f27bb2a2912be
   original:
     hackage: serialport-0.5.3@sha256:8ccc17cfb28737508e81eb38ab232f8006e6d85ac782ef94f7dea6f9ab45e908,1703
+- completed:
+    hackage: xmonad-0.17.0@sha256:fc90c8fa647390c68c902912a5a7417f04025dfe72f7de51b248217f7ca0d484,5533
+    pantry-tree:
+      size: 2485
+      sha256: 6fd7c6a64621a088fcbb2e5a66030a78b0832d7341e4c465d3aeb4e668d097a5
+  original:
+    hackage: xmonad-0.17.0
+- completed:
+    hackage: xmonad-contrib-0.17.0@sha256:defd04a9ca0e031eb7280b734ccd6d6b73f757babfe4a561a7ff718e75211749,20357
+    pantry-tree:
+      size: 21783
+      sha256: 81a4589ef85fed434a852ba1324466b5ad8f4fd752cd88840aa4ea4348a16cec
+  original:
+    hackage: xmonad-contrib-0.17.0
 snapshots:
 - completed:
-    size: 534126
-    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/16/31.yaml
-    sha256: 637fb77049b25560622a224845b7acfe81a09fdb6a96a3c75997a10b651667f6
-  original: lts-16.31
+    size: 586286
+    url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/18/16.yaml
+    sha256: cdead65fca0323144b346c94286186f4969bf85594d649c49c7557295675d8a5
+  original: lts-18.16

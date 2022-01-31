@@ -1,19 +1,18 @@
 Config
   { font = "Bitstream Vera Sans Mono:size=16:antialias=true"
-  , bgColor = "#555555"
+  , bgColor = "#000000"
   , fgColor = "#cccccc"
-  , position = Static
-      { xpos = 0
-      , ypos = 0
-      , width = 1920
-      , height = 16
-      }
-  , lowerOnStart = True,
+  , position = Top
+  , lowerOnStart = True
+  , pickBroadest = False
+  , allDesktops = True
   , commands =
-      [ Run Date
-            "%m-%d <fc=#aa00aa>//</fc> <fc=#ffffff>%H:%M</fc>"
+      [ Run XMonadLog
+      , Run Date
+            "%Y-%m-%d <fc=#aa00aa>//</fc> <fc=#ffffff>%H:%M</fc>"
             "date"
             10
+      , Run Com "/bin/sh" ["-c","/home/sandy/.tino/bin/spotify-details"] "music" 5
       , Run Battery
           [ "--template" , "<acstatus>"
           , "--Low"      , "10"
@@ -27,9 +26,8 @@ Config
           , "-O"	, "<left> <fc=#aa00aa>//</fc> <fc=#ffffff>Charging</fc>"
           , "-i"	, "<fc=#006000>Charged</fc>"
           ] 50
-      , Run StdinReader
       ]
   , sepChar = "%"
   , alignSep = "}{"
-  , template = "%StdinReader% }{ %battery% <fc=#aa00aa>//</fc> <fc=#ffffff>%date%</fc>   "
+  , template = "   %XMonadLog% }{ %music% <fc=#aa00aa>//</fc> %battery% <fc=#aa00aa>//</fc> <fc=#ffffff>%date%</fc>   "
   }
