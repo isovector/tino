@@ -24,16 +24,15 @@ nmap <d-7> 7gt
 nmap <d-8> 8gt
 nmap <d-9> 9gt
 
-" " set guifont=Monospace\ 8
-" set guifont=PragmataPro\ 22
+set guifont=Monospace:h8
 " set guifont=PragmataPro\ 16
-" " set guifont=DejaVu\ Sans\ Mono\ 14
-set guifont=Monospace\ 11
-set guifont=Monospace\ 9
+set guifont=DejaVu\ Sans\ Mono:14
+" set guifont=Monospace\ 11
+" set guifont=Monospace\ 9
 
-function! SetStreaming()
-  set guifont=Inconsolata:h20
-endfunction
+" function! SetStreaming()
+"   set guifont=Inconsolata:h20
+" endfunction
 
 nnoremap ZZ <nop>
 vnoremap ZZ <nop>
