@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-HOURS_LEFT=$(( ( $(date +%s -d "january 1 2022 00:00") - $( date +%s ) ) / 3600 ))
+HOURS_LEFT=$(( ( $(date +%s -d "january 1 2023 00:00") - $( date +%s ) ) / 3600 ))
 TOTAL_HOURS=8760
 
 echo -n '${font :BOLD}${alignc}${color}-'
