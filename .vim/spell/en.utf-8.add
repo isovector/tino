@@ -527,3 +527,15 @@ Polytypes
 polytype
 impredicativity
 impredicative
+optimality
+suboptimality
+suboptimal
+#atamorphism
+catamorphism
+copatterns
+coinductive
+codatatypes
+copattern
+codata/!
+codata
+destructors

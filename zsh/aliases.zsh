@@ -1,3 +1,5 @@
+eval "$(direnv hook zsh)"
+
 alias ls='ls --color=tty'
 alias diff='git diff --'
 alias diffp='git diff --patience --'
