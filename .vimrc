@@ -1,7 +1,7 @@
 autocmd!
 set nocompatible
 
-set guifont=Source\ Code\ Pro:h7
+set guifont=Source\ Code\ Pro:h9
 
 if !has('nvim')
   set shell=/usr/bin/zsh\ -l
@@ -62,7 +62,6 @@ Plug 'skwp/greplace.vim'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-commentary'
 Plug 'junegunn/vim-easy-align'
-Plug 'michaeljsmith/vim-indent-object'
 "
 
 " Languages
@@ -491,6 +490,8 @@ set iminsert=1
 set imsearch=1
 set imcmdline
 lnoremap <C-v> <C-r><C-o>+
+set clipboard+=unnamedplus
+
 
 " Jump back to same line when reopening
 augroup line_return
@@ -623,16 +624,21 @@ function! AddHsPragma(kind, more)
     normal `s
 endfunction
 
+au BufRead,BufNewFile *.agda call AgdaFiletype()
+au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
+
 function! AgdaFiletype()
+    imap == <space>\==<space>
     imap -= <space>\to<space>
     inoremap )_ <space>=><space>
     imap 0- <space>\to<space>
     inoremap =- <space><-<space>
     inoremap -0 <space><-<space>
     imap \step \==\< ? \><CR><space><space>?
+    imap \sstep \~~\< ? \><CR><space><space>?
     nnoremap <buffer> <leader>l :CornelisLoad<CR>
     nnoremap <buffer> zl :CornelisLoad<CR>
-    nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS", "")<CR>
+    nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS", "--")<CR>
     nnoremap <buffer> <leader>r :CornelisRefine<CR>
     nnoremap <buffer> <leader>d :CornelisMakeCase<CR>
     " nnoremap <buffer> <leader>e :AgdaContext<CR>
@@ -640,6 +646,11 @@ function! AgdaFiletype()
     nnoremap <buffer> <leader>, :CornelisTypeContext<CR>
     " nnoremap <buffer> <leader>x :AgdaCompute<CR>
     nnoremap <buffer> <leader>n :CornelisSolve<CR>
+    nnoremap <buffer> gd :CornelisGoToDefinition<CR>
+    nnoremap <buffer> [/ :CornelisPrevGoal<CR>
+    nnoremap <buffer> ]/ :CornelisNextGoal<CR>
+    nnoremap <buffer> ch cl{!  !}<ESC>:w<CR>hh
+    nnoremap <buffer> <leader>m yyp0f:C= ?<esc>:w<CR>$
 endfunction
 
 
@@ -650,6 +661,10 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader>l :call AddHsPragma("LANGUAGE", "")<CR>
     nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS_GHC", "-")<CR>
     " setlocal formatprg=floskell
+
+    nmap <silent> [g <Plug>(coc-diagnostic-prev)
+    nmap <silent> ]g <Plug>(coc-diagnostic-next)
+    nmap <silent> gd <Plug>(coc-definition)
 
     nnoremap <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
     nnoremap <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
@@ -718,7 +733,6 @@ au BufRead,BufNewFile *.db setfiletype db
 au BufRead,BufNewFile *.md call MarkdownFiletype()
 au BufRead,BufNewFile *.markdown call MarkdownFiletype()
 au BufRead,BufNewFile *.hs call HaskellFiletype()
-au BufRead,BufNewFile *.agda call AgdaFiletype()
 autocmd FileType cpp setlocal commentstring=//\ %s
 
 
@@ -954,10 +968,6 @@ function! s:WingmanUseCtor(type)
   call CocAction('codeAction', a:type, ['refactor.wingman.useConstructor'])
   call <SID>GotoNextHole()
 endfunction
-
-nmap <silent> [g <Plug>(coc-diagnostic-prev)
-nmap <silent> ]g <Plug>(coc-diagnostic-next)
-nmap <silent> gd <Plug>(coc-definition)
 
 " Remove search highlighting
 nnoremap <silent> <leader><space>  :noh<cr>
