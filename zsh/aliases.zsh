@@ -1,5 +1,3 @@
-eval "$(direnv hook zsh)"
-
 alias ls='ls --color=tty'
 alias diff='git diff --'
 alias diffp='git diff --patience --'
@@ -13,7 +11,8 @@ alias t='tino'
 alias o='gnome-open'
 alias e=$EDITOR
 alias :e=$EDITOR
-alias st='desklights 0 0 0; t ok stack test'
+
+alias -g .st="\`stack ide targets 2>&1 | fzf\`"
 
 alias gs='git status'
 alias gd='git diff'

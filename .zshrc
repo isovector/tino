@@ -1,4 +1,5 @@
 # cat ~/.cache/wal/sequences
+# cat ~/.config/wpg/sequences
 
 zstyle ':completion:*' completer _complete _ignored _approximate
 zstyle :compinstall filename "$HOME/.zshrc"
@@ -30,3 +31,5 @@ case $TERM in
 esac
 
 [ -f "/home/sandy/.ghcup/env" ] && source "/home/sandy/.ghcup/env" # ghcup-env
+
+eval "$(direnv hook zsh)"

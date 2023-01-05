@@ -8,5 +8,5 @@ xbacklight -time 0 -steps 1 -inc $1
 
 BRIGHTNESS=$(xbacklight -get | cut -d'.' -f1)
 
-xbacklight -set $(max_number $BRIGHTNESS 1)
+xbacklight -set $(max_number $BRIGHTNESS 0.01)
 

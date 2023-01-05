@@ -1,7 +1,8 @@
 autocmd!
 set nocompatible
 
-set guifont=Source\ Code\ Pro:h9
+" set guifont=Source\ Code\ Pro:h9
+set guifont=Hack:h8
 
 if !has('nvim')
   set shell=/usr/bin/zsh\ -l
@@ -33,6 +34,7 @@ Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'kana/vim-submode'
 Plug 'vim-scripts/ingo-library'
 Plug 'mattn/webapi-vim'
+Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 
 " Silent
 Plug 'rking/ag.vim'
@@ -43,11 +45,13 @@ Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
 Plug 'Shougo/vimproc'
 Plug 'yssl/QFEnter'
-::
+
 " Navigation
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'vim-scripts/JumpToLastOccurrence'
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'nvim-lua/plenary.nvim'
+" Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 
 " Misc
 Plug 'mattn/gist-vim'
@@ -66,13 +70,14 @@ Plug 'junegunn/vim-easy-align'
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
-Plug 'plasticboy/vim-markdown'
+" Plug 'plasticboy/vim-markdown'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
-Plug 'jtratner/vim-flavored-markdown'
+" Plug 'jtratner/vim-flavored-markdown'
 Plug 'rstacruz/sparkup'
 " Plug 'derekelkins/agda-vim'
 " Plug 'ashinkarov/nvim-agda'
+Plug 'tikhomirov/vim-glsl'
 
 
 " Colors
@@ -97,6 +102,7 @@ Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
 Plug 'fielding/vice'
 Plug 'dylanaraps/wal.vim'
+Plug 'jonstoler/werewolf.vim'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
@@ -119,15 +125,28 @@ Plug 'norcalli/snippets.nvim'
 Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 Plug 'neovimhaskell/nvim-hs.vim'
+Plug 'liuchengxu/vim-which-key'
+
+" light colos
+Plug 'NLKNguyen/papercolor-theme'
+Plug 'rakr/vim-one'
 
 
+Plug 'junegunn/limelight.vim'
+Plug 'junegunn/goyo.vim'
+
+" let g:cornelis_max_size = 19
+" let g:cornelis_split_direction = 'Vertical'
 
 call plug#end()
+
 
 syntax on
 let g:solarized_termcolors=256
 set t_Co=256
-set background=dark
+set background=light
+
+let g:coc_enable_locationlist=0
 
 
 
@@ -138,8 +157,8 @@ let mapleader = " "
 let maplocalleader = "\\"
 
 " Automatic pane split layouts
-nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
-nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
+" nnoremap <leader>3 :vsplit<CR>:bn<CR>:vsplit<CR>:bn<CR>
+" nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
 nnoremap <leader>zl :silent! s/-- $> /<cr>:noh<cr>I-- $> <esc>:w<cr>02w
@@ -194,15 +213,15 @@ nnoremap c "_c
 
 let g:howdoi_map = '<leader>h'
 let g:vim_markdown_folding_disabled=1
+let g:vim_markdown_conceal=0
+let g:tex_conceal = ""
+
 
 
 " ------------------------------------------------------------------------------
                                 " Local Leaders
 " ------------------------------------------------------------------------------
 " TODO(sandy): Add infrastructure to only enable these in certain filetypes
-
-" Insert new vim plugin line from system clipboard
-nnoremap <leader>pg o<ESC>"+pkddA'<ESC>0iPlug '<ESC>0
 
 " Create banners in vimrc
 nmap <localleader>wb O<ESC>78i-<ESC>gccyyjpk<CR>center<CR>gcc
@@ -240,7 +259,6 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
-nnoremap <leader>eo :e ~/one-liners<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -330,9 +348,6 @@ vnoremap <silent> <leader>d "_d
 
 " Save file
 nnoremap ;; :w<CR>
-inoremap <c-s> <esc>:w<CR>a
-nnoremap <c-s> :w<CR>
-vnoremap <c-s> :<c-u>w<CR>
 
 " Pop tag stack
 " nnoremap <C-[> <ESC>:po<CR>
@@ -346,20 +361,22 @@ nnoremap zk moO <c-u><esc>`o
 
 " Things we can align on
 let g:easy_align_delimiters = {
-\ '[': { 'pattern': '[[\]]', 'left_margin': 0, 'right_margin': 0, 'stick_to_left': 0 },
-\ '(': { 'pattern': '[()]', 'left_margin': 0, 'right_margin': 0, 'stick_to_left': 0 },
-\ ']': { 'pattern': '[[\]]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
-\ ')': { 'pattern': '[()]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
-\ '<': { 'pattern': '[<]', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
-\ '.': { 'pattern': '\.', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ '>': { 'pattern': '->', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ ':': { 'pattern': '::', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ '@': { 'pattern': '@', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
-\ '$': { 'pattern': '\$', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ '~': { 'pattern': '\.\~', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ '#': { 'pattern': '#', 'left_margin': 1, 'right_margin': 0, 'stick_to_left': 0 },
-\ 'q': { 'pattern': '\(qualified\)\?\ze ', 'left_margin': 1, 'right_margin': 1, 'stick_to_left': 0 },
-\ 'c': { 'pattern': '.\zs--', 'left_margin': 2, 'right_margin': 1, 'stick_to_left': 0, 'ignore_groups': [] },
+\ '[': { 'pattern': '[[\]]',               'left_margin': 0, 'right_margin': 0 },
+\ '(': { 'pattern': '[()]',                'left_margin': 0, 'right_margin': 0 },
+\ ']': { 'pattern': '[[\]]',               'left_margin': 1, 'right_margin': 0 },
+\ ')': { 'pattern': '[()]',                'left_margin': 1, 'right_margin': 0 },
+\ '<': { 'pattern': '[<←]',                'left_margin': 1, 'right_margin': 0 },
+\ '.': { 'pattern': '\.',                  'left_margin': 1, 'right_margin': 1 },
+\ '>': { 'pattern': '->\|→',               'left_margin': 1, 'right_margin': 1 },
+\ 'p': { 'pattern': '¿¿',                  'left_margin': 1, 'right_margin': 1 },
+\ ':': { 'pattern': '::\|∷',               'left_margin': 1, 'right_margin': 1 },
+\ '@': { 'pattern': '@',                   'left_margin': 1, 'right_margin': 0 },
+\ '$': { 'pattern': '\$',                  'left_margin': 1, 'right_margin': 1 },
+\ '~': { 'pattern': '\.\~',                'left_margin': 1, 'right_margin': 1 },
+\ '#': { 'pattern': '#',                   'left_margin': 1, 'right_margin': 0 },
+\ 'q': { 'pattern': '\(qualified\)\?\ze ', 'left_margin': 1, 'right_margin': 1 },
+\ 'c': { 'pattern': '.\zs--',              'left_margin': 2, 'right_margin': 1, 'ignore_groups': [] },
+\ 'r': { 'pattern': '[≤≡≈∎]',              'left_margin': 2, 'right_margin': 0 },
 \ }
 
 cmap <expr> %% expand('%:p:h') . '/'
@@ -400,6 +417,7 @@ nnoremap <silent> <C-c> :copen<CR>
 
 " Buffer list
 nnoremap gb :ls<CR>:b<Space>
+" nnoremap gb :Telescope buffers<CR>
 
 
 
@@ -531,7 +549,9 @@ else
 endif
 
 set guioptions=ac
-colo phd
+set background=dark
+colo boa
+" colo PaperColor
 " set background=light
 
 " Rainbow colored parentheses
@@ -624,37 +644,70 @@ function! AddHsPragma(kind, more)
     normal `s
 endfunction
 
-au BufRead,BufNewFile *.agda call AgdaFiletype()
+au BufReadPre *.agda call AgdaFiletype()
+au BufReadPre *.lagda* call AgdaFiletype()
 au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
 
 function! AgdaFiletype()
-    imap == <space>\==<space>
-    imap -= <space>\to<space>
-    inoremap )_ <space>=><space>
-    imap 0- <space>\to<space>
-    inoremap =- <space><-<space>
-    inoremap -0 <space><-<space>
-    imap \step \==\< ? \><CR><space><space>?
-    imap \sstep \~~\< ? \><CR><space><space>?
+    inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
+
+    call cornelis#bind_input("ne", "≠")
+    call cornelis#bind_input("neq", "≢")
+    call cornelis#bind_input("num", "↥")
+    call cornelis#bind_input("den", "↧ₙ")
+    call cornelis#bind_input("-p", "⟶")
+    call cornelis#bind_input(".0", "□")
+    call cornelis#bind_input(".1", "∙")
+    call cornelis#bind_input(".2", "⠢")
+    call cornelis#bind_input(".3", "⋱")
+    call cornelis#bind_input(".4", "⠭")
+    call cornelis#bind_input(".5", "⁙")
+    call cornelis#bind_input(".6", "⠿")
+
+
+    " imap <buffer> == <space>\==<space>
+    imap <buffer> -= <space>\to<space>
+    imap <buffer> )_ <space>\=><space>
+    imap <buffer> \cong cong (λ \Gf \to ?) ?
+    imap <buffer> \begin begin<CR><tab>?<CR><BS>\step<CR><BS>\qed
+    imap <buffer> 0- <space>\to<space>
+    inoremap <buffer> =- <space><-<space>
+    inoremap <buffer> -0 <space><-<space>
+    " inoremap <buffer> ? {!  !}<left><left><left>
+    imap <buffer> \step \==\< ? \><CR><space><space>?
+    imap <buffer> \sstep \~~\< ? \><CR><space><space>?
     nnoremap <buffer> <leader>l :CornelisLoad<CR>
     nnoremap <buffer> zl :CornelisLoad<CR>
     nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS", "--")<CR>
     nnoremap <buffer> <leader>r :CornelisRefine<CR>
     nnoremap <buffer> <leader>d :CornelisMakeCase<CR>
+    nnoremap <buffer> <leader>h :CornelisQuestionToMeta<CR>
+    nnoremap <buffer> <C-A>     :CornelisInc<CR>
+    nnoremap <buffer> <C-X>     :CornelisDec<CR>
     " nnoremap <buffer> <leader>e :AgdaContext<CR>
     " nnoremap <buffer> <leader>h :AgdaHelperFun<CR>
-    nnoremap <buffer> <leader>, :CornelisTypeContext<CR>
+    nnoremap <buffer> <leader>, :CornelisTypeContext Simplified<CR>
+    nnoremap <buffer> <leader><leader>, :CornelisTypeContext AsIs<CR>
+    nnoremap <buffer> <leader><leader><leader>, :CornelisTypeContext Normalised<CR>
+    nnoremap <buffer> <leader>. :CornelisTypeContextInfer Simplified<CR>
+    nnoremap <buffer> <leader><leader>. :CornelisTypeContextInfer AsIs<CR>
+    nnoremap <buffer> <leader><leader><leader>. :CornelisTypeContextInfer Normalised<CR>
     " nnoremap <buffer> <leader>x :AgdaCompute<CR>
-    nnoremap <buffer> <leader>n :CornelisSolve<CR>
+    nnoremap <buffer> <leader>n :CornelisSolve Simplified<CR>
+    nnoremap <buffer> <leader><leader>n :CornelisSolve AsIs<CR>
+    nnoremap <buffer> <leader><leader><leader>n :CornelisSolve Normalised<CR>
+    nnoremap <buffer> <leader>N :CornelisAuto<CR>
     nnoremap <buffer> gd :CornelisGoToDefinition<CR>
     nnoremap <buffer> [/ :CornelisPrevGoal<CR>
     nnoremap <buffer> ]/ :CornelisNextGoal<CR>
     nnoremap <buffer> ch cl{!  !}<ESC>:w<CR>hh
     nnoremap <buffer> <leader>m yyp0f:C= ?<esc>:w<CR>$
+
 endfunction
 
 
 function! HaskellFiletype()
+    nnoremap <buffer> <leader>m yyp0f:C= _<esc>:w<CR>$
     " set formatprg=stylish-haskell
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
@@ -662,20 +715,23 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader>o :call AddHsPragma("OPTIONS_GHC", "-")<CR>
     " setlocal formatprg=floskell
 
-    nmap <silent> [g <Plug>(coc-diagnostic-prev)
-    nmap <silent> ]g <Plug>(coc-diagnostic-next)
-    nmap <silent> gd <Plug>(coc-definition)
+    inoremap <buffer> <localleader>[[ ⟦
+    inoremap <buffer> <localleader>]] ⟧
 
-    nnoremap <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
-    nnoremap <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
+    nmap <buffer> <silent> [g <Plug>(coc-diagnostic-prev)
+    nmap <buffer> <silent> ]g <Plug>(coc-diagnostic-next)
+    nmap <buffer> <silent> gd <Plug>(coc-definition)
 
-    syntax match haskellKeyword "/\\/ conceal cchar=λ"
-    syntax match haskellKeyword "/ \zs\.\ze / conceal cchar=∙"
-    syntax match haskellKeyword "/\zs-\ze>/ conceal cchar=─"
-    syntax match haskellKeyword "/>/ conceal cchar=►"
-    syntax match haskellKeyword "/\// conceal cchar=÷"
+    nnoremap <buffer> <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
+    nnoremap <buffer> <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
 
-    " syntax match haskellKeyword /\zs=\ze>/ conceal cchar=≍
+    syntax match haskellKeyword "/\\/ conceal cchar=Î»"
+    syntax match haskellKeyword "/ \zs\.\ze / conceal cchar=â"
+    syntax match haskellKeyword "/\zs-\ze>/ conceal cchar=â"
+    syntax match haskellKeyword "/>/ conceal cchar=âº"
+    syntax match haskellKeyword "/\// conceal cchar=Ã·"
+
+    " syntax match haskellKeyword /\zs=\ze>/ conceal cchar=â
     hi clear Conceal
     setlocal conceallevel=2
     setlocal concealcursor=nvic
@@ -684,13 +740,13 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader>pf V:! pointfree "`cat`"<CR>==
 
     " Easy-to-type haskell digraphs
-    inoremap ,. <space>~><space>
-    inoremap -= <space>-><space>
-    inoremap 0- <space>-><space>
-    inoremap =- <space><-<space>
-    inoremap -0 <space><-<space>
-    inoremap _+ <space>=><space>
-    inoremap )_ <space>=><space>
+    inoremap <buffer> ,. <space>~><space>
+    inoremap <buffer> -= <space>-><space>
+    inoremap <buffer> 0- <space>-><space>
+    inoremap <buffer> =- <space><-<space>
+    inoremap <buffer> -0 <space><-<space>
+    inoremap <buffer> _+ <space>=><space>
+    inoremap <buffer> )_ <space>=><space>
 
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
@@ -708,10 +764,10 @@ function! HaskellFiletype()
     nnoremap <silent><buffer> <leader>si magg/^import<CR>vip:EasyAlign q<CR>gv:sort /.*\%18v/<CR>:noh<CR>`a
 
     " Better syntax highlighting
-    syntax keyword haskellTodo showTrace error undefined traceChanges unsafePerformIO fromJust unsafeCoerce trace
+    syntax keyword error undefined unsafePerformIO fromJust unsafeCoerce read
 
-    syntax keyword haskellKeyword when unless flip const id maybe fmap map pure return sequence fst snd curry uncurry show read view set first second toS either forM_ mapM_ forM mapM join mempty mappend mconcat mzero fix traverse traverse_
-    syntax keyword haskellPragma ap ask filter foldl foldr not negate abs fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile lookup zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust makePrisms makeLenses get put local liftIO def runReader runState runReaderT runStateT runWriter runWriterT fromEnum toEnum subtract fromIntegral forM lift liftM liftM2 liftM3 liftM4 liftM5 uncons minBound maxBound runIdentity coiter coiterT extract unwrap liftF runFree cata ana forall evalStateT execStateT evalState runState Just Nothing Left Right
+    syntax keyword haskellKeyword when unless flip const id maybe fmap pure fst snd curry uncurry show first second either for_ join mempty mappend mconcat asum empty mzero traverse traverse_
+    syntax keyword haskellPragma ap ask filter foldl foldr not negate fromInteger div mod toInteger round truncate ceiling floor null length elem head tail any all concat and or take drop takeWhile dropWhile zip zipWith lines words unlines unwords putStrLn print getChar getLine readFile writeFile isJust get put local liftIO runReader runState runReaderT runStateT runWriter runWriterT subtract fromIntegral lift runIdentity extract Just Nothing Left Right
     syntax match haskellIdentifier /\v(S|M)\.(singleton|empty|insert|contains)/
     syntax match haskellIdentifier /\vT\.(pack|unpack)/
 
@@ -720,23 +776,25 @@ function! HaskellFiletype()
     syntax keyword haskellBottom DemoteRep Proxy Type Typeable
     syntax keyword haskellKeyword m
 
-    nnoremap <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
-    nnoremap <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
-    nnoremap <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
-    nnoremap <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
-    nnoremap <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
+    nnoremap <buffer> <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
+    nnoremap <buffer> <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
+    nnoremap <buffer> <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
+    nnoremap <buffer> <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
+    nnoremap <buffer> <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
 endfunction
 
 " Set filetypes
 " autocmd BufReadPre,BufNewFile * let b:did_ftplugin = 1
 au BufRead,BufNewFile *.db setfiletype db
-au BufRead,BufNewFile *.md call MarkdownFiletype()
+" au BufRead,BufNewFile *.md call MarkdownFiletype()
 au BufRead,BufNewFile *.markdown call MarkdownFiletype()
 au BufRead,BufNewFile *.hs call HaskellFiletype()
 autocmd FileType cpp setlocal commentstring=//\ %s
 
 
 syntax on
+
+let g:did_load_filetypes = 1
 filetype plugin indent on
 
 " Markdown settings
@@ -775,7 +833,7 @@ set incsearch
 set laststatus=2
 set nolazyredraw
 set list
-set listchars="tab:��,trail:�"
+set listchars="tab:»·,trail:·"
 set matchtime=3
 set modeline
 set modelines=2
@@ -997,4 +1055,17 @@ function! s:show_documentation()
 endfunction
 
 let g:ctrlp_working_path_mode = 'r'
+
+let g:neovide_cursor_vfx_mode = "ripple"
+
+let g:werewolf_day_start = 8
+let g:werewolf_day_end = 17
+let g:werewolf_day_themes = ['PaperColor']
+let g:werewolf_night_themes = ['boa']
+
+
+
+
+nnoremap <leader>ut yypVr=<esc>o<cr><esc>
+nnoremap <leader>us o<cr>----<esc>o<cr><esc>
 

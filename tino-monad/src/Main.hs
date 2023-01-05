@@ -46,7 +46,7 @@ import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
 import           XMonad.Util.Hacks
-import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput)
+import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput, runInTerm)
 import           XMonad.Util.Ungrab
 import           XMonad.Util.WindowProperties (getProp32s)
 import           XPcfb
@@ -84,25 +84,25 @@ rofi prompt actions = do
 
 myManageHook :: Query (Endo WindowSet)
 myManageHook = fold
-    [ resource  =? "desktop_window" --> doIgnore
-    , className =? "stalonetray"    --> doIgnore
-    , className =? "anki"           --> doFloat
-    , className =? "Anki"           --> doFloat
-    , className =? "vlc"            --> doFloat
-    , className =? "Spotify"        --> doShift "music"
-    , className =? "Signal"         --> do
+  [ resource  =? "desktop_window" --> doIgnore
+  , className =? "stalonetray"    --> doIgnore
+  , className =? "anki"           --> doFloat
+  , className =? "Anki"           --> doFloat
+  , className =? "vlc"            --> doFloat
+  , className =? "Spotify"        --> doShift "music"
+  , className =? "Signal"         --> do
         doSink
         doShift "comm"
-    , title     =? "New entry"      --> doFloat
-    , role      =? "conversation"   --> doSideFloat SE
-    , kdeOverride                   --> doFloat
-    , do
-        c <- className
-        if c == "zoom"
-           then doFloat >> doF copyToAll
-           else mempty
-    -- , isFullscreen                  --> doFullFloat
-    ]
+  , title     =? "New entry"      --> doFloat
+  , role      =? "conversation"   --> doSideFloat SE
+  , kdeOverride                   --> doFloat
+  , do
+    c <- className
+    if c == "zoom"
+       then doFloat >> doF copyToAll
+       else mempty
+  -- , isFullscreen                  --> doFullFloat
+  ]
 
 
 doSink :: ManageHook
@@ -131,7 +131,7 @@ myLayout =
   -- ||| Mirror (Tall 1 (3/100) (1/2))
   ||| Full
   -- ||| spiral (6/7)
-  -- ||| emptyBSP
+  ||| emptyBSP
     )
   ||| noBorders (fullscreenFull Full)
 
@@ -169,6 +169,8 @@ keysToBind =
   [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
   , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
+  -- , ((modk .|. alt, xK_g),          runInTerm "" "neomutt")
+  , ((modk .|. alt, xK_g),          runOrRaise "evolution" [] $ className =? "Evolution")
   , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
@@ -195,6 +197,11 @@ keysToBind =
   , ((modk, xK_F9), do
       safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
       polybar
+    )
+  , ((modk, xK_F8), do
+      safeSpawn' "xrandr" "--output HDMI-1 --brightness 0.5"
+      safeSpawn' "xrandr" "--output DP-2 --brightness 0.5"
+      safeSpawn' "xrandr" "--output eDP-1 --brightness 0.5"
     )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
@@ -227,7 +234,8 @@ haskellProject = do
       liftIO $ withCurrentDirectory prj $ do
         let target = case prj of
                        "/home/sandy/prj/hls" -> "hls-tactics-plugin:lib"
-                       "/home/sandy/prj/wire-server" -> "spar:lib"
+                       "/home/sandy/prj/marlo" -> "marlo:lib"
+                       "/home/sandy/prj/wire-server" -> "brig:lib"
                        _ -> ""
         safeSpawn "neovide" []
         safeSpawn "xfce4-terminal" ["--command", "tmux new-session 'stack repl " <> target <> "'"]
@@ -256,8 +264,8 @@ mkShortcut ks url =
 
 shortcuts :: [(KeySym, String)]
 shortcuts =
-  [ (xK_g, "https://gmail.com")
-  , (xK_r, "https://reddit.com")
+  [ (xK_r, "https://reddit.com")
+  -- , (xK_g, "https://gmail.com")
   , (xK_f, "https://riot.cofree.coffee")
   , (xK_d, "file:///home/sandy/.rawdog/output.html")
   , (xK_m, "https://maps.google.com")
@@ -265,7 +273,9 @@ shortcuts =
   , (xK_c, "https://calendar.google.com/calendar/u/0/r")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_y, "https://www.beeminder.com/santino/")
+  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1633677481636657623/edit")
+  , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
+  -- , (xK_y, "https://www.beeminder.com/santino/")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]

@@ -24,7 +24,7 @@ nmap <d-7> 7gt
 nmap <d-8> 8gt
 nmap <d-9> 9gt
 
-set guifont=Monospace:h8
+set guifont=Monospace:h9
 " set guifont=PragmataPro\ 16
 set guifont=DejaVu\ Sans\ Mono:14
 " set guifont=Monospace\ 11
