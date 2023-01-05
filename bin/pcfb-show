@@ -20,11 +20,13 @@ for file in files:
   day = map(int, re.split("([0-9]{4})-([0-9]{2})-([0-9]{2})", date)[1:-1])
   day[1] -= 1
 
+  tasks = []
   starts = []
   stops = []
   for line in open(file):
     line = line.rstrip("\n")
     entry = line.split(" ")
+    tasks.append("\"" + entry[0] + "\"")
     starts.append(time2sec(entry[1]))
     if len(entry) == 3:
       stops.append(time2sec(entry[2]))
@@ -32,9 +34,9 @@ for file in files:
       stops.append(time2sec(time.strftime("%H:%M")))
 
   entries.append(
-      "{date: new Date(%d, %d, %d), starts: [%%s], stops: [%%s]}" %
+    "{date: new Date(%d, %d, %d), starts: [%%s], stops: [%%s], tasks: [%%s]}" %
         tuple(day) %
-        (", ".join(starts), ", ".join(stops)))
+        (", ".join(starts), ", ".join(stops), ", ".join(tasks)))
 
 pending = ""
 def write(x):
