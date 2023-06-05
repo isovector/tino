@@ -32,7 +32,7 @@ formfiller.extend({
 })
 
 function _M.pass_show(name)
-    print(string.format("%s show %q", _M.executable, name))
+    -- print(string.format("%s show %q", _M.executable, name))
     local f = io.popen(string.format("%s show %q", _M.executable, name))
     local ret = f:read("*all")
     f:close()
@@ -80,7 +80,7 @@ function _M.parse_field(pass_data, fields)
             local len = string.len(field)
             if string.sub(line, 1, len) == field and string.sub(line, len + 1, len + 1) == ":" then
                 local f = string.gsub(string.sub(line, len + 2), "^ *", "")
-                print("field: %s", f)
+                -- print("field: %s", f)
                 return f
             end
         end
@@ -206,11 +206,11 @@ end
 function _M.build_menu(w, arg, mode)
     local menu = {}
     if arg == nil then
-        print("", w.view.uri)
+        -- print("", w.view.uri)
         for _, entry in ipairs(_M.query_uri(w.view.uri)) do
             local name = entry.username .. " (" .. entry.domain .. ")"
             local t = { name, name = name, id = entry.id, domain = entry.domain, mode = mode }
-            print("inserting " .. dump(t))
+            -- print("inserting " .. dump(t))
             table.insert(menu, t)
         end
     else
@@ -241,10 +241,10 @@ modes.new_mode("pass-menu", {
     enter = function (w, menu)
         local rows = { { "Pass", title = true } }
         for _, m in ipairs(menu) do
-            print(dump(m))
+            -- print(dump(m))
             table.insert(rows, m)
         end
-        print(dump(rows))
+        -- print(dump(rows))
         w.menu:build(rows)
     end,
     leave = function (w)
@@ -256,7 +256,7 @@ modes.add_binds("pass-menu", lousy.util.table.join({
     { "<Return>", "Select pass profile.", function (w)
         local row = w.menu:get()
         w:set_mode()
-        print("got row " .. dump(row))
+        -- print("got row " .. dump(row))
         if row.mode == _M.MODE_SHOW then
             _M.show(w, row.id)
         elseif row.mode == _M.MODE_FILL then
