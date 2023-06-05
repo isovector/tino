@@ -7,6 +7,7 @@ import qualified Codec.Binary.UTF8.String as UTF8
 import           Control.Exception
 import           Control.Monad
 import           Data.Foldable
+import           Data.IORef
 import           Data.List (sort)
 import           Data.Maybe (fromJust)
 import           Data.Monoid (Endo (..), All(..))
@@ -24,6 +25,7 @@ import           System.IO.Capture (capture)
 import           System.Process (readProcessWithExitCode, readProcess)
 import           XMonad hiding (getDirectories)
 import           XMonad.Actions.CopyWindow (copyToAll)
+import           XMonad.Actions.CycleWS
 import           XMonad.Actions.Search hiding (Query)
 import           XMonad.Actions.WindowGo (raiseMaybe)
 import           XMonad.Actions.WorkspaceNames
@@ -101,7 +103,7 @@ myManageHook = fold
     if c == "zoom"
        then doFloat >> doF copyToAll
        else mempty
-  -- , isFullscreen                  --> doFullFloat
+  , isFullscreen                  --> doFullFloat
   ]
 
 
@@ -147,6 +149,9 @@ musk = mod3Mask
 modk :: KeyMask
 modk = mod4Mask
 
+ctrlk :: KeyMask
+ctrlk = controlMask
+
 keysToUnbind :: [(KeyMask, KeySym)]
 keysToUnbind =
   [ (modk, xK_p)
@@ -164,8 +169,8 @@ safeSpawn' p = safeSpawn p . words
 polybar :: X ()
 polybar = pure () -- safeSpawn' "/home/sandy/.tino/bin/tino" "bar"
 
-keysToBind :: [((KeyMask, KeySym), X ())]
-keysToBind =
+keysToBind :: IORef Bool -> [((KeyMask, KeySym), X ())]
+keysToBind ref =
   [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
   , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
@@ -183,46 +188,60 @@ keysToBind =
   , ((modk .|. shiftMask, xK_q),    kill)
   , ((modk, xK_p),                  safeSpawnProg "scrot")
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
-  , ((0, xF86XK_AudioRaiseVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
-  , ((0, xF86XK_AudioLowerVolume),  safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
-  , ((0, xF86XK_MonBrightnessDown), safeSpawn' "/home/sandy/.tino/bin/backlight" "-10")
-  , ((0, xF86XK_MonBrightnessUp),   safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
+  , ((ctrlk, xK_F3),  safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
+  , ((ctrlk, xK_F2),  safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
+  , ((ctrlk, xK_F5),  safeSpawn' "/home/sandy/.tino/bin/backlight" "-10")
+  , ((ctrlk, xK_F6),  safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
-      safeSpawn' "xrandr" "--output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-2 --mode 1920x1080 --left-of HDMI-1 --rotate left"
+      safeSpawn' "xrandr" "--output HDMI1 --mode 1920x1080 --left-of eDP1 --output DP2 --mode 1920x1080 --left-of HDMI1 --rotate left"
       feh
       polybar
     )
   , ((modk, xK_F9), do
-      safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
+      safeSpawn' "xrandr" "--output DP2 --off --output HDMI1 --off"
       polybar
     )
   , ((modk, xK_F8), do
-      safeSpawn' "xrandr" "--output HDMI-1 --brightness 0.5"
-      safeSpawn' "xrandr" "--output DP-2 --brightness 0.5"
-      safeSpawn' "xrandr" "--output eDP-1 --brightness 0.5"
+      safeSpawn' "xrandr" "--output HDMI1 --brightness 0.5"
+      safeSpawn' "xrandr" "--output DP2 --brightness 0.5"
+      safeSpawn' "xrandr" "--output eDP1 --brightness 0.5"
     )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
-  , ((modk, xK_Left),               liftIO $ setDeskColor 40 0 40)
-  , ((modk, xK_Right),              liftIO $ setDeskColor 60 20 0)
-  , ((modk, xK_Down),               liftIO $ setDeskColor 0 0 0)
-  , ((modk, xK_Up),                 liftIO $ setDeskColor 0 0 80)
+  -- , ((modk, xK_Left),               liftIO $ setDeskColor 40 0 40)
+  -- , ((modk, xK_Right),              liftIO $ setDeskColor 60 20 0)
+  -- , ((modk, xK_Down),               liftIO $ setDeskColor 0 0 0)
+  -- , ((modk, xK_Up),                 liftIO $ setDeskColor 0 0 80)
   , ((modk, xK_v),                  safeSpawn' "/home/sandy/.tino/bin/tino" "pcfb")
   , ((modk, xK_bracketleft),        liftIO pcfbOpen)
   , ((modk, xK_bracketright),       liftIO pcfbClose)
-  , ((modk .|. controlMask, xK_l),  safeSpawn' "dm-tool" "lock")
-  , ((modk .|. controlMask, xK_h),  safeSpawn' "systemctl" "suspend")
-  , ((modk .|. controlMask, xK_f),  withFocused $ windows . W.sink)
+  , ((modk .|. ctrlk, xK_l),  safeSpawn' "dm-tool" "lock")
+  , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
+  , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
+  -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
   , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotify")
   , ((0, xF86XK_AudioPrev),         safeSpawn' "playerctl" "previous --player=spotify")
   , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotify")
   , ((0, xF86XK_AudioNext),         safeSpawn' "playerctl" "next --player=spotify")
   , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
   , ((0, xF86XK_AudioPlay),         safeSpawn' "playerctl" "play-pause --player=spotify")
+  -- seems silly but my screens are backwards from their physical setup
+  , ((modk, xK_Left),                nextScreen)
+  , ((modk, xK_Right),               prevScreen)
+  , ((modk .|. shiftMask, xK_Left),  shiftNextScreen >> nextScreen)
+  , ((modk .|. shiftMask, xK_Right), shiftPrevScreen >> prevScreen)
+  , ((modk .|. alt .|. ctrlk, xK_k), hass "homeassistant.toggle" "entity_id=switch.kitchen_light")
+  , ((modk .|. alt .|. ctrlk, xK_l), hass "homeassistant.toggle" "entity_id=light.living_room_lights")
   ] ++ fmap (uncurry mkShortcut) shortcuts
+
+hass :: String -> String -> X ()
+hass service args =
+  safeSpawn'
+    "hass-cli" $
+    "--token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NGY5MDVhZGU3Mjg0ZDY3YWMyYjlhNWJjMGQ0MzJkZSIsImlhdCI6MTY3NzExMTY5NCwiZXhwIjoxOTkyNDcxNjk0fQ.I3Ble7B9lRIONfPmHb42TKr0OjcITzzczZ7Elk0B4Pw -s http://192.168.1.2:8123 service call " <> service <> " --arguments " <> args
 
 
 haskellProject :: X ()
@@ -260,7 +279,7 @@ myStatusBar = mconcat
 
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
 mkShortcut ks url =
-  ((modk .|. alt, ks), safeSpawn' "xdg-open" url)
+  ((modk .|. alt, ks), safeSpawn' "luakit" url)
 
 shortcuts :: [(KeySym, String)]
 shortcuts =
@@ -273,9 +292,10 @@ shortcuts =
   , (xK_c, "https://calendar.google.com/calendar/u/0/r")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1633677481636657623/edit")
+  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1731486768303307536/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
-  -- , (xK_y, "https://www.beeminder.com/santino/")
+  , (xK_t, "https://www.rememberthemilk.com/app/#all")
+  , (xK_a, "http://192.168.1.2:8123/")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -285,12 +305,18 @@ buttonsToUnbind =
   , (modk, button3)
   ]
 
-buttonsToBind :: [((KeyMask, Button), Window -> X ())]
-buttonsToBind =
-  [ ((alt, button1),  \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
-  , ((alt, button2),  windows . (W.shiftMaster .) . W.focusWindow)
-  , ((alt, button3),  \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
-  , ((modk, button3), \w -> focus w >> withFocused (windows . W.sink))
+onlyWhenIORef :: IORef Bool -> X () -> X ()
+onlyWhenIORef ref m = do
+  liftIO (readIORef ref) >>= \case
+    True -> m
+    False -> pure ()
+
+buttonsToBind :: IORef Bool -> [((KeyMask, Button), Window -> X ())]
+buttonsToBind ioref =
+  [ ((alt, button1),  \w -> onlyWhenIORef ioref $ focus w >> mouseMoveWindow w >> windows W.shiftMaster)
+  , ((alt, button2),  \w -> onlyWhenIORef ioref $ windows . (W.shiftMaster .) $ W.focusWindow w)
+  , ((alt, button3),  \w -> onlyWhenIORef ioref $ focus w >> mouseResizeWindow w >> windows W.shiftMaster)
+  , ((modk, button3), \w -> onlyWhenIORef ioref $ focus w >> withFocused (windows . W.sink))
   ]
 
 kdeOverride :: Query Bool
@@ -305,6 +331,7 @@ feh =
 
 main :: IO ()
 main = do
+  mouseToggleIORef <- newIORef True
 
   setCurrentDirectory "/home/sandy"
   let space = 5
@@ -320,6 +347,7 @@ main = do
     , modMask = modk
     , startupHook = setWMName "LG3D" <> feh <> docksStartupHook
     , layoutHook  = avoidStruts $ smartBorders myLayout
+    , focusFollowsMouse = True
     , manageHook  = mconcat [ manageDocks
                             , myManageHook
                             ]
@@ -330,9 +358,9 @@ main = do
         , windowedFullscreenFixEventHook
         ]
     } `removeKeys`              keysToUnbind
-      `additionalKeys`          keysToBind
+      `additionalKeys`          (keysToBind mouseToggleIORef)
       `removeMouseBindings`     buttonsToUnbind
-      `additionalMouseBindings` buttonsToBind
+      `additionalMouseBindings` (buttonsToBind mouseToggleIORef)
 
 
 setTransparentHook :: Event -> X All

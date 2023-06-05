@@ -10,4 +10,5 @@ export VISUAL="vim"
 export PAGER="less"
 
 export PYTHONPATH=$PYTHONPATH:/var/lib
+export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 

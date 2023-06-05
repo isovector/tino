@@ -1,0 +1,8 @@
+wire 08:32 10:08
+research 10:34 10:54
+wingman 11:00 11:36
+research 11:48 11:48
+wire 11:48 12:17
+wire 12:29 13:02
+hls 13:20 14:08
+podcast 15:09

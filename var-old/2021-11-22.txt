@@ -1,0 +1,12 @@
+planning 08:32 09:14
+book 09:32 10:03
+book 10:07 10:34
+laundry 10:35 10:47
+bank 10:47 11:25
+laundry 11:33 11:35
+cooking 11:35 11:58
+correspondence 11:58 12:18
+book 12:22 12:35
+polysemy 12:35 14:26
+laundry 14:29 14:31
+fitness 14:45 15:15

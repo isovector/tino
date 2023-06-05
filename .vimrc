@@ -1,8 +1,8 @@
 autocmd!
 set nocompatible
 
-" set guifont=Source\ Code\ Pro:h9
-set guifont=Hack:h8
+set guifont=Source\ Code\ Pro:h7
+" set guifont=Hack:h8
 
 if !has('nvim')
   set shell=/usr/bin/zsh\ -l
@@ -78,6 +78,7 @@ Plug 'rstacruz/sparkup'
 " Plug 'derekelkins/agda-vim'
 " Plug 'ashinkarov/nvim-agda'
 Plug 'tikhomirov/vim-glsl'
+Plug 'zhengguan/Smallhammer'
 
 
 " Colors
@@ -106,7 +107,7 @@ Plug 'jonstoler/werewolf.vim'
 
 " Textobjs
 Plug 'tmhedberg/matchit'
-Plug 'tpope/vim-surround'
+Plug 'pilgrimlyieu/vim-surround'
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-syntax'
 " Plug 'Lokaltog/vim-easymotion'
@@ -134,6 +135,7 @@ Plug 'rakr/vim-one'
 
 Plug 'junegunn/limelight.vim'
 Plug 'junegunn/goyo.vim'
+Plug 'smjonas/live-command.nvim'
 
 " let g:cornelis_max_size = 19
 " let g:cornelis_split_direction = 'Vertical'
@@ -369,7 +371,7 @@ let g:easy_align_delimiters = {
 \ '.': { 'pattern': '\.',                  'left_margin': 1, 'right_margin': 1 },
 \ '>': { 'pattern': '->\|→',               'left_margin': 1, 'right_margin': 1 },
 \ 'p': { 'pattern': '¿¿',                  'left_margin': 1, 'right_margin': 1 },
-\ ':': { 'pattern': '::\|∷',               'left_margin': 1, 'right_margin': 1 },
+\ ':': { 'pattern': '::\|∷\|:',               'left_margin': 1, 'right_margin': 1 },
 \ '@': { 'pattern': '@',                   'left_margin': 1, 'right_margin': 0 },
 \ '$': { 'pattern': '\$',                  'left_margin': 1, 'right_margin': 1 },
 \ '~': { 'pattern': '\.\~',                'left_margin': 1, 'right_margin': 1 },
@@ -427,7 +429,7 @@ nnoremap gb :ls<CR>:b<Space>
 function! SmartWordSearch(dir)
   let hlsearch = &hlsearch
   let search = @/
-  let @/ = "\\v<|\\u|_\\zs|\\s+\\zs\\S"
+  let @/ = "\\v<|\\u|[_.-]\\zs|\\s+\\zs\\S"
   execute "normal! " . a:dir
   let @/ = search
   let &hlsearch = hlsearch
@@ -549,9 +551,8 @@ else
 endif
 
 set guioptions=ac
-set background=dark
-colo boa
-" colo PaperColor
+set background=light
+colo PaperColor
 " set background=light
 
 " Rainbow colored parentheses
@@ -645,13 +646,27 @@ function! AddHsPragma(kind, more)
 endfunction
 
 au BufReadPre *.agda call AgdaFiletype()
-au BufReadPre *.lagda* call AgdaFiletype()
+au BufReadPre *.lagda.md call AgdaFiletype()
 au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
 
 function! AgdaFiletype()
+    setlocal nospell
     inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
-
+    set cc=65,81
+    let b:surround_104="{! \r !}"
+    let b:surround_112="{-# \r #-}"
+    call cornelis#bind_input("alg", "…algebra…")
+    call cornelis#bind_input("via", "…via…")
+    call cornelis#bind_input("...", "…")
+    call cornelis#bind_input("mto", "↦")
+    call cornelis#bind_input("two", "⇉")
+    call cornelis#bind_input("sqv", "▯")
+    call cornelis#bind_input("^+", "⁺")
+    call cornelis#bind_input("imp", "⊃")
+    call cornelis#bind_input("inj", "↪")
     call cornelis#bind_input("ne", "≠")
+    call cornelis#bind_input("iso", "↔")
+    call cornelis#bind_input("iff", "↔")
     call cornelis#bind_input("neq", "≢")
     call cornelis#bind_input("num", "↥")
     call cornelis#bind_input("den", "↧ₙ")
@@ -707,7 +722,9 @@ endfunction
 
 
 function! HaskellFiletype()
-    nnoremap <buffer> <leader>m yyp0f:C= _<esc>:w<CR>$
+    let b:surround_112="{-# \r #-}"
+
+    nnoremap <buffer> <leader>m yyp0f:C= _<esc>
     " set formatprg=stylish-haskell
     nnoremap <buffer> <F1> :Hoogle<space>
     nnoremap <buffer> <leader>h :Hoogle<space>
@@ -1059,13 +1076,44 @@ let g:ctrlp_working_path_mode = 'r'
 let g:neovide_cursor_vfx_mode = "ripple"
 
 let g:werewolf_day_start = 8
-let g:werewolf_day_end = 17
+let g:werewolf_day_end = 23
 let g:werewolf_day_themes = ['PaperColor']
-let g:werewolf_night_themes = ['boa']
+let g:werewolf_night_themes = ['PaperColor']
 
+nnoremap J :set operatorfunc=Joinoperator<CR>g@
+nnoremap JJ J
+nnoremap gJ :set operatorfunc=GJoinoperator<CR>g@
+onoremap J j
+func! Joinoperator(submode)
+        '[,']join
+endfunc
+func! GJoinoperator(submode)
+        '[,']join!
+endfunc
 
 
 
 nnoremap <leader>ut yypVr=<esc>o<cr><esc>
 nnoremap <leader>us o<cr>----<esc>o<cr><esc>
+
+
+function! DoCombyMatch(cmd)
+  let args = map(split(a:cmd, '/'), {pos,val -> shellescape(val)})
+  let comby = "comby -match-only -ripgrep " . shellescape("--ignore -g *." . expand("%:e")) .  " " . args[0] . " ''"
+  echom comby
+  cexpr system(comby)
+endfunc
+
+function! DoCombySubst(cmd)
+  let args = map(split(a:cmd, '/'), {pos,val -> shellescape(val)})
+  let comby = "comby -stdin -stdout -matcher ." . expand("%:e") . " " . args[0] . " " . args[1]
+  let cmd = "norm! :0,$ !" . comby . "\<CR>"
+  norm! ms
+  execute cmd
+  norm! `s
+endfunc
+
+command! -nargs=1 CombySubst call DoCombySubst(<q-args>)
+
+command! -nargs=1 CombyGrep call DoCombyMatch(<q-args>)
 

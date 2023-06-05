@@ -1,0 +1,7 @@
+paper 00:00 00:08
+paper 00:08 00:34
+math 09:45 11:20
+mentoring 12:00 13:00
+research 13:32 13:52
+mentoring 14:00 15:00
+concat 15:00 16:00

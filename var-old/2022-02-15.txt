@@ -1,0 +1,9 @@
+paper 09:02 10:59
+wire 12:15 12:40
+math 14:00 15:13
+paper 15:30 15:58
+music 15:59 16:13
+research 16:13 16:18
+music 16:18 17:17
+research 17:18 17:30
+paper 17:52 18:40

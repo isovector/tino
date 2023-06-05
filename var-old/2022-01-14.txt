@@ -1,0 +1,6 @@
+podcast 10:00 11:30
+paper 14:00 14:21
+paper 14:22 15:00
+exercise 15:03 15:29
+paper 15:29 16:04
+podcast 16:28 17:26

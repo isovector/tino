@@ -1,0 +1,9 @@
+company 09:07 09:12
+wire 09:12 09:36
+research 09:59 10:22
+cornelis 11:45 14:03
+podcast 14:36 16:33
+yaron 18:15 18:42
+yaron 20:16 20:55
+blogging 21:00 21:20
+blogging 21:46 21:51

@@ -1,0 +1,7 @@
+podcast 09:30 10:07
+podcast 10:07 12:12
+podcast 15:40 15:45
+wire 15:45 16:06
+podcast 16:06 16:15
+wire 16:15 16:46
+podcast 18:32 19:24

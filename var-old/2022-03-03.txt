@@ -1,0 +1,8 @@
+paper 09:00 09:58
+paper 09:59 12:00
+desi 12:00 13:00
+paper 13:00 14:00
+cornelis 14:00 14:34
+meetup 19:03 19:06
+agda 19:06 19:06
+research 19:06 19:15

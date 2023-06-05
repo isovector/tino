@@ -1,0 +1,8 @@
+cleaning 10:02 10:23
+prep 11:21 11:51
+call 11:58 13:01
+run 16:25 18:26
+research 18:26 18:28
+research 18:30 18:31
+research 18:33 18:34
+blarg 20:56
