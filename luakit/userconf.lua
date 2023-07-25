@@ -50,6 +50,13 @@ webview.add_signal("init", function(view)
             return false
         end
     end)
+
+    view:add_signal("new-window-decision", function (v, uri, reason)
+        local w = window.ancestor(v)
+        w:new_tab(uri)
+        return true
+    end)
+
 end)
 
 local theme = require "theme"

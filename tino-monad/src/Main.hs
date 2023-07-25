@@ -16,6 +16,7 @@ import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
 import           Lights
+import           Roledex
 import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
 import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
 import           System.Exit
@@ -37,13 +38,17 @@ import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFl
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Hooks.StatusBar
 import           XMonad.Hooks.StatusBar.PP
-import           XMonad.Layout.Accordion
 import           XMonad.Layout.BinarySpacePartition
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
+import           XMonad.Layout.LayoutBuilder
+import           XMonad.Layout.MagicFocus
 import           XMonad.Layout.NoBorders
 import           XMonad.Layout.Spacing
 import           XMonad.Layout.Spiral
+import           XMonad.Layout.Tabbed
 import           XMonad.Layout.ThreeColumns
+import           XMonad.Layout.Grid
+import           XMonad.Layout.Drawer
 import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
@@ -65,6 +70,7 @@ myWorkspaces =
   , "7"
   , "8"
   , "music"
+  , "command"
   ]
 
 
@@ -124,18 +130,22 @@ role = stringProperty "WM_WINDOW_ROLE"
 name :: Query String
 name = stringProperty "WM_NAME"
 
-
-myLayout =
+myLayout = -- onLeft mydrawer $
     avoidStruts
     ( Tall 1 (3/100) (1/2)
   -- ||| ThreeColMid 1 (3/100) (1/2)
-  ||| Accordion
+  ||| Roledex
+  ||| simpleTabbed
   -- ||| Mirror (Tall 1 (3/100) (1/2))
   ||| Full
   -- ||| spiral (6/7)
   ||| emptyBSP
+  ||| Grid
     )
   ||| noBorders (fullscreenFull Full)
+
+
+mydrawer = simpleDrawer 0.01 0.3 (ClassName "Xfce4-terminal")
 
 runOrRaise :: String -> [String] -> Query Bool -> X ()
 runOrRaise = (raiseMaybe .) . safeSpawn
@@ -168,6 +178,7 @@ safeSpawn' p = safeSpawn p . words
 
 polybar :: X ()
 polybar = pure () -- safeSpawn' "/home/sandy/.tino/bin/tino" "bar"
+
 
 keysToBind :: IORef Bool -> [((KeyMask, KeySym), X ())]
 keysToBind ref =
@@ -211,6 +222,7 @@ keysToBind ref =
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
+  , ((modk, xK_0),                  windows $ W.greedyView "command")
   -- , ((modk, xK_Left),               liftIO $ setDeskColor 40 0 40)
   -- , ((modk, xK_Right),              liftIO $ setDeskColor 60 20 0)
   -- , ((modk, xK_Down),               liftIO $ setDeskColor 0 0 0)
@@ -218,16 +230,18 @@ keysToBind ref =
   , ((modk, xK_v),                  safeSpawn' "/home/sandy/.tino/bin/tino" "pcfb")
   , ((modk, xK_bracketleft),        liftIO pcfbOpen)
   , ((modk, xK_bracketright),       liftIO pcfbClose)
-  , ((modk .|. ctrlk, xK_l),  safeSpawn' "dm-tool" "lock")
+  , ((modk .|. ctrlk, xK_l),  do
+        sid <- withWindowSet $ pure . drop 2 . show . W.screen . W.current
+        spawn $ "eww close powermenu || eww open powermenu --screen " <> sid)
   , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
   -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
-  , ((musk, xK_Left),               safeSpawn' "playerctl" "previous --player=spotify")
-  , ((0, xF86XK_AudioPrev),         safeSpawn' "playerctl" "previous --player=spotify")
-  , ((musk, xK_Right),              safeSpawn' "playerctl" "next --player=spotify")
-  , ((0, xF86XK_AudioNext),         safeSpawn' "playerctl" "next --player=spotify")
-  , ((musk, xK_Down),               safeSpawn' "playerctl" "play-pause --player=spotify")
-  , ((0, xF86XK_AudioPlay),         safeSpawn' "playerctl" "play-pause --player=spotify")
+  , ((musk, xK_Left),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
+  , ((0, xF86XK_AudioPrev),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
+  , ((musk, xK_Right),              safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
+  , ((0, xF86XK_AudioNext),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
+  , ((musk, xK_Down),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
+  , ((0, xF86XK_AudioPlay),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
   -- seems silly but my screens are backwards from their physical setup
   , ((modk, xK_Left),                nextScreen)
   , ((modk, xK_Right),               prevScreen)
@@ -255,6 +269,7 @@ haskellProject = do
                        "/home/sandy/prj/hls" -> "hls-tactics-plugin:lib"
                        "/home/sandy/prj/marlo" -> "marlo:lib"
                        "/home/sandy/prj/wire-server" -> "brig:lib"
+                       "/home/sandy/prj/maniga" -> "maniga:lib"
                        _ -> ""
         safeSpawn "neovide" []
         safeSpawn "xfce4-terminal" ["--command", "tmux new-session 'stack repl " <> target <> "'"]
@@ -265,7 +280,7 @@ myPP = def
   { ppCurrent = xmobarColor "#ff7700" "" . wrap "[" "]"
   , ppTitle   = id
   , ppVisible = wrap "(" ")"
-  , ppLayout  = const ""
+  , ppLayout  = id
   , ppUrgent  = xmobarColor "red" "yellow"
   }
 
@@ -279,20 +294,19 @@ myStatusBar = mconcat
 
 mkShortcut :: MonadIO m => KeySym -> String -> ((KeyMask, KeySym), m ())
 mkShortcut ks url =
-  ((modk .|. alt, ks), safeSpawn' "luakit" url)
+  ((modk .|. alt, ks), safeSpawn' "xdg-open" url)
 
 shortcuts :: [(KeySym, String)]
 shortcuts =
-  [ (xK_r, "https://reddit.com")
-  -- , (xK_g, "https://gmail.com")
-  , (xK_f, "https://riot.cofree.coffee")
+  [
+    (xK_f, "https://riot.cofree.coffee")
   , (xK_d, "file:///home/sandy/.rawdog/output.html")
   , (xK_m, "https://maps.google.com")
   , (xK_h, "https://github.com/pulls")
-  , (xK_c, "https://calendar.google.com/calendar/u/0/r")
+  , (xK_c, "https://mx.sandymaguire.me/SOGo/so/sandy@sandymaguire.me/Calendar/view")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1731486768303307536/edit")
+  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1780048935486880454/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
   , (xK_t, "https://www.rememberthemilk.com/app/#all")
   , (xK_a, "http://192.168.1.2:8123/")
@@ -311,6 +325,7 @@ onlyWhenIORef ref m = do
     True -> m
     False -> pure ()
 
+
 buttonsToBind :: IORef Bool -> [((KeyMask, Button), Window -> X ())]
 buttonsToBind ioref =
   [ ((alt, button1),  \w -> onlyWhenIORef ioref $ focus w >> mouseMoveWindow w >> windows W.shiftMaster)
@@ -327,7 +342,7 @@ kdeOverride = ask >>= \w -> liftX $ do
 
 feh :: X ()
 feh =
-  spawn "feh --bg-center ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg"
+  spawn "feh --bg-fill ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg"
 
 main :: IO ()
 main = do
@@ -356,6 +371,7 @@ main = do
         , dynamicPropertyChange "WM_NAME" myDynamicManageHook
         , docksEventHook
         , windowedFullscreenFixEventHook
+        , followOnlyIf shouldFollow
         ]
     } `removeKeys`              keysToUnbind
       `additionalKeys`          (keysToBind mouseToggleIORef)

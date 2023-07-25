@@ -2,6 +2,10 @@ autocmd!
 set nocompatible
 
 set guifont=Source\ Code\ Pro:h7
+if exists('g:GtkGuiLoaded')
+  call rpcnotify(1, 'Gui', 'Font', 'Source Code Pro 8')
+  call rpcnotify(1, 'Gui', 'Option', 'Tabline', 0)
+endif
 " set guifont=Hack:h8
 
 if !has('nvim')
@@ -23,8 +27,8 @@ let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
 " ------------------------------------------------------------------------------
 call plug#begin('~/.vim/plugged')
 " Development
-Plug 'isovector/ghci.vim'
-Plug 'isovector/cornelis'
+Plug 'isovector/ghci.vim', { 'for': 'haskell' }
+Plug 'isovector/cornelis', { 'for': 'agda' }
 
 " Libraries
 Plug 'vim-scripts/L9'
@@ -33,8 +37,7 @@ Plug 'tomtom/tlib_vim'
 Plug 'MarcWeber/vim-addon-mw-utils'
 Plug 'kana/vim-submode'
 Plug 'vim-scripts/ingo-library'
-Plug 'mattn/webapi-vim'
-Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'Shougo/vimproc'
 
 " Silent
 Plug 'rking/ag.vim'
@@ -43,43 +46,38 @@ Plug 'majutsushi/tagbar'
 Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
 Plug 'ap/vim-buftabline'
-Plug 'Shougo/vimproc'
-Plug 'yssl/QFEnter'
+" Plug 'yssl/QFEnter'
 
 " Navigation
 Plug 'ctrlpvim/ctrlp.vim'
-Plug 'vim-scripts/JumpToLastOccurrence'
-Plug 'christoomey/vim-tmux-navigator'
-Plug 'nvim-lua/plenary.nvim'
-" Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
 
 " Misc
-Plug 'mattn/gist-vim'
 " Plug 'Shougo/neosnippet'
+
+" system clipboard
 Plug 'vim-scripts/tregisters'
+
+" git
 Plug 'tpope/vim-fugitive'
 
-" Formatting
+" block-mode visual
 Plug 'vim-scripts/vis'
-Plug 'godlygeek/tabular'
-Plug 'skwp/greplace.vim'
+
+" snake case to kebab case
 Plug 'tpope/vim-abolish'
+
+" autocomment
 Plug 'tpope/vim-commentary'
+
+" align character columns
 Plug 'junegunn/vim-easy-align'
 "
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
-" Plug 'plasticboy/vim-markdown'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
-" Plug 'jtratner/vim-flavored-markdown'
 Plug 'rstacruz/sparkup'
-" Plug 'derekelkins/agda-vim'
-" Plug 'ashinkarov/nvim-agda'
-Plug 'tikhomirov/vim-glsl'
-Plug 'zhengguan/Smallhammer'
-
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -102,29 +100,23 @@ Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
 Plug 'fielding/vice'
-Plug 'dylanaraps/wal.vim'
-Plug 'jonstoler/werewolf.vim'
 
 " Textobjs
+" expanded %
 Plug 'tmhedberg/matchit'
 Plug 'pilgrimlyieu/vim-surround'
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-syntax'
-" Plug 'Lokaltog/vim-easymotion'
-Plug 'junegunn/vim-after-object'
-Plug 'terryma/vim-expand-region'
+
 Plug 'rbonvall/vim-textobj-latex'
 Plug 'Julian/vim-textobj-variable-segment'
 Plug 'deris/vim-shot-f'
-" Plug 'wellle/targets.vim'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
 
-Plug 'junkblocker/git-time-lapse'
-Plug 'norcalli/snippets.nvim'
+Plug 'neoclide/coc.nvim', {'for': 'haskell', 'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
-Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
-
+" cornelis
 Plug 'neovimhaskell/nvim-hs.vim'
 Plug 'liuchengxu/vim-which-key'
 
@@ -132,9 +124,6 @@ Plug 'liuchengxu/vim-which-key'
 Plug 'NLKNguyen/papercolor-theme'
 Plug 'rakr/vim-one'
 
-
-Plug 'junegunn/limelight.vim'
-Plug 'junegunn/goyo.vim'
 Plug 'smjonas/live-command.nvim'
 
 " let g:cornelis_max_size = 19
@@ -195,7 +184,7 @@ nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **
 nnoremap <silent> <leader>sgt :! (cd `git rev-parse --show-toplevel`; hasktags compiler/**/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 function! MkHsModuleName(dir, path)
-  return substitute(a:path[strlen(a:dir . "src/"):-4], '/', '.', '')
+  return substitute(a:path[], '/', '.', '')
 endfunction
 
 function! HsModuleName()
@@ -261,6 +250,7 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
+nnoremap <leader>ek :e ~/.config/luakit/userconf.lua<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -364,7 +354,7 @@ nnoremap zk moO <c-u><esc>`o
 " Things we can align on
 let g:easy_align_delimiters = {
 \ '[': { 'pattern': '[[\]]',               'left_margin': 0, 'right_margin': 0 },
-\ '(': { 'pattern': '[()]',                'left_margin': 0, 'right_margin': 0 },
+\ '(': { 'pattern': '[()]',                'left_margin': 2, 'right_margin': 0 },
 \ ']': { 'pattern': '[[\]]',               'left_margin': 1, 'right_margin': 0 },
 \ ')': { 'pattern': '[()]',                'left_margin': 1, 'right_margin': 0 },
 \ '<': { 'pattern': '[<←]',                'left_margin': 1, 'right_margin': 0 },
@@ -522,8 +512,6 @@ augroup line_return
         \ endif
 augroup END
 
-autocmd VimEnter * call after_object#enable('=', ':', '-', '#', ' ')
-
 " Get rid of stupid system files from ctrl-p search
 let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs'
 " let g:ctrlp_by_filename = 1
@@ -535,7 +523,7 @@ let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs'
 if has("gui_running")
     set guitablabel=%-0.12t%M
     set showtabline=2
-    au BufAdd * :RainbowParentheses
+    " au BufAdd * :RainbowParentheses
 
     try
     if g:colors_name ==# "railscasts"
@@ -652,10 +640,12 @@ au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
 function! AgdaFiletype()
     setlocal nospell
     inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
-    set cc=65,81
+    set cc=71,81
     let b:surround_104="{! \r !}"
     let b:surround_112="{-# \r #-}"
     call cornelis#bind_input("alg", "…algebra…")
+    call cornelis#bind_input("idl", "identityˡ")
+    call cornelis#bind_input("idr", "identityʳ")
     call cornelis#bind_input("via", "…via…")
     call cornelis#bind_input("...", "…")
     call cornelis#bind_input("mto", "↦")
@@ -1076,7 +1066,7 @@ let g:ctrlp_working_path_mode = 'r'
 let g:neovide_cursor_vfx_mode = "ripple"
 
 let g:werewolf_day_start = 8
-let g:werewolf_day_end = 23
+let g:werewolf_day_end = 21
 let g:werewolf_day_themes = ['PaperColor']
 let g:werewolf_night_themes = ['PaperColor']
 

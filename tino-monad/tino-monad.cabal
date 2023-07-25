@@ -17,7 +17,7 @@ cabal-version:       >=1.10
 
 executable tino-monad
   main-is:             Main.hs
-  other-modules: Log, Data.Pcfb, XPcfb, Lights
+  other-modules: Log, Data.Pcfb, XPcfb, Lights, Roledex
   -- other-extensions:
   build-depends:       base >=4.9 && <5, xmonad, xmonad-contrib, X11, filepath, hslogger, mtl, directory, dbus, utf8-string, io-capture, process, time, unix, parsec, serialport
   hs-source-dirs:      src
