@@ -1,11 +1,20 @@
-autocmd!
+" autocmd!
 set nocompatible
 
-set guifont=Source\ Code\ Pro:h7
-if exists('g:GtkGuiLoaded')
-  call rpcnotify(1, 'Gui', 'Font', 'Source Code Pro 8')
-  call rpcnotify(1, 'Gui', 'Option', 'Tabline', 0)
+set rtp +=~/.vim
+
+let output = system("xrandr | grep HDMI-1 | grep disconnected")
+if v:shell_error != 0
+  " hdmi is connected
+  set guifont=Source\ Code\ Pro:h8
+else
+  set guifont=Source\ Code\ Pro:h7
 endif
+
+" if exists('g:GtkGuiLoaded')
+"   call rpcnotify(1, 'Gui', 'Font', 'Source Code Pro 8')
+"   call rpcnotify(1, 'Gui', 'Option', 'Tabline', 0)
+" endif
 " set guifont=Hack:h8
 
 if !has('nvim')
@@ -17,7 +26,6 @@ endif
 " ------------------------------------------------------------------------------
 let $PATH = $PATH . ':' . expand('~/.local/bin')
 let $PATH = $PATH . ':' . expand('~/.cabal/bin')
-let $PATH = $PATH . ':' . expand('~/.stack/programs/x86_64-linux/ghc-7.8.4/bin')
 let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
 
 
@@ -64,7 +72,7 @@ Plug 'tpope/vim-fugitive'
 Plug 'vim-scripts/vis'
 
 " snake case to kebab case
-Plug 'tpope/vim-abolish'
+" Plug 'tpope/vim-abolish'
 
 " autocomment
 Plug 'tpope/vim-commentary'
@@ -78,6 +86,9 @@ Plug 'neovimhaskell/haskell-vim'
 Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'rstacruz/sparkup'
+Plug 'wlangstroth/vim-racket'
+Plug 'derekwyatt/vim-scala'
+Plug 'scalameta/nvim-metals'
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -128,7 +139,6 @@ Plug 'smjonas/live-command.nvim'
 
 " let g:cornelis_max_size = 19
 " let g:cornelis_split_direction = 'Vertical'
-
 call plug#end()
 
 
@@ -154,8 +164,6 @@ nnoremap <leader>sv :vert sb  <BS>
 
 nnoremap <leader>zl :silent! s/-- $> /<cr>:noh<cr>I-- $> <esc>:w<cr>02w
 nnoremap <leader>zr O <c-u>-- $>  <bs>
-
-nnoremap zh :OnlineThesaurusCurrentWord<CR>
 
 nnoremap zC zc
 
@@ -202,7 +210,6 @@ nnoremap <leader>b :Git blame<CR>
 " things i stole from chris penner
 nnoremap c "_c
 
-let g:howdoi_map = '<leader>h'
 let g:vim_markdown_folding_disabled=1
 let g:vim_markdown_conceal=0
 let g:tex_conceal = ""
@@ -222,25 +229,9 @@ nmap <localleader>wb O<ESC>78i-<ESC>gccyyjpk<CR>center<CR>gcc
 " ------------------------------------------------------------------------------
                               " Quick Directories
 " ------------------------------------------------------------------------------
-function! Go()
-  let where = input("go ")
-  let dir = system("~/.tino/bin/tino where " . where)
-  execute ":cd " . dir
-endfunction
-
-function! EditGo()
-  let where = input("edit go ")
-  let where = split(system("~/.tino/bin/tino where " . where), "\n")[0]
-  return ":e " . where . "/"
-endfunction
-nnoremap <expr> <leader>eg EditGo()
-
 nnoremap <leader>cd :cd %:p:h<CR>
 nnoremap <leader>cp :cd ~/prj/
-nnoremap <leader>cj :cd ~/prj/time2jam/<CR>
-nnoremap <leader>cg :call Go()<CR>
 nnoremap <leader>ct :cd ~/.tino/
-nnoremap <leader>cz :cd ~/.tino/zsh/
 
 " ------------------------------------------------------------------------------
                                  " Quick Edits
@@ -250,7 +241,6 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
-nnoremap <leader>ek :e ~/.config/luakit/userconf.lua<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -261,8 +251,6 @@ function! EditPcfbFile()
   let file = strpart(file, 0, len(file) - 1)
   execute ":e ~/.tino/var/" . file . ".txt"
 endfunction
-
-
 
 
 
@@ -438,8 +426,8 @@ function! Reg()
     redraw
 endfunction
 
-noremap <up>    <C-W>-
-noremap <down>  <C-W>+
+" noremap <up>    <C-W>-
+" noremap <down>  <C-W>+
 noremap <left>  3<C-W><
 noremap <right> 3<C-W>>
 
@@ -487,15 +475,11 @@ endfunction
 
 nnoremap <expr> PP SetPasteOver()
 
-nnoremap <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<' . synIDattr(synID(line("."),col("."),0),"name") . "> lo<" . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
-
 
 " ------------------------------------------------------------------------------
                               " System Integration
 " ------------------------------------------------------------------------------
 " Regular copy and paste
-" TODO(sandy): Maybe get rid of this and use the system clipboard?
-vnoremap <C-c> "+yi
 set iminsert=1
 set imsearch=1
 set imcmdline
@@ -637,6 +621,11 @@ au BufReadPre *.agda call AgdaFiletype()
 au BufReadPre *.lagda.md call AgdaFiletype()
 au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
 
+function! ScalaFiletype()
+  inoremap <buffer> -= <space>=><space>
+  inoremap <buffer> 0- <space>=><space>
+endfunction
+
 function! AgdaFiletype()
     setlocal nospell
     inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
@@ -650,6 +639,8 @@ function! AgdaFiletype()
     call cornelis#bind_input("...", "…")
     call cornelis#bind_input("mto", "↦")
     call cornelis#bind_input("two", "⇉")
+    call cornelis#bind_input("sem", "⊨")
+    call cornelis#bind_input("nsem", "⊭")
     call cornelis#bind_input("sqv", "▯")
     call cornelis#bind_input("^+", "⁺")
     call cornelis#bind_input("imp", "⊃")
@@ -708,6 +699,13 @@ function! AgdaFiletype()
     nnoremap <buffer> ch cl{!  !}<ESC>:w<CR>hh
     nnoremap <buffer> <leader>m yyp0f:C= ?<esc>:w<CR>$
 
+endfunction
+
+function! AgdaMarkdownFiletype()
+  call AgdaFiletype()
+  set tw=80
+  set fo+=t
+  set spell
 endfunction
 
 
@@ -987,13 +985,6 @@ nnoremap <silent> <c-l> :call MaybeInsertMode("l")<cr>
 
 endif
 
-function! NewPost()
-  let slug = input("new slug: ")
-  cd ~/prj/sandymaguire.me
-  execute "normal! \<CR>!make newpost\<CR>"
-  execute ":e wip/"  . slug . ".markdown"
-endfunction
-
 
 " COC stuff
 
@@ -1065,11 +1056,6 @@ let g:ctrlp_working_path_mode = 'r'
 
 let g:neovide_cursor_vfx_mode = "ripple"
 
-let g:werewolf_day_start = 8
-let g:werewolf_day_end = 21
-let g:werewolf_day_themes = ['PaperColor']
-let g:werewolf_night_themes = ['PaperColor']
-
 nnoremap J :set operatorfunc=Joinoperator<CR>g@
 nnoremap JJ J
 nnoremap gJ :set operatorfunc=GJoinoperator<CR>g@
@@ -1104,6 +1090,5 @@ function! DoCombySubst(cmd)
 endfunc
 
 command! -nargs=1 CombySubst call DoCombySubst(<q-args>)
-
 command! -nargs=1 CombyGrep call DoCombyMatch(<q-args>)
 

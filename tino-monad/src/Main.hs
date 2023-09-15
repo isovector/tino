@@ -16,7 +16,6 @@ import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
 import           Lights
-import           Roledex
 import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
 import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
 import           System.Exit
@@ -133,14 +132,13 @@ name = stringProperty "WM_NAME"
 myLayout = -- onLeft mydrawer $
     avoidStruts
     ( Tall 1 (3/100) (1/2)
-  -- ||| ThreeColMid 1 (3/100) (1/2)
-  ||| Roledex
-  ||| simpleTabbed
+  ||| ThreeColMid 1 (3/100) (1/2)
+  -- ||| simpleTabbed
   -- ||| Mirror (Tall 1 (3/100) (1/2))
   ||| Full
   -- ||| spiral (6/7)
   ||| emptyBSP
-  ||| Grid
+  -- ||| Grid
     )
   ||| noBorders (fullscreenFull Full)
 
@@ -199,25 +197,27 @@ keysToBind ref =
   , ((modk .|. shiftMask, xK_q),    kill)
   , ((modk, xK_p),                  safeSpawnProg "scrot")
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
-  , ((ctrlk, xK_F3),  safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
-  , ((ctrlk, xK_F2),  safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
-  , ((ctrlk, xK_F5),  safeSpawn' "/home/sandy/.tino/bin/backlight" "-10")
-  , ((ctrlk, xK_F6),  safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
+  , ((ctrlk, xK_F3),               safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
+  , ((ctrlk, xK_F2),               safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
+  , ((ctrlk, xK_F5),               safeSpawn' "/home/sandy/.tino/bin/backlight" "-1")
+  , ((ctrlk .|. shiftMask, xK_F5), safeSpawn' "/home/sandy/.tino/bin/backlight" "-5")
+  , ((ctrlk, xK_F6),               safeSpawn' "/home/sandy/.tino/bin/backlight" "1")
+  , ((ctrlk .|. shiftMask, xK_F6), safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
   , ((modk, xK_F10), do
-      safeSpawn' "xrandr" "--output HDMI1 --mode 1920x1080 --left-of eDP1 --output DP2 --mode 1920x1080 --left-of HDMI1 --rotate left"
+      safeSpawn' "/home/sandy/.tino/bin/external-monitor" ""
       feh
       polybar
     )
   , ((modk, xK_F9), do
-      safeSpawn' "xrandr" "--output DP2 --off --output HDMI1 --off"
+      safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
       polybar
     )
   , ((modk, xK_F8), do
-      safeSpawn' "xrandr" "--output HDMI1 --brightness 0.5"
-      safeSpawn' "xrandr" "--output DP2 --brightness 0.5"
-      safeSpawn' "xrandr" "--output eDP1 --brightness 0.5"
+      safeSpawn' "xrandr" "--output HDMI-1 --brightness 0.5"
+      safeSpawn' "xrandr" "--output DP-2 --brightness 0.5"
+      safeSpawn' "xrandr" "--output eDP-1 --brightness 0.5"
     )
   , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
@@ -236,12 +236,12 @@ keysToBind ref =
   , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
   -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
-  , ((musk, xK_Left),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
-  , ((0, xF86XK_AudioPrev),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
-  , ((musk, xK_Right),              safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
-  , ((0, xF86XK_AudioNext),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
-  , ((musk, xK_Down),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
-  , ((0, xF86XK_AudioPlay),         safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
+  , ((musk, xK_Left),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
+  , ((0, xF86XK_AudioPrev),          safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
+  , ((musk, xK_Right),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
+  , ((0, xF86XK_AudioNext),          safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
+  , ((musk, xK_Down),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
+  , ((0, xF86XK_AudioPlay),          safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "play-pause")
   -- seems silly but my screens are backwards from their physical setup
   , ((modk, xK_Left),                nextScreen)
   , ((modk, xK_Right),               prevScreen)
@@ -306,7 +306,7 @@ shortcuts =
   , (xK_c, "https://mx.sandymaguire.me/SOGo/so/sandy@sandymaguire.me/Calendar/view")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1780048935486880454/edit")
+  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1808331315003652408/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
   , (xK_t, "https://www.rememberthemilk.com/app/#all")
   , (xK_a, "http://192.168.1.2:8123/")
@@ -371,7 +371,7 @@ main = do
         , dynamicPropertyChange "WM_NAME" myDynamicManageHook
         , docksEventHook
         , windowedFullscreenFixEventHook
-        , followOnlyIf shouldFollow
+        -- , followOnlyIf shouldFollow
         ]
     } `removeKeys`              keysToUnbind
       `additionalKeys`          (keysToBind mouseToggleIORef)

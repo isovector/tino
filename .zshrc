@@ -31,5 +31,3 @@ case $TERM in
 esac
 
 [ -f "/home/sandy/.ghcup/env" ] && source "/home/sandy/.ghcup/env" # ghcup-env
-
-eval "$(direnv hook zsh)"

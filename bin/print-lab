@@ -1,0 +1,3 @@
+cat $1 | ssh fmap@remote.cs.ubc.ca lpr -Piccs-308
+# iccs-212-colour
+

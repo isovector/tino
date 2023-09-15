@@ -1,0 +1,9 @@
+#!/usr/bin/bash
+
+
+if xrandr | grep HDMI-1 | grep disconnected &> /dev/null; then
+  xrandr --output DP-2 --mode 1920x1080 --left-of eDP-1
+else
+  xrandr --output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-2 --mode 1920x1080 --left-of HDMI-1 --rotate left
+fi
+
