@@ -632,6 +632,7 @@ function! AgdaFiletype()
     set cc=71,81
     let b:surround_104="{! \r !}"
     let b:surround_112="{-# \r #-}"
+    let b:surround_105="⦃ \r ⦄"
     call cornelis#bind_input("alg", "…algebra…")
     call cornelis#bind_input("idl", "identityˡ")
     call cornelis#bind_input("idr", "identityʳ")
