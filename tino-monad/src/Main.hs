@@ -233,7 +233,7 @@ keysToBind ref =
   , ((modk .|. ctrlk, xK_l),  do
         sid <- withWindowSet $ pure . drop 2 . show . W.screen . W.current
         spawn $ "eww close powermenu || eww open powermenu --screen " <> sid)
-  , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
+  -- , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
   -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
   , ((musk, xK_Left),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
@@ -306,7 +306,7 @@ shortcuts =
   , (xK_c, "https://mx.sandymaguire.me/SOGo/so/sandy@sandymaguire.me/Calendar/view")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1808331315003652408/edit")
+  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1820653622044785115/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
   , (xK_t, "https://www.rememberthemilk.com/app/#all")
   , (xK_a, "http://192.168.1.2:8123/")
