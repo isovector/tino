@@ -247,8 +247,8 @@ keysToBind ref =
   , ((modk, xK_Right),               prevScreen)
   , ((modk .|. shiftMask, xK_Left),  shiftNextScreen >> nextScreen)
   , ((modk .|. shiftMask, xK_Right), shiftPrevScreen >> prevScreen)
-  , ((modk .|. alt .|. ctrlk, xK_k), hass "homeassistant.toggle" "entity_id=switch.kitchen_light")
-  , ((modk .|. alt .|. ctrlk, xK_l), hass "homeassistant.toggle" "entity_id=light.living_room_lights")
+  -- , ((modk .|. alt .|. ctrlk, xK_k), hass "homeassistant.toggle" "entity_id=switch.kitchen_light")
+  -- , ((modk .|. alt .|. ctrlk, xK_l), hass "homeassistant.toggle" "entity_id=light.living_room_lights")
   ] ++ fmap (uncurry mkShortcut) shortcuts
 
 hass :: String -> String -> X ()
@@ -266,9 +266,6 @@ haskellProject = do
     Just prj -> do
       liftIO $ withCurrentDirectory prj $ do
         let target = case prj of
-                       "/home/sandy/prj/hls" -> "hls-tactics-plugin:lib"
-                       "/home/sandy/prj/marlo" -> "marlo:lib"
-                       "/home/sandy/prj/wire-server" -> "brig:lib"
                        "/home/sandy/prj/maniga" -> "maniga:lib"
                        _ -> ""
         safeSpawn "neovide" []
@@ -286,9 +283,9 @@ myPP = def
 
 myStatusBar :: StatusBarConfig
 myStatusBar = mconcat
-  [ statusBarProp "xmobar -x 0" (pure myPP)
-  , statusBarProp "xmobar -x 1" (pure myPP)
-  , statusBarProp "xmobar -x 2" (pure myPP)
+  [ statusBarProp "/usr/local/bin/xmobar -x 0 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
+  , statusBarProp "/usr/local/bin/xmobar -x 1 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
+  , statusBarProp "/usr/local/bin/xmobar -x 2 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
   ]
 
 
