@@ -37,8 +37,11 @@ import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFl
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Hooks.StatusBar
 import           XMonad.Hooks.StatusBar.PP
+import           XMonad.Hooks.WindowSwallowing
 import           XMonad.Layout.BinarySpacePartition
+import           XMonad.Layout.Drawer
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
+import           XMonad.Layout.Grid
 import           XMonad.Layout.LayoutBuilder
 import           XMonad.Layout.MagicFocus
 import           XMonad.Layout.NoBorders
@@ -46,8 +49,6 @@ import           XMonad.Layout.Spacing
 import           XMonad.Layout.Spiral
 import           XMonad.Layout.Tabbed
 import           XMonad.Layout.ThreeColumns
-import           XMonad.Layout.Grid
-import           XMonad.Layout.Drawer
 import           XMonad.Prompt (greenXPConfig, XPConfig(font))
 import qualified XMonad.StackSet as W
 import           XMonad.Util.EZConfig (additionalKeys, removeKeys, additionalMouseBindings, removeMouseBindings)
@@ -91,18 +92,19 @@ rofi prompt actions = do
 
 myManageHook :: Query (Endo WindowSet)
 myManageHook = fold
-  [ resource  =? "desktop_window" --> doIgnore
-  , className =? "stalonetray"    --> doIgnore
-  , className =? "anki"           --> doFloat
-  , className =? "Anki"           --> doFloat
-  , className =? "vlc"            --> doFloat
-  , className =? "Spotify"        --> doShift "music"
-  , className =? "Signal"         --> do
+  [ resource  =? "desktop_window"  --> doIgnore
+  , className =? "stalonetray"     --> doIgnore
+  , className =? "blueman-applet"  --> doIgnore
+  , className =? "anki"            --> doFloat
+  , className =? "Anki"            --> doFloat
+  , className =? "vlc"             --> doFloat
+  , className =? "Spotify"         --> doShift "music"
+  , className =? "Signal"          --> do
         doSink
         doShift "comm"
-  , title     =? "New entry"      --> doFloat
-  , role      =? "conversation"   --> doSideFloat SE
-  , kdeOverride                   --> doFloat
+  , title     =? "New entry"       --> doFloat
+  , role      =? "conversation"    --> doSideFloat SE
+  , kdeOverride                    --> doFloat
   , do
     c <- className
     if c == "zoom"
@@ -183,6 +185,7 @@ keysToBind ref =
   [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
   , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
+  , ((modk, xK_l),                  safeSpawn' "betterlockscreen" "-l")
   -- , ((modk .|. alt, xK_g),          runInTerm "" "neomutt")
   , ((modk .|. alt, xK_g),          runOrRaise "evolution" [] $ className =? "Evolution")
   , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
@@ -191,7 +194,9 @@ keysToBind ref =
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
   , ((modk, xK_e),                  haskellProject)
   , ((modk, xK_backslash),          polybar)
-  , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
+  -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
+  , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/connect-bt" "on")
+  , ((modk .|. shiftMask, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/connect-bt" "off")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
   , ((modk .|. shiftMask, xK_q),    kill)
@@ -199,19 +204,19 @@ keysToBind ref =
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
   , ((ctrlk, xK_F3),               safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
   , ((ctrlk, xK_F2),               safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
-  , ((ctrlk, xK_F5),               safeSpawn' "/home/sandy/.tino/bin/backlight" "-1")
-  , ((ctrlk .|. shiftMask, xK_F5), safeSpawn' "/home/sandy/.tino/bin/backlight" "-5")
-  , ((ctrlk, xK_F6),               safeSpawn' "/home/sandy/.tino/bin/backlight" "1")
-  , ((ctrlk .|. shiftMask, xK_F6), safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
+  , ((0, xF86XK_MonBrightnessDown),               safeSpawn' "/home/sandy/.tino/bin/backlight" "-5")
+  , ((shiftMask, xF86XK_MonBrightnessDown), safeSpawn' "/home/sandy/.tino/bin/backlight" "-15")
+  , ((0, xF86XK_MonBrightnessUp),               safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
+  , ((shiftMask, xF86XK_MonBrightnessUp), safeSpawn' "/home/sandy/.tino/bin/backlight" "15")
   , ((modk .|. shiftMask, xK_h),    sendMessage Shrink)
   , ((modk .|. shiftMask, xK_l),    sendMessage Expand)
-  , ((modk, xK_F10), do
+  , ((modk, xK_F7), do
       safeSpawn' "/home/sandy/.tino/bin/external-monitor" ""
       feh
       polybar
     )
-  , ((modk, xK_F9), do
-      safeSpawn' "xrandr" "--output DP-2 --off --output HDMI-1 --off"
+  , ((modk .|. shiftMask, xK_F7), do
+      safeSpawn' "xrandr" "--output DP-1 --off --output DP-2 --off --output HDMI-1 --off"
       polybar
     )
   , ((modk, xK_F8), do
@@ -219,7 +224,7 @@ keysToBind ref =
       safeSpawn' "xrandr" "--output DP-2 --brightness 0.5"
       safeSpawn' "xrandr" "--output eDP-1 --brightness 0.5"
     )
-  , ((modk, xK_F11),                safeSpawn' "redshift" "-x")
+  , ((modk .|. shiftMask, xK_F12),  safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
   , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
   , ((modk, xK_0),                  windows $ W.greedyView "command")
@@ -233,7 +238,7 @@ keysToBind ref =
   , ((modk .|. ctrlk, xK_l),  do
         sid <- withWindowSet $ pure . drop 2 . show . W.screen . W.current
         spawn $ "eww close powermenu || eww open powermenu --screen " <> sid)
-  -- , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
+  , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
   -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
   , ((musk, xK_Left),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
@@ -368,6 +373,7 @@ main = do
         , dynamicPropertyChange "WM_NAME" myDynamicManageHook
         , docksEventHook
         , windowedFullscreenFixEventHook
+        , swallowEventHook (className =? "Xfce4-terminal") (return True)
         -- , followOnlyIf shouldFollow
         ]
     } `removeKeys`              keysToUnbind

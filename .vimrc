@@ -3,12 +3,12 @@ set nocompatible
 
 set rtp +=~/.vim
 
-let output = system("xrandr | grep HDMI-1 | grep disconnected")
+let output = system("xrandr | grep DP-1 | grep disconnected")
 if v:shell_error != 0
   " hdmi is connected
   set guifont=Source\ Code\ Pro:h8
 else
-  set guifont=Source\ Code\ Pro:h10
+  set guifont=Source\ Code\ Pro:h11
 endif
 
 " if exists('g:GtkGuiLoaded')
@@ -36,7 +36,7 @@ let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
 call plug#begin('~/.vim/plugged')
 " Development
 Plug 'isovector/ghci.vim', { 'for': 'haskell' }
-Plug 'isovector/cornelis', { 'for': 'agda' }
+Plug 'isovector/cornelis'
 
 " Libraries
 Plug 'vim-scripts/L9'

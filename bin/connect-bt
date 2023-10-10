@@ -1,0 +1,9 @@
+#!/bin/bash
+
+MAC_ADD="A8:51:AB:E6:F1:6f"
+
+if [ "$1" == "on" ]; then
+    bluetoothctl connect $MAC_ADD
+elif [ "$1" == "off" ]; then
+    bluetoothctl disconnect $MAC_ADD
+fi
