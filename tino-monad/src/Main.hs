@@ -22,7 +22,7 @@ import           System.Exit
 import           System.FilePath
 import           System.IO (hGetContents, Handle)
 import           System.IO.Capture (capture)
-import           System.Process (readProcessWithExitCode, readProcess)
+import           System.Process (readProcessWithExitCode)
 import           XMonad hiding (getDirectories)
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.CycleWS
@@ -37,7 +37,6 @@ import           XMonad.Hooks.ManageHelpers (doFullFloat, isFullscreen, doSideFl
 import           XMonad.Hooks.SetWMName (setWMName)
 import           XMonad.Hooks.StatusBar
 import           XMonad.Hooks.StatusBar.PP
-import           XMonad.Hooks.WindowSwallowing
 import           XMonad.Layout.BinarySpacePartition
 import           XMonad.Layout.Drawer
 import           XMonad.Layout.Fullscreen hiding (fullscreenEventHook)
@@ -80,6 +79,11 @@ getDirectories fp = liftIO $ do
   let is_dir = fmap (fileTypeIsDirectory . fileTypeFromMetadata) . getFileMetadata
   filterM is_dir $ sort files
 
+
+readProcess :: String -> [String] -> String -> X String
+readProcess prog args input = do
+    unGrab
+    runProcessWithInput prog args input
 
 rofi :: String -> [String] -> X (Maybe String)
 rofi prompt actions = do
@@ -187,7 +191,8 @@ keysToBind ref =
   , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
   , ((modk, xK_l),                  safeSpawn' "betterlockscreen" "-l")
   -- , ((modk .|. alt, xK_g),          runInTerm "" "neomutt")
-  , ((modk .|. alt, xK_g),          runOrRaise "evolution" [] $ className =? "Evolution")
+  , ((modk .|. alt, xK_g),          safeSpawn' "evolution" "-c mail")
+  , ((modk .|. alt, xK_c),          safeSpawn' "evolution" "-c calendar")
   , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
@@ -195,7 +200,7 @@ keysToBind ref =
   , ((modk, xK_e),                  haskellProject)
   , ((modk, xK_backslash),          polybar)
   -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
-  , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/connect-bt" "on")
+  , ((modk, xK_b),                  bluetooth)
   , ((modk .|. shiftMask, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/connect-bt" "off")
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
@@ -204,6 +209,10 @@ keysToBind ref =
   , ((modk .|. shiftMask, xK_p),    spawn "sleep 0.2; scrot -s")
   , ((ctrlk, xK_F3),               safeSpawn' "amixer" "-c 1 -q set Master 2dB+")
   , ((ctrlk, xK_F2),               safeSpawn' "amixer" "-c 1 -q set Master 2dB-")
+  , ((modk, xK_F8),               safeSpawn' "/home/sandy/.tino/bin/backlight" "-5")
+  , ((modk .|. shiftMask, xK_F8), safeSpawn' "/home/sandy/.tino/bin/backlight" "-15")
+  , ((modk, xK_F9),               safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
+  , ((modk .|. shiftMask, xK_F9), safeSpawn' "/home/sandy/.tino/bin/backlight" "15")
   , ((0, xF86XK_MonBrightnessDown),               safeSpawn' "/home/sandy/.tino/bin/backlight" "-5")
   , ((shiftMask, xF86XK_MonBrightnessDown), safeSpawn' "/home/sandy/.tino/bin/backlight" "-15")
   , ((0, xF86XK_MonBrightnessUp),               safeSpawn' "/home/sandy/.tino/bin/backlight" "5")
@@ -218,11 +227,6 @@ keysToBind ref =
   , ((modk .|. shiftMask, xK_F7), do
       safeSpawn' "xrandr" "--output DP-1 --off --output DP-2 --off --output HDMI-1 --off"
       polybar
-    )
-  , ((modk, xK_F8), do
-      safeSpawn' "xrandr" "--output HDMI-1 --brightness 0.5"
-      safeSpawn' "xrandr" "--output DP-2 --brightness 0.5"
-      safeSpawn' "xrandr" "--output eDP-1 --brightness 0.5"
     )
   , ((modk .|. shiftMask, xK_F12),  safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
@@ -262,6 +266,15 @@ hass service args =
     "hass-cli" $
     "--token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NGY5MDVhZGU3Mjg0ZDY3YWMyYjlhNWJjMGQ0MzJkZSIsImlhdCI6MTY3NzExMTY5NCwiZXhwIjoxOTkyNDcxNjk0fQ.I3Ble7B9lRIONfPmHb42TKr0OjcITzzczZ7Elk0B4Pw -s http://192.168.1.2:8123 service call " <> service <> " --arguments " <> args
 
+
+
+bluetooth :: X ()
+bluetooth = do
+  bts <- fmap lines $ readProcess "bluetoothctl" ["devices", "Paired"] ""
+  x <- rofi "Devices" bts
+  for_ x $ \bt -> do
+    let dev = words bt !! 1
+    safeSpawn "bluetoothctl" ["connect", dev]
 
 haskellProject :: X ()
 haskellProject = do
@@ -305,7 +318,6 @@ shortcuts =
   , (xK_d, "file:///home/sandy/.rawdog/output.html")
   , (xK_m, "https://maps.google.com")
   , (xK_h, "https://github.com/pulls")
-  , (xK_c, "https://mx.sandymaguire.me/SOGo/so/sandy@sandymaguire.me/Calendar/view")
   , (xK_w, "https://workflowy.com")
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1820653622044785115/edit")
@@ -373,7 +385,6 @@ main = do
         , dynamicPropertyChange "WM_NAME" myDynamicManageHook
         , docksEventHook
         , windowedFullscreenFixEventHook
-        , swallowEventHook (className =? "Xfce4-terminal") (return True)
         -- , followOnlyIf shouldFollow
         ]
     } `removeKeys`              keysToUnbind
