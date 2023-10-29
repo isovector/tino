@@ -1,9 +1,17 @@
 #!/bin/bash
 
-MAC_ADD="A8:51:AB:E6:F1:6f"
 
-if [ "$1" == "on" ]; then
-    bluetoothctl connect $MAC_ADD
-elif [ "$1" == "off" ]; then
-    bluetoothctl disconnect $MAC_ADD
+if [[ $# -eq 0 ]]; then
+  SINK=0
+  bluetoothctl disconnect
+else
+  bluetoothctl connect $1
+  sleep 2
+  SINK=$(pactl list short sinks | tail -n1 | cut -f1)
 fi
+
+pacmd set-default-sink $SINK
+for INPUT in $(pactl list short sink-inputs | cut -f1); do
+  pacmd move-sink-input $INPUT $SINK
+done
+

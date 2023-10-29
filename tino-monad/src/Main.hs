@@ -201,7 +201,7 @@ keysToBind ref =
   , ((modk, xK_backslash),          polybar)
   -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_b),                  bluetooth)
-  , ((modk .|. shiftMask, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/connect-bt" "off")
+  , ((modk .|. shiftMask, xK_b),    safeSpawn "/home/sandy/.tino/bin/connect-bt" [])
   , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
   , ((modk, xK_t),                  safeSpawnProg "thunar")
   , ((modk .|. shiftMask, xK_q),    kill)
@@ -274,7 +274,7 @@ bluetooth = do
   x <- rofi "Devices" bts
   for_ x $ \bt -> do
     let dev = words bt !! 1
-    safeSpawn "bluetoothctl" ["connect", dev]
+    safeSpawn "/home/sandy/.tino/bin/connect-bt" [dev]
 
 haskellProject :: X ()
 haskellProject = do
@@ -322,7 +322,7 @@ shortcuts =
   , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1820653622044785115/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
-  , (xK_t, "https://www.rememberthemilk.com/app/#all")
+  , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")
   ]
 
