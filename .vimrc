@@ -3,12 +3,12 @@ set nocompatible
 
 set rtp +=~/.vim
 
-let output = system("xrandr | grep DP-1 | grep disconnected")
+let output = system("xrandr | grep '^DP-1 disconnected'")
 if v:shell_error != 0
   " hdmi is connected
-  set guifont=Source\ Code\ Pro:h8
+  set guifont=Source\ Code\ Pro:h10
 else
-  set guifont=Source\ Code\ Pro:h11
+  set guifont=Source\ Code\ Pro:h6
 endif
 
 " if exists('g:GtkGuiLoaded')
@@ -619,7 +619,7 @@ endfunction
 
 au BufReadPre *.agda call AgdaFiletype()
 au BufReadPre *.lagda.md call AgdaFiletype()
-au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
+" au BufWritePost *.agda execute "normal! :CornelisLoad\<CR>"
 
 function! ScalaFiletype()
   inoremap <buffer> -= <space>=><space>
@@ -647,7 +647,7 @@ function! AgdaFiletype()
     call cornelis#bind_input("imp", "⊃")
     call cornelis#bind_input("inj", "↪")
     call cornelis#bind_input("ne", "≠")
-    call cornelis#bind_input("iso", "↔")
+    call cornelis#bind_input("iso", "≅")
     call cornelis#bind_input("iff", "↔")
     call cornelis#bind_input("neq", "≢")
     call cornelis#bind_input("num", "↥")
@@ -664,6 +664,7 @@ function! AgdaFiletype()
 
     " imap <buffer> == <space>\==<space>
     imap <buffer> -= <space>\to<space>
+    imap <buffer> _+ <space>\=><space>
     imap <buffer> )_ <space>\=><space>
     imap <buffer> \cong cong (λ \Gf \to ?) ?
     imap <buffer> \begin begin<CR><tab>?<CR><BS>\step<CR><BS>\qed
