@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+MERGE_BASE="$(git merge-base HEAD "$REVIEW_BASE")"
+
+CMD=$(git diff --name-only "$MERGE_BASE..HEAD")
+# CMD=$(find | grep "\(Manipipe/\(Payload\|Rabbit\|Deed\)\)\|ManiType" | grep ".hs$")
+
+mkdot() {
+  echo 'digraph G {'
+
+  FILTER="OKEYDOKEARONEY"
+  for FILE in $CMD; do
+    MODULE=$(cat $FILE | grep '^module' | grep -E 'module ([A-Za-z.])+' | cut -d' ' -f2)
+    FILTER="$FILTER\\|import $MODULE\($\| \)"
+    echo '"'$MODULE'" [shape=box];'
+  done
+
+  for FILE in $CMD; do
+    MODULE=$(cat $FILE | grep '^module' | grep -E 'module ([A-Za-z.])+' | cut -d' ' -f2)
+    for IMPORT in $(cat $FILE | grep '^import' | grep "$FILTER" | grep -E 'import ([A-Za-z.])+' | cut -d' ' -f2); do
+      echo '"'$MODULE'" -> "'$IMPORT'"'
+    done
+  done
+  echo '}'
+}
+
+mkdot | dot '-Gbgcolor=#ffffff00' -Grankdir=${1:-LR} -Gcolor=white -Gfontcolor=white -Ncolor=white -Nfontcolor=white -Ecolor=white -Tpng | kitty icat

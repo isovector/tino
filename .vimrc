@@ -1,12 +1,14 @@
-" autocmd!
+autocmd!
 set nocompatible
+
+set shortmess+=I
 
 set rtp +=~/.vim
 
-let output = system("xrandr | grep '^DP-1 disconnected'")
+let output = system("xrandr | grep '^HDMI-1 disconnected'")
 if v:shell_error != 0
   " hdmi is connected
-  set guifont=Source\ Code\ Pro:h10
+  set guifont=Source\ Code\ Pro:h6
 else
   set guifont=Source\ Code\ Pro:h6
 endif
@@ -34,6 +36,7 @@ let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
                               " Plugin Management
 " ------------------------------------------------------------------------------
 call plug#begin('~/.vim/plugged')
+
 " Development
 Plug 'isovector/ghci.vim', { 'for': 'haskell' }
 Plug 'isovector/cornelis'
@@ -83,12 +86,10 @@ Plug 'junegunn/vim-easy-align'
 
 " Languages
 Plug 'neovimhaskell/haskell-vim'
-Plug 'rhysd/conflict-marker.vim'
 Plug 'vim-scripts/latex-support.vim'
 Plug 'rstacruz/sparkup'
-Plug 'wlangstroth/vim-racket'
-Plug 'derekwyatt/vim-scala'
 Plug 'scalameta/nvim-metals'
+Plug 'BeneCollyridam/futhark-vim'
 
 " Colors
 Plug 'altercation/vim-colors-solarized'
@@ -125,7 +126,7 @@ Plug 'deris/vim-shot-f'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
 
-Plug 'neoclide/coc.nvim', {'for': 'haskell', 'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 " cornelis
 Plug 'neovimhaskell/nvim-hs.vim'
@@ -162,7 +163,7 @@ let maplocalleader = "\\"
 " nnoremap <leader>4 :vnew<CR>:bn<CR>:vnew<CR>:bn<CR><C-W><C-L><C-W><C-L>:split<CR>:bn<CR>
 nnoremap <leader>sv :vert sb  <BS>
 
-nnoremap <leader>zl :silent! s/-- $> /<cr>:noh<cr>I-- $> <esc>:w<cr>02w
+nnoremap <leader>zl :silent! s//<cr>:noh<cr>I<esc>:w<cr>02w
 nnoremap <leader>zr O <c-u>-- $>  <bs>
 
 nnoremap zC zc
@@ -171,7 +172,7 @@ nnoremap zC zc
 nnoremap <leader>m :! (cd `git rev-parse --show-toplevel`; make)<CR>
 nnoremap <leader>g :silent! grep!  <BS>
 nnoremap K :silent! grep! <cword><CR>:copen<CR>
-nnoremap <leader>f ::CtrlP<CR>
+nnoremap <leader>f ::CtrlPMRUFiles<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
 nnoremap <leader>wc :! wc %<CR>
@@ -241,6 +242,9 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
+nnoremap <leader>ej :e ~/.config/jj/config.toml<cr>
+nnoremap <leader>ew :e ~/.w3m/keymap<cr>
+nnoremap <leader>ey :e ~/.config/eww/eww.yuck<cr>
 nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
@@ -341,6 +345,7 @@ nnoremap zk moO <c-u><esc>`o
 
 " Things we can align on
 let g:easy_align_delimiters = {
+\ '=': { 'pattern': '[=≡]',                'left_margin': 1, 'right_margin': 1 },
 \ '[': { 'pattern': '[[\]]',               'left_margin': 0, 'right_margin': 0 },
 \ '(': { 'pattern': '[()]',                'left_margin': 2, 'right_margin': 0 },
 \ ']': { 'pattern': '[[\]]',               'left_margin': 1, 'right_margin': 0 },
@@ -354,9 +359,10 @@ let g:easy_align_delimiters = {
 \ '$': { 'pattern': '\$',                  'left_margin': 1, 'right_margin': 1 },
 \ '~': { 'pattern': '\.\~',                'left_margin': 1, 'right_margin': 1 },
 \ '#': { 'pattern': '#',                   'left_margin': 1, 'right_margin': 0 },
+\ 't': { 'pattern': '⁀',                   'left_margin': 1, 'right_margin': 1 },
 \ 'q': { 'pattern': '\(qualified\)\?\ze ', 'left_margin': 1, 'right_margin': 1 },
 \ 'c': { 'pattern': '.\zs--',              'left_margin': 2, 'right_margin': 1, 'ignore_groups': [] },
-\ 'r': { 'pattern': '[≤≡≈∎]',              'left_margin': 2, 'right_margin': 0 },
+\ 'r': { 'pattern': '[∼≤≡≈∎]',             'left_margin': 2, 'right_margin': 0 },
 \ }
 
 cmap <expr> %% expand('%:p:h') . '/'
@@ -497,7 +503,7 @@ augroup line_return
 augroup END
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs\|\.jj'
 " let g:ctrlp_by_filename = 1
 
 
@@ -523,8 +529,8 @@ else
 endif
 
 set guioptions=ac
-set background=light
-colo PaperColor
+set background=dark
+colo ego
 " set background=light
 
 " Rainbow colored parentheses
@@ -629,10 +635,30 @@ endfunction
 function! AgdaFiletype()
     setlocal nospell
     inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
-    set cc=71,81
+    set cc=64,81
     let b:surround_104="{! \r !}"
     let b:surround_112="{-# \r #-}"
     let b:surround_105="⦃ \r ⦄"
+    call cornelis#bind_input("rep", "𝄆 𝄇")
+    call cornelis#bind_input("ru", " ⇀ ")
+    call cornelis#bind_input("dw", "𝅝")
+    call cornelis#bind_input("dh", "𝅗𝅥")
+    call cornelis#bind_input("dq", "𝅘𝅥")
+    call cornelis#bind_input("d8", "𝅘𝅥𝅮")
+    call cornelis#bind_input("d1", "𝅘𝅥𝅯")
+    call cornelis#bind_input("d3", "𝅘𝅥𝅰")
+    call cornelis#bind_input("d.", "．")
+    call cornelis#bind_input("tie", "⁀")
+    call cornelis#bind_input("div", "÷")
+    call cornelis#bind_input("half", "½")
+    call cornelis#bind_input("sp", "𝄩")
+
+    call cornelis#bind_input("drw", "𝄻")
+    call cornelis#bind_input("drh", "𝄼")
+    call cornelis#bind_input("drq", "𝄽")
+    call cornelis#bind_input("dr8", "𝄾")
+    call cornelis#bind_input("dr6", "𝄿")
+    call cornelis#bind_input("dr2", "𝅀")
     call cornelis#bind_input("alg", "…algebra…")
     call cornelis#bind_input("idl", "identityˡ")
     call cornelis#bind_input("idr", "identityʳ")
@@ -712,6 +738,7 @@ endfunction
 
 
 function! HaskellFiletype()
+    nnoremap <buffer> <leader>eh :e %-boot<cr>
     let b:surround_112="{-# \r #-}"
 
     nnoremap <buffer> <leader>m yyp0f:C= _<esc>
@@ -757,13 +784,14 @@ function! HaskellFiletype()
 
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
-    nnoremap <buffer> -- O<esc>78i-<esc>o<esc><<A \|<space>
+    nnoremap <buffer> -- O-- \|<space>
     nnoremap <buffer> <leader><leader>gg magg/^import<CR>Oimport GHC.Generics<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>db magg/^import<CR>Oimport Data.Bool<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>cm magg/^import<CR>Oimport Control.Monad<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>dm magg/^import<CR>Oimport qualified Data.Map as M<CR>import Data.Map (Map)<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ds magg/^import<CR>Oimport qualified Data.Set as S<CR>import Data.Set (Set)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>dim magg/^import<CR>Oimport qualified Data.IntMap as IM<CR>import Data.IntMap (IntMap)<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>dt magg/^import<CR>Oimport Data.Traversable<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>df magg/^import<CR>Oimport Data.Foldable<ESC>`a:noh<CR>
 
@@ -875,7 +903,7 @@ set wildignore+=*.pyc
 set wildignore+=*.spl
 set wildignore+=*.sw?
 set wildignore+=docs/
-set wildignore+=.hg,.git,.svn
+set wildignore+=.hg,.git,.svn,.jj
 set wildignore+=tags
 set wildignore+=ghcide
 set wildignore+=testdata
@@ -1044,7 +1072,7 @@ if has("patch-8.1.1564")
 else
   set signcolumn=yes
 endif
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+" nnoremap <silent> K :call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -1055,6 +1083,8 @@ function! s:show_documentation()
 endfunction
 
 let g:ctrlp_working_path_mode = 'r'
+let g:ctrlp_mruf_relative = 1
+let g:ctrlp_mruf_exclude = '.jj'
 
 let g:neovide_cursor_vfx_mode = "ripple"
 

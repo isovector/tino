@@ -1,17 +1,22 @@
-{-# LANGUAGE LambdaCase  #-}
-{-# LANGUAGE NumDecimals #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE NumDecimals       #-}
+{-# LANGUAGE OverloadedStrings #-}
+
+{-# OPTIONS_GHC -fno-warn-deprecations #-}
 
 module Main where
 
 import qualified Codec.Binary.UTF8.String as UTF8
 import           Control.Exception
 import           Control.Monad
+import           Data.Char (isSpace)
 import           Data.Foldable
 import           Data.IORef
-import           Data.List (sort)
+import           Data.List (sort, intercalate, isInfixOf)
 import           Data.Maybe (fromJust)
 import           Data.Monoid (Endo (..), All(..))
 import           Data.Ratio
+import qualified Data.Text as T
 import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
@@ -22,7 +27,8 @@ import           System.Exit
 import           System.FilePath
 import           System.IO (hGetContents, Handle)
 import           System.IO.Capture (capture)
-import           System.Process (readProcessWithExitCode)
+import           System.Process (readProcessWithExitCode, shell, readCreateProcess)
+import           Text.Show.Unicode
 import           XMonad hiding (getDirectories)
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.CycleWS
@@ -59,18 +65,7 @@ import           XPcfb
 
 
 myWorkspaces :: [String]
-myWorkspaces =
-  [ "www"
-  , "work"
-  , "side"
-  , "read"
-  , "5"
-  , "comm"
-  , "7"
-  , "8"
-  , "music"
-  , "command"
-  ]
+myWorkspaces = fmap show [1..10]
 
 
 getDirectories :: MonadIO m => FilePath -> m [String]
@@ -80,11 +75,18 @@ getDirectories fp = liftIO $ do
   filterM is_dir $ sort files
 
 
+-- NOTE TO SELF: doing anything with processes is super liable to explode and
+-- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
+-- rather than using anything from the @process@ lib directly.
 readProcess :: String -> [String] -> String -> X String
 readProcess prog args input = do
     unGrab
     runProcessWithInput prog args input
 
+
+-- NOTE TO SELF: doing anything with processes is super liable to explode and
+-- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
+-- rather than using anything from the @process@ lib directly.
 rofi :: String -> [String] -> X (Maybe String)
 rofi prompt actions = do
     unGrab
@@ -101,7 +103,7 @@ myManageHook = fold
   , className =? "blueman-applet"  --> doIgnore
   , className =? "anki"            --> doFloat
   , className =? "Anki"            --> doFloat
-  , className =? "vlc"             --> doFloat
+  -- , className =? "vlc"             --> doFloat
   , className =? "Spotify"         --> doShift "music"
   , className =? "Signal"          --> do
         doSink
@@ -149,7 +151,9 @@ myLayout = -- onLeft mydrawer $
   ||| noBorders (fullscreenFull Full)
 
 
-mydrawer = simpleDrawer 0.01 0.3 (ClassName "Xfce4-terminal")
+myterm = "kitty"
+
+mydrawer = simpleDrawer 0.01 0.3 (ClassName myterm)
 
 runOrRaise :: String -> [String] -> Query Bool -> X ()
 runOrRaise = (raiseMaybe .) . safeSpawn
@@ -181,15 +185,14 @@ safeSpawn' :: MonadIO m => FilePath -> String -> m ()
 safeSpawn' p = safeSpawn p . words
 
 polybar :: X ()
-polybar = pure () -- safeSpawn' "/home/sandy/.tino/bin/tino" "bar"
+polybar = safeSpawn' "eww" "reload"
 
 
 keysToBind :: IORef Bool -> [((KeyMask, KeySym), X ())]
 keysToBind ref =
-  [ ((modk, xK_f),                  runOrRaise "brave" [] $ className =? "brave")
-  , ((modk, xK_g),                  runOrRaise "neovide" [] $ className =? "neovide")
-  , ((modk, xK_m),                  runOrRaise "spotify" [] $ className =? "Spotify")
-  , ((modk, xK_l),                  safeSpawn' "betterlockscreen" "-l")
+  [ ((modk, xK_f),                  -- safeSpawn "/usr/bin/kitty" ["/usr/bin/w3m",  "/home/sandy/.rawdog/output.html"])
+                                    runOrRaise "brave" [] $ className =? "brave")
+  , ((modk, xK_g),                  runOrRaise "neovide" ["--no-multigrid"] $ className =? "neovide")
   -- , ((modk .|. alt, xK_g),          runInTerm "" "neomutt")
   , ((modk .|. alt, xK_g),          safeSpawn' "evolution" "-c mail")
   , ((modk .|. alt, xK_c),          safeSpawn' "evolution" "-c calendar")
@@ -197,12 +200,16 @@ keysToBind ref =
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
-  , ((modk, xK_e),                  haskellProject)
+  , ((modk, xK_e),                  manigaJJEdit)
+  , ((modk, xK_n),                  manigaJJNew)
+  , ((modk .|. shiftMask, xK_n),    manigaJJDesc)
+  , ((modk, xK_r),                  safeSpawn' "eww" "reload")
   , ((modk, xK_backslash),          polybar)
   -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_b),                  bluetooth)
+  , ((modk, xK_m),                  manigaPullRequests)
   , ((modk .|. shiftMask, xK_b),    safeSpawn "/home/sandy/.tino/bin/connect-bt" [])
-  , ((modk, xK_x),                  safeSpawnProg "xfce4-terminal")
+  , ((modk, xK_x),                  safeSpawnProg myterm)
   , ((modk, xK_t),                  safeSpawnProg "thunar")
   , ((modk .|. shiftMask, xK_q),    kill)
   , ((modk, xK_p),                  safeSpawnProg "scrot")
@@ -222,7 +229,6 @@ keysToBind ref =
   , ((modk, xK_F7), do
       safeSpawn' "/home/sandy/.tino/bin/external-monitor" ""
       feh
-      polybar
     )
   , ((modk .|. shiftMask, xK_F7), do
       safeSpawn' "xrandr" "--output DP-1 --off --output DP-2 --off --output HDMI-1 --off"
@@ -256,6 +262,8 @@ keysToBind ref =
   , ((modk, xK_Right),               prevScreen)
   , ((modk .|. shiftMask, xK_Left),  shiftNextScreen >> nextScreen)
   , ((modk .|. shiftMask, xK_Right), shiftPrevScreen >> prevScreen)
+
+  , ((modk, xK_comma), spawn "eww update revealInfo=true; sleep 3s; eww update revealInfo=false")
   -- , ((modk .|. alt .|. ctrlk, xK_k), hass "homeassistant.toggle" "entity_id=switch.kitchen_light")
   -- , ((modk .|. alt .|. ctrlk, xK_l), hass "homeassistant.toggle" "entity_id=light.living_room_lights")
   ] ++ fmap (uncurry mkShortcut) shortcuts
@@ -268,14 +276,28 @@ hass service args =
 
 
 
+-- NOTE TO SELF: doing anything with processes is super liable to explode and
+-- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
+-- rather than using anything from the @process@ lib directly.
 bluetooth :: X ()
 bluetooth = do
-  bts <- fmap lines $ readProcess "bluetoothctl" ["devices", "Paired"] ""
+  bts <- fmap ( filter (not . isInfixOf "Pro Controller")
+              . lines
+              . T.unpack
+              . T.replace "PYLEUSA" "Kitchen"
+              . T.replace "BE-RCA" "Living Room"
+              . T.pack
+              )
+       $ readProcess "bluetoothctl" ["devices", "Paired"] ""
   x <- rofi "Devices" bts
   for_ x $ \bt -> do
     let dev = words bt !! 1
     safeSpawn "/home/sandy/.tino/bin/connect-bt" [dev]
 
+
+-- NOTE TO SELF: doing anything with processes is super liable to explode and
+-- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
+-- rather than using anything from the @process@ lib directly.
 haskellProject :: X ()
 haskellProject = do
   dirs <- getDirectories "/home/sandy/prj"
@@ -286,24 +308,71 @@ haskellProject = do
         let target = case prj of
                        "/home/sandy/prj/maniga" -> "maniga:lib"
                        _ -> ""
-        safeSpawn "neovide" []
-        safeSpawn "xfce4-terminal" ["--command", "tmux new-session 'stack repl " <> target <> "'"]
+        safeSpawn "neovide" ["--no-multigrid"]
+        safeSpawn myterm ["--command", "tmux new-session 'stack repl " <> target <> "'"]
     Nothing -> pure ()
+
+
+-- NOTE TO SELF: doing anything with processes is super liable to explode and
+-- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
+-- rather than using anything from the @process@ lib directly.
+manigaPullRequests :: X ()
+manigaPullRequests = do
+  liftIO $ setCurrentDirectory "/home/sandy/prj/manifold/maniga"
+  rawPrs <- readProcess "gh" ["pr", "list"] ""
+  liftIO $ setCurrentDirectory homeDir
+  let prs = sort
+          $ fmap (T.unpack . T.intercalate "\t" . take 2 . filter (not . T.null) . T.splitOn "\t" .  T.pack)
+          $ lines rawPrs
+  x <- rofi "Maniga PRs" prs
+  for_ x $ \pr ->
+    safeSpawn' "xdg-open" $
+      "https://github.com/manifoldvalley/maniga/pull/" <> takeWhile (not . isSpace) pr
+
+jjProject = "/home/sandy/prj/manifold/maniga"
+
+manigaJJEdit :: X ()
+manigaJJEdit = do
+  liftIO $ setCurrentDirectory jjProject
+  safeSpawn' "/home/sandy/.tino/bin/e" ""
+  liftIO $ setCurrentDirectory homeDir
+
+manigaJJNew :: X ()
+manigaJJNew = do
+  liftIO $ setCurrentDirectory jjProject
+  safeSpawn' "/home/sandy/.tino/bin/jj-rofi" "new"
+  liftIO $ setCurrentDirectory homeDir
+
+manigaJJDesc :: X ()
+manigaJJDesc = do
+  liftIO $ setCurrentDirectory jjProject
+  safeSpawn' "/home/sandy/.tino/bin/jj-rofi" "describe"
+  liftIO $ setCurrentDirectory homeDir
+
 
 myPP :: PP
 myPP = def
-  { ppCurrent = xmobarColor "#ff7700" "" . wrap "[" "]"
-  , ppTitle   = id
-  , ppVisible = wrap "(" ")"
-  , ppLayout  = id
-  , ppUrgent  = xmobarColor "red" "yellow"
+  { ppCurrent = \name -> "\"" <> name <> "\": \"current active\""
+  , ppHidden  = \name -> "\"" <> name <> "\": \"active\""
+  , ppVisible = \name -> "\"" <> name <> "\": \"active visible\""
+  , ppWsSep = ", "
+  , ppTitle = mappend "\"title\": "
+            . ushow
+            . T.unpack
+            . T.replace "- NVIM" ""
+            . T.replace "- Brave" ""
+            . T.replace "- YouTube" ""
+            . T.pack
+  , ppLayout = \l -> "\"layout\": " <> show l
+  , ppOrder = pure . wrap "{" "}" . intercalate ", "
+  , ppSep = ", "
   }
 
 myStatusBar :: StatusBarConfig
 myStatusBar = mconcat
-  [ statusBarProp "/usr/local/bin/xmobar -x 0 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
-  , statusBarProp "/usr/local/bin/xmobar -x 1 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
-  , statusBarProp "/usr/local/bin/xmobar -x 2 /home/sandy/.xmonad/xmobar.hs" (pure myPP)
+  [ statusBarProp "eww open bar0" $ pure myPP
+  , statusBarProp "eww open bar1" $ pure myPP
+  , statusBarProp "eww open bar2" $ pure myPP
   ]
 
 
@@ -319,11 +388,12 @@ shortcuts =
   , (xK_m, "https://maps.google.com")
   , (xK_h, "https://github.com/pulls")
   , (xK_w, "https://workflowy.com")
-  , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
-  , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1820653622044785115/edit")
+  -- , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
+  -- , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1922138192530766354/edit")
   , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
   , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")
+  , (xK_y, "http://100.92.132.112:8451")
   ]
 
 buttonsToUnbind :: [(KeyMask, Button)]
@@ -358,23 +428,32 @@ feh :: X ()
 feh =
   spawn "feh --bg-fill ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg"
 
+homeDir :: FilePath
+homeDir = "/home/sandy"
+
 main :: IO ()
 main = do
   mouseToggleIORef <- newIORef True
 
-  setCurrentDirectory "/home/sandy"
+  setCurrentDirectory homeDir
   let space = 5
       border = Border space space space space
 
   xmonad $ withSB myStatusBar $ docks $ ewmh $
     def
     { borderWidth        = 1
-    , terminal           = "xfce4-terminal"
+    , terminal           = myterm
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#444444"
     , workspaces = myWorkspaces
     , modMask = modk
-    , startupHook = setWMName "LG3D" <> feh <> docksStartupHook
+    , startupHook = mconcat
+        [ setWMName "LG3D"
+        , feh
+        , spawn "xsetroot -cursor_name left_ptr"
+        , spawn "eww daemon"
+        , docksStartupHook
+        ]
     , layoutHook  = avoidStruts $ smartBorders myLayout
     , focusFollowsMouse = True
     , manageHook  = mconcat [ manageDocks

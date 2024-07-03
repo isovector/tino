@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+
+rawdog -uw
+wkhtmltopdf --enable-local-file-access /home/sandy/.rawdog/output.html /tmp/news.pdf
+cd /tmp
+rmapi rm news
+rmapi put ./news.pdf
+

@@ -1,0 +1,25 @@
+#! /usr/bin/bash
+
+declare -A PRS
+
+genDesc() {
+  CHANGE=$1
+  TITLE=$(jj -r "$CHANGE" --no-graph -T 'description.remove_prefix("plan: ")')
+
+  echo "$TITLE"
+  echo ""
+
+  echo "Depends On:"
+  while read PARENT; do
+    echo "- [ ] #${PRS[$PARENT]}"
+  done < <(jj -r "$CHANGE- & sigil_plan" --no-graph --reversed -T 'change_id++"\n"')
+}
+
+while read CHANGE; do
+  TITLE=$(jj -r "$CHANGE" --no-graph -T 'description.remove_prefix("plan: ")')
+
+  PRS[$CHANGE]=$(gh issue new -t "ManiType: $TITLE" -F <(genDesc $CHANGE) -m "ManiType" | cut -d/ -f7)
+
+  echo "$TITLE -> ${PRS[$CHANGE]}"
+  sleep 5s
+done < <(jj -r 'downstream(trunk(), sigil_plan)' --no-graph --reversed -T 'change_id++"\n"')

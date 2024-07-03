@@ -36,17 +36,18 @@ parse_git_dirty() {
   fi
 }
 
-function nix_enabled() {
-  if [ -z ${IN_NIX_SHELL+x} ]; then
-    echo -n "%{$fg_bold[red]%}➜"
+function jj_enabled() {
+  if jj st &> /dev/null; then
+    local REV=$(jj st | grep 'Working copy :' | cut -d' ' -f4)
+    echo -n "%{$fg_bold[green]%}@${REV} "
   else
-    echo -n "%{$fg_bold[blue]%}❄"
+    echo -n "%{$fg_bold[red]%}➜  $(git_prompt_info)"
   fi
   echo "%{$reset_color%}"
 }
 
 PROMPT='
-$(nix_enabled)  $(git_prompt_info)%{$fg[yellow]%}$(places)%{$reset_color%} '
+$(jj_enabled)%{$fg[yellow]%}$(places)%{$reset_color%} '
 
 RPROMPT='%{$fg[green]%}%T%{$reset_color%}'
 

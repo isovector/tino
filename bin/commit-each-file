@@ -1,0 +1,8 @@
+#!/bin/bash
+
+FILES=$(git status | grep modified | cut -f2 | cut -d' ' -f4)
+
+for FILE in $FILES; do
+  git add $FILE
+  git commit -m "Update $FILE"
+done
