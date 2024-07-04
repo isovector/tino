@@ -1,0 +1,60 @@
+[user]
+name = "Sandy Maguire"
+email = "sandy@sandymaguire.me"
+
+[ui]
+default-command = 'log'
+# diff.tool = ["difft", "--color=always", "$left", "$right"]
+merge-editor = ["meld", "$left", "$base", "$right", "-o", "$output"]
+log-synthetic-elided-nodes = false
+paginate = "never"
+
+[revsets]
+log = "changeset | avalanche | @"
+
+[revset-aliases]
+old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandheads | sigil_folded) | branches_and_sigils)"
+'downstream(x,y)' = '(x::y) & y'
+'upstream(x,y)' = '(y::x) & y'
+'base(x)' = 'latest(branches_and_sigils::x- & branches_and_sigils)'
+'cap(x)' = 'roots(x:: & branchesandheads)'
+'ctx(x)' = 'x---::x+++'
+'stem(x)' = 'base(x)+ & ::x'
+
+'sandy-root' = 'latest(description("∅"))'
+'roots' = 'sandy-root'
+'boneyard' = 'present(sandy-boneyard)'
+'branches' = 'downstream(trunk(), branches() | sandy-root) & mine() ~ boneyard::'
+'branches_and_sigils' = 'branches | (downstream(roots, sigils) & mine())'
+'branchesandheads' = '(branches_and_sigils | (heads(trunk()::) & mine()))'
+'base' = 'base(@)'
+'cap' = 'cap(@)'
+'ctx' = 'ctx(@)'
+'stem' = 'stem(@)'
+'garbage' = '~(sandy-root:: | sandy-boneyard::) & mine() & ~(::trunk())'
+
+'changeset' = 'downstream(trunk(), stem::cap)'
+'avalanche' = 'downstream(trunk(), branchesandheads)'
+
+'hide(what, dueto)' = 'what & ~(dueto::)'
+'hide_folded(what)' = 'hide(what, (sigil_folded ~ upstream(@, sigil_folded))+)'
+
+'sigil_feat' = 'description(glob:"feat: *")'
+'sigil_refactor' = 'description(glob:"refactor: *")'
+'sigil_design' = 'description(glob:"design: *")'
+'sigil_doc' = 'description(glob:"doc: *")'
+'sigil_chore' = 'description(glob:"chore: *")'
+'sigil_test' = 'description(glob:"test: *")'
+'sigil_wip' = 'description(glob:"wip: *")'
+'sigil_plan' = 'description(glob:"plan: *")'
+'sigil_folded' = 'description(glob:"... *")'
+
+'sigils' = 'sigil_feat | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan'
+
+
+'tree' = "(trunk()::) & mine()"
+
+[template-aliases]
+# 'format_short_id(id)' = 'id.shortest()'
+'format_timestamp(timestamp)'="timestamp.ago()"
+
