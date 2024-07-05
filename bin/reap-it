@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-jackd -R -d alsa -P hw:1,0 -o 2 --period 256 -X seq

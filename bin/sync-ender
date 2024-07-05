@@ -1,6 +1,0 @@
-#!/usr/bin/env zsh
-
-udisksctl mount -b /dev/disk/by-id/usb-Mass_Storage_Device_121220160204-0:0-part1
-cp -Rvu ~/ender/* /run/media/sandy/27FA-61A7/
-sync
-umount /run/media/sandy/27FA-61A7/

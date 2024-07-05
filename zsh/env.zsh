@@ -15,6 +15,6 @@ export PYTHONPATH=$PYTHONPATH:/var/lib
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 export NVIM_GTK_NO_HEADERBAR=1
 
-export LD_PRELOAD="/opt/hdf5110/lib/libhdf5.so:$LD_RELOAD"
+# export LD_PRELOAD="/opt/hdf5110/lib/libhdf5.so:$LD_RELOAD"
 
 export REVIEW_BASE=main

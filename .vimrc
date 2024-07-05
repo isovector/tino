@@ -8,9 +8,9 @@ set rtp +=~/.vim
 let output = system("xrandr | grep '^HDMI-1 disconnected'")
 if v:shell_error != 0
   " hdmi is connected
-  set guifont=Source\ Code\ Pro:h6
+  set guifont=Liberation\ Mono:h7
 else
-  set guifont=Source\ Code\ Pro:h6
+  set guifont=Liberation\ Mono:h7
 endif
 
 " if exists('g:GtkGuiLoaded')
@@ -241,7 +241,7 @@ nnoremap <leader>ev :e ~/.vimrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
-nnoremap <leader>ex :e ~/.xmonad/src/Main.hs<cr>
+nnoremap <leader>ex :e ~/.config/xmonad/xmonad.hs<cr>
 nnoremap <leader>ej :e ~/.config/jj/config.toml<cr>
 nnoremap <leader>ew :e ~/.w3m/keymap<cr>
 nnoremap <leader>ey :e ~/.config/eww/eww.yuck<cr>
