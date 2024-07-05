@@ -6,12 +6,10 @@
 
 module Main where
 
-import qualified Codec.Binary.UTF8.String as UTF8
 import           Control.Exception
 import           Control.Monad
 import           Data.Char (isSpace)
 import           Data.Foldable
-import           Data.IORef
 import           Data.List (sort, intercalate, isInfixOf)
 import           Data.Maybe (fromJust)
 import           Data.Monoid (Endo (..), All(..))
@@ -20,15 +18,12 @@ import qualified Data.Text as T
 import           Data.Word (Word32)
 import           GHC.Exts (fromString)
 import           Graphics.X11.ExtraTypes.XF86
-import           Lights
 import           System.Directory (setCurrentDirectory, withCurrentDirectory, listDirectory)
 import           System.Directory.Internal (fileTypeIsDirectory, getFileMetadata, fileTypeFromMetadata)
 import           System.Exit
 import           System.FilePath
 import           System.IO (hGetContents, Handle)
-import           System.IO.Capture (capture)
 import           System.Process (readProcessWithExitCode, shell, readCreateProcess)
-import           Text.Show.Unicode
 import           XMonad hiding (getDirectories)
 import           XMonad.Actions.CopyWindow (copyToAll)
 import           XMonad.Actions.CycleWS
@@ -61,18 +56,6 @@ import           XMonad.Util.Hacks
 import           XMonad.Util.Run (safeSpawnProg, safeSpawn, spawnPipe, hPutStrLn, runProcessWithInput, runInTerm)
 import           XMonad.Util.Ungrab
 import           XMonad.Util.WindowProperties (getProp32s)
-import           XPcfb
-
-
-myWorkspaces :: [String]
-myWorkspaces = fmap show [1..10]
-
-
-getDirectories :: MonadIO m => FilePath -> m [String]
-getDirectories fp = liftIO $ do
-  files <- fmap (fp </>) <$> listDirectory fp
-  let is_dir = fmap (fileTypeIsDirectory . fileTypeFromMetadata) . getFileMetadata
-  filterM is_dir $ sort files
 
 
 -- NOTE TO SELF: doing anything with processes is super liable to explode and
@@ -188,8 +171,8 @@ polybar :: X ()
 polybar = safeSpawn' "eww" "reload"
 
 
-keysToBind :: IORef Bool -> [((KeyMask, KeySym), X ())]
-keysToBind ref =
+keysToBind :: [((KeyMask, KeySym), X ())]
+keysToBind =
   [ ((modk, xK_f),                  -- safeSpawn "/usr/bin/kitty" ["/usr/bin/w3m",  "/home/sandy/.rawdog/output.html"])
                                     runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" ["--no-multigrid"] $ className =? "neovide")
@@ -200,14 +183,10 @@ keysToBind ref =
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
   , ((modk, xK_h),                  spawn "/home/sandy/.tino/bin/rofi-hackage")
-  , ((modk, xK_e),                  manigaJJEdit)
-  , ((modk, xK_n),                  manigaJJNew)
-  , ((modk .|. shiftMask, xK_n),    manigaJJDesc)
   , ((modk, xK_r),                  safeSpawn' "eww" "reload")
   , ((modk, xK_backslash),          polybar)
   -- , ((modk, xK_b),                  safeSpawn' "/home/sandy/.tino/bin/rofi-web" "")
   , ((modk, xK_b),                  bluetooth)
-  , ((modk, xK_m),                  manigaPullRequests)
   , ((modk .|. shiftMask, xK_b),    safeSpawn "/home/sandy/.tino/bin/connect-bt" [])
   , ((modk, xK_x),                  safeSpawnProg myterm)
   , ((modk, xK_t),                  safeSpawnProg "thunar")
@@ -236,21 +215,12 @@ keysToBind ref =
     )
   , ((modk .|. shiftMask, xK_F12),  safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
-  , ((modk, xK_c),                  rofi "Start Project" [] >>= pcfbPrompt . fromJust)
   , ((modk, xK_0),                  windows $ W.greedyView "command")
-  -- , ((modk, xK_Left),               liftIO $ setDeskColor 40 0 40)
-  -- , ((modk, xK_Right),              liftIO $ setDeskColor 60 20 0)
-  -- , ((modk, xK_Down),               liftIO $ setDeskColor 0 0 0)
-  -- , ((modk, xK_Up),                 liftIO $ setDeskColor 0 0 80)
-  , ((modk, xK_v),                  safeSpawn' "/home/sandy/.tino/bin/tino" "pcfb")
-  , ((modk, xK_bracketleft),        liftIO pcfbOpen)
-  , ((modk, xK_bracketright),       liftIO pcfbClose)
   , ((modk .|. ctrlk, xK_l),  do
         sid <- withWindowSet $ pure . drop 2 . show . W.screen . W.current
         spawn $ "eww close powermenu || eww open powermenu --screen " <> sid)
   , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
-  -- , ((modk .|. ctrlk, xK_m),  liftIO $ modifyIORef' ref not)
   , ((musk, xK_Left),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
   , ((0, xF86XK_AudioPrev),          safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
   , ((musk, xK_Right),               safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "next")
@@ -264,15 +234,7 @@ keysToBind ref =
   , ((modk .|. shiftMask, xK_Right), shiftPrevScreen >> prevScreen)
 
   , ((modk, xK_comma), spawn "eww update revealInfo=true; sleep 3s; eww update revealInfo=false")
-  -- , ((modk .|. alt .|. ctrlk, xK_k), hass "homeassistant.toggle" "entity_id=switch.kitchen_light")
-  -- , ((modk .|. alt .|. ctrlk, xK_l), hass "homeassistant.toggle" "entity_id=light.living_room_lights")
   ] ++ fmap (uncurry mkShortcut) shortcuts
-
-hass :: String -> String -> X ()
-hass service args =
-  safeSpawn'
-    "hass-cli" $
-    "--token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0NGY5MDVhZGU3Mjg0ZDY3YWMyYjlhNWJjMGQ0MzJkZSIsImlhdCI6MTY3NzExMTY5NCwiZXhwIjoxOTkyNDcxNjk0fQ.I3Ble7B9lRIONfPmHb42TKr0OjcITzzczZ7Elk0B4Pw -s http://192.168.1.2:8123 service call " <> service <> " --arguments " <> args
 
 
 
@@ -295,61 +257,6 @@ bluetooth = do
     safeSpawn "/home/sandy/.tino/bin/connect-bt" [dev]
 
 
--- NOTE TO SELF: doing anything with processes is super liable to explode and
--- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
--- rather than using anything from the @process@ lib directly.
-haskellProject :: X ()
-haskellProject = do
-  dirs <- getDirectories "/home/sandy/prj"
-  x <- rofi "Project" dirs
-  case x of
-    Just prj -> do
-      liftIO $ withCurrentDirectory prj $ do
-        let target = case prj of
-                       "/home/sandy/prj/maniga" -> "maniga:lib"
-                       _ -> ""
-        safeSpawn "neovide" ["--no-multigrid"]
-        safeSpawn myterm ["--command", "tmux new-session 'stack repl " <> target <> "'"]
-    Nothing -> pure ()
-
-
--- NOTE TO SELF: doing anything with processes is super liable to explode and
--- not work for the dumbest reasons. Make sure to ALWAYS call 'readProcess'
--- rather than using anything from the @process@ lib directly.
-manigaPullRequests :: X ()
-manigaPullRequests = do
-  liftIO $ setCurrentDirectory "/home/sandy/prj/manifold/maniga"
-  rawPrs <- readProcess "gh" ["pr", "list"] ""
-  liftIO $ setCurrentDirectory homeDir
-  let prs = sort
-          $ fmap (T.unpack . T.intercalate "\t" . take 2 . filter (not . T.null) . T.splitOn "\t" .  T.pack)
-          $ lines rawPrs
-  x <- rofi "Maniga PRs" prs
-  for_ x $ \pr ->
-    safeSpawn' "xdg-open" $
-      "https://github.com/manifoldvalley/maniga/pull/" <> takeWhile (not . isSpace) pr
-
-jjProject = "/home/sandy/prj/manifold/maniga"
-
-manigaJJEdit :: X ()
-manigaJJEdit = do
-  liftIO $ setCurrentDirectory jjProject
-  safeSpawn' "/home/sandy/.tino/bin/e" ""
-  liftIO $ setCurrentDirectory homeDir
-
-manigaJJNew :: X ()
-manigaJJNew = do
-  liftIO $ setCurrentDirectory jjProject
-  safeSpawn' "/home/sandy/.tino/bin/jj-rofi" "new"
-  liftIO $ setCurrentDirectory homeDir
-
-manigaJJDesc :: X ()
-manigaJJDesc = do
-  liftIO $ setCurrentDirectory jjProject
-  safeSpawn' "/home/sandy/.tino/bin/jj-rofi" "describe"
-  liftIO $ setCurrentDirectory homeDir
-
-
 myPP :: PP
 myPP = def
   { ppCurrent = \name -> "\"" <> name <> "\": \"current active\""
@@ -357,7 +264,7 @@ myPP = def
   , ppVisible = \name -> "\"" <> name <> "\": \"active visible\""
   , ppWsSep = ", "
   , ppTitle = mappend "\"title\": "
-            . ushow
+            . show
             . T.unpack
             . T.replace "- NVIM" ""
             . T.replace "- Brave" ""
@@ -403,19 +310,13 @@ buttonsToUnbind =
   , (modk, button3)
   ]
 
-onlyWhenIORef :: IORef Bool -> X () -> X ()
-onlyWhenIORef ref m = do
-  liftIO (readIORef ref) >>= \case
-    True -> m
-    False -> pure ()
 
-
-buttonsToBind :: IORef Bool -> [((KeyMask, Button), Window -> X ())]
-buttonsToBind ioref =
-  [ ((alt, button1),  \w -> onlyWhenIORef ioref $ focus w >> mouseMoveWindow w >> windows W.shiftMaster)
-  , ((alt, button2),  \w -> onlyWhenIORef ioref $ windows . (W.shiftMaster .) $ W.focusWindow w)
-  , ((alt, button3),  \w -> onlyWhenIORef ioref $ focus w >> mouseResizeWindow w >> windows W.shiftMaster)
-  , ((modk, button3), \w -> onlyWhenIORef ioref $ focus w >> withFocused (windows . W.sink))
+buttonsToBind :: [((KeyMask, Button), Window -> X ())]
+buttonsToBind =
+  [ ((alt, button1),  \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
+  , ((alt, button2),  \w -> windows . (W.shiftMaster .) $ W.focusWindow w)
+  , ((alt, button3),  \w -> focus w >> mouseResizeWindow w >> windows W.shiftMaster)
+  , ((modk, button3), \w -> focus w >> withFocused (windows . W.sink))
   ]
 
 kdeOverride :: Query Bool
@@ -433,8 +334,6 @@ homeDir = "/home/sandy"
 
 main :: IO ()
 main = do
-  mouseToggleIORef <- newIORef True
-
   setCurrentDirectory homeDir
   let space = 5
       border = Border space space space space
@@ -445,7 +344,6 @@ main = do
     , terminal           = myterm
     , normalBorderColor  = "#000000"
     , focusedBorderColor = "#444444"
-    , workspaces = myWorkspaces
     , modMask = modk
     , startupHook = mconcat
         [ setWMName "LG3D"
@@ -467,9 +365,9 @@ main = do
         -- , followOnlyIf shouldFollow
         ]
     } `removeKeys`              keysToUnbind
-      `additionalKeys`          (keysToBind mouseToggleIORef)
+      `additionalKeys`          keysToBind
       `removeMouseBindings`     buttonsToUnbind
-      `additionalMouseBindings` (buttonsToBind mouseToggleIORef)
+      `additionalMouseBindings` buttonsToBind
 
 
 setTransparentHook :: Event -> X All

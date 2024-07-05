@@ -126,7 +126,7 @@ Plug 'deris/vim-shot-f'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
 
-Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
+" Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 " cornelis
 Plug 'neovimhaskell/nvim-hs.vim'
@@ -242,6 +242,7 @@ nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.config/xmonad/xmonad.hs<cr>
+nnoremap <leader>en :e /etc/nixos/configuration.nix<cr>
 nnoremap <leader>ej :e ~/.config/jj/config.toml<cr>
 nnoremap <leader>ew :e ~/.w3m/keymap<cr>
 nnoremap <leader>ey :e ~/.config/eww/eww.yuck<cr>
