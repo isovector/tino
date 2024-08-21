@@ -5,9 +5,9 @@ export FUNKY='172.232.163.190'
 
 export NIX_IGNORE_SYMLINK_STORE=1
 
-export GIT_EDITOR="vim"
-export EDITOR="vim"
-export VISUAL="vim"
+export GIT_EDITOR="nvim"
+export EDITOR="nvim"
+export VISUAL="nvim"
 export LESS="FRK"
 export PAGER="less"
 

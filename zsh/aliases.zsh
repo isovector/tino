@@ -10,19 +10,20 @@ alias xcopy='xclip -selection c'
 alias t='tino'
 alias o='gnome-open'
 # alias e='jj edit'
-alias :e=$EDITOR
+# alias :e=$EDITOR
 
-# e() {
-#   if (( $# != 0 )); then
-#     jj edit $*
-#   else
-#     REV=$(jj log --color always -T 'description.remove_suffix("\n")++" $"++change_id.shortest()' | fzf --ansi | cut -d'$' -f2)
-#     jj edit $REV
-#   fi
-# }
+e() {
+  if (( $# != 0 )); then
+    jj edit $*
+  else
+    REV=$(jj log --color always -T 'description.remove_suffix("\n")++" $"++change_id.shortest()' | fzf --ansi | cut -d'$' -f2)
+    jj edit $REV
+  fi
+}
 
 alias -g .st="\`stack ide targets 2>&1 | fzf\`"
 
+alias hag='ag -G "hs$"'
 alias gs='jj st'
 alias gd='jj diff'
 alias git-ignore='git update-index --assume-unchanged'
@@ -34,16 +35,19 @@ alias cs='jj -r changeset'
 alias prs='jj -r avalanche'
 alias plans="jj -r 'downstream(trunk(), sigil_plan) | sandy-root'"
 alias format="new Format && ./tools/format.sh -f all"
+alias golden="new Golden; add-parent dev-root; stack run -- --all --golden --update; rm-parent dev-root"
 alias jp='jj git push -r cap'
 
 new() { jj new -B cap -m "$*" }
+bnew() { jj new -B @ -m "$*" }
+newb() { jj new -B @ -m "$*" }
 desc() { jj describe -m "$*" }
 a() { alias $1="cd $PWD"; }
 add-parent() { jj rebase -s @ -d "all:@- | ($1)" }
 rm-parent() { jj rebase -s @ -d "all:@- & ~($1)" }
 rebase-main() { jj git fetch && jj rebase -s sandy-root -d 'trunk()' }
 stack-pr() { jj new -r 'heads(@::)' -m "$*" }
-new-pr() { jj new -r sandy-root -m "$*" }
+new-pr() { jj new -r dev-root -m "$*" }
 
 avalancheimpl() {
   PRS=$(gh pr list)

@@ -160,7 +160,7 @@ EOF
 
         (
           cd $TMP
-          echo $CMDS $FILES | xargs vim
+          echo $CMDS $FILES | xargs nvim
           stty sane
         )
 

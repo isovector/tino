@@ -1,15 +1,9 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 
 set -xe
 
 
-if xrandr | grep HDMI-1 | grep disconnected &> /dev/null; then
-  xrandr --output DP-1 --mode 1920x1080 --left-of eDP-1
-elif xrandr | grep DP-1 | grep disconnected &> /dev/null; then
-  xrandr --output HDMI-1 --mode 1920x1080 --same-as eDP-1
-else
-  xrandr --output HDMI-1 --mode 1920x1080 --left-of eDP-1 --output DP-1 --mode 1920x1080 --left-of HDMI-1 --rotate left
-fi
+xrandr --output HDMI-1 --mode 1920x1080 --left-of eDP-1
 
 (sleep 1s && eww reload && feh --bg-fill ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg) &
 

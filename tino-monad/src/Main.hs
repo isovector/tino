@@ -177,8 +177,8 @@ keysToBind =
                                     runOrRaise "brave" [] $ className =? "brave")
   , ((modk, xK_g),                  runOrRaise "neovide" ["--no-multigrid"] $ className =? "neovide")
   -- , ((modk .|. alt, xK_g),          runInTerm "" "neomutt")
-  , ((modk .|. alt, xK_g),          safeSpawn' "evolution" "-c mail")
-  , ((modk .|. alt, xK_c),          safeSpawn' "evolution" "-c calendar")
+  , ((modk .|. alt, xK_g),          safeSpawn' "thunderbird" "-mail")
+  , ((modk .|. alt, xK_c),          safeSpawn' "thunderbird" "-calendar")
   , ((modk, xK_s),                  runOrRaise "signal-desktop" [] $ className =? "Signal")
   , ((modk, xK_d),                  safeSpawn' "rofi" "-show run")
   -- , ((modk, xK_s),                  safeSpawn' "/home/sandy/.tino/bin/rofi-find" "")
@@ -215,10 +215,6 @@ keysToBind =
     )
   , ((modk .|. shiftMask, xK_F12),  safeSpawn' "redshift" "-x")
   , ((modk, xK_F12),                safeSpawn' "redshift" "-O1500")
-  , ((modk, xK_0),                  windows $ W.greedyView "command")
-  , ((modk .|. ctrlk, xK_l),  do
-        sid <- withWindowSet $ pure . drop 2 . show . W.screen . W.current
-        spawn $ "eww close powermenu || eww open powermenu --screen " <> sid)
   , ((modk .|. ctrlk, xK_h),  safeSpawn' "systemctl" "suspend")
   , ((modk .|. ctrlk, xK_f),  withFocused $ windows . W.sink)
   , ((musk, xK_Left),                safeSpawn' "/home/sandy/.tino/bin/playerctl-fast" "previous")
@@ -291,13 +287,13 @@ shortcuts :: [(KeySym, String)]
 shortcuts =
   [
     (xK_f, "https://riot.cofree.coffee")
-  , (xK_d, "file:///home/sandy/.rawdog/output.html")
+  , (xK_d, "http://localhost:8080/unread")
   , (xK_m, "https://maps.google.com")
   , (xK_h, "https://github.com/pulls")
   , (xK_w, "https://workflowy.com")
   -- , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   -- , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1922138192530766354/edit")
-  , (xK_p, "https://clients.mindbodyonline.com/classic/ws?studioid=30617")
+  , (xK_p, "https://www.wellnessliving.com/rs/schedule/origins_parkour")
   , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")
   , (xK_y, "http://100.92.132.112:8451")
@@ -350,6 +346,7 @@ main = do
         , feh
         , spawn "xsetroot -cursor_name left_ptr"
         , spawn "eww daemon"
+        , spawn "/home/sandy/.local/bin/arbtt-capture &"
         , docksStartupHook
         ]
     , layoutHook  = avoidStruts $ smartBorders myLayout
