@@ -7,10 +7,10 @@ default-command = 'log'
 # diff.tool = ["difft", "--color=always", "$left", "$right"]
 merge-editor = ["meld", "$left", "$base", "$right", "-o", "$output"]
 log-synthetic-elided-nodes = false
-paginate = "never"
+# paginate = "never"
 
 [revsets]
-log = "(trunk | changeset | avalanche | @ | roots | dev-root | present(manilearn))"
+log = "(trunk | changeset | avalanche | @ | roots)"
 
 [revset-aliases]
 old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandheads | sigil_folded) | branches_and_sigils)"
@@ -22,8 +22,8 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 'stem(x)' = 'base(x)+ & ::x'
 
 'sandy-root' = 'latest(description("∅"))'
-'dev-root' = 'latest(description("∂"))'
 'roots' = 'sandy-root'
+'root' = 'sandy-root'
 'boneyard' = 'latest(description("boneyard") & mine())'
 'branches' = 'downstream(trunk, branches() | sandy-root) & mine() ~ boneyard::'
 'branches_and_sigils' = 'branches | (downstream(roots, sigils) & mine())'
@@ -34,6 +34,7 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 'stem' = 'stem(@)'
 'garbage' = '~(sandy-root:: | sandy-boneyard::) & mine() & ~(::trunk)'
 'trunk' = 'trunk()'
+'nextc' = 'roots(@:: & conflict())'
 
 'changeset' = 'downstream(trunk, stem::cap)'
 'avalanche' = 'downstream(trunk, branchesandheads)'
@@ -52,9 +53,10 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 'sigil_wip' = 'description(glob:"wip: *")'
 'sigil_plan' = 'description(glob:"plan: *")'
 'sigil_todo' = 'description(glob:"todo: *")'
+'sigil_idea' = 'description(glob:"idea: *")'
 'sigil_folded' = 'description(glob:"... *")'
 
-'sigils' = 'sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo'
+'sigils' = 'sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea'
 
 
 'tree' = "(trunk::) & mine()"

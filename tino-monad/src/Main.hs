@@ -161,6 +161,7 @@ keysToUnbind =
   , (modk, xK_r)
   , (modk, xK_h)
   , (modk, xK_l)
+  , (modk, xK_period)
   ]
 
 
@@ -293,6 +294,7 @@ shortcuts =
   , (xK_w, "https://workflowy.com")
   -- , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   -- , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1922138192530766354/edit")
+  , (xK_j, "https://docs.google.com/spreadsheets/d/1udeiGM0kxpk-LhfcrtbrDe3Hf60N11ol_h8lzRepvi8/edit?gid=1090125696#gid=1090125696")
   , (xK_p, "https://www.wellnessliving.com/rs/schedule/origins_parkour")
   , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")

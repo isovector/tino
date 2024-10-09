@@ -47,7 +47,7 @@ function jj_enabled() {
 }
 
 PROMPT='
-$(jj_enabled)%{$fg[yellow]%}$(places)%{$reset_color%} '
+$(jj_enabled)%{$fg[yellow]%}%~%{$reset_color%} '
 
 RPROMPT='%{$fg[green]%}%T%{$reset_color%}'
 

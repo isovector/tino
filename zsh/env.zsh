@@ -18,3 +18,5 @@ export NVIM_GTK_NO_HEADERBAR=1
 # export LD_PRELOAD="/opt/hdf5110/lib/libhdf5.so:$LD_RELOAD"
 
 export REVIEW_BASE=main
+
+eval "$(direnv hook zsh)"

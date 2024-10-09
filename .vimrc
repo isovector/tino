@@ -86,7 +86,6 @@ Plug 'junegunn/vim-easy-align'
 " Languages
 Plug 'neovimhaskell/haskell-vim'
 Plug 'vim-scripts/latex-support.vim'
-Plug 'rstacruz/sparkup'
 Plug 'scalameta/nvim-metals'
 Plug 'BeneCollyridam/futhark-vim'
 
@@ -596,19 +595,19 @@ augroup unmapCRInQuickfix
 augroup END
 
 
-autocmd VimLeave * system("echo '' | xcopy")
-
 " ------------------------------------------------------------------------------
                               " Filetype Settings
 " ------------------------------------------------------------------------------
 
 function! MarkdownFiletype()
-    setf ghmarkdown
+    setf markdown
     " Markdown link
     inoremap <buffer> <C-B><C-B> ****<Left><Left>
     nnoremap <buffer> zb z=1<CR><CR>
     imap <buffer> \ann <ESC>maysiv]%a(Ann)<space><esc>a
     set cc=81
+    set tw=80
+    set fo+=t
 endfunction
 
 function! AddHsPragma(kind, more)

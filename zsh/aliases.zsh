@@ -24,8 +24,12 @@ e() {
 alias -g .st="\`stack ide targets 2>&1 | fzf\`"
 
 alias hag='ag -G "hs$"'
-alias gs='jj st'
-alias gd='jj diff'
+alias gs='git status'
+alias gd='git diff'
+alias gc='git commit'
+alias gp='git push'
+alias js='jj st'
+alias jd='jj diff'
 alias git-ignore='git update-index --assume-unchanged'
 alias git-unignore='git update-index --no-assume-unchanged'
 
@@ -35,7 +39,7 @@ alias cs='jj -r changeset'
 alias prs='jj -r avalanche'
 alias plans="jj -r 'downstream(trunk(), sigil_plan) | sandy-root'"
 alias format="new Format && ./tools/format.sh -f all"
-alias golden="new Golden; add-parent dev-root; stack run -- --all --golden --update; rm-parent dev-root"
+alias golden="new Golden; stack run -- --all --golden --update"
 alias jp='jj git push -r cap'
 
 new() { jj new -B cap -m "$*" }
@@ -47,7 +51,9 @@ add-parent() { jj rebase -s @ -d "all:@- | ($1)" }
 rm-parent() { jj rebase -s @ -d "all:@- & ~($1)" }
 rebase-main() { jj git fetch && jj rebase -s sandy-root -d 'trunk()' }
 stack-pr() { jj new -r 'heads(@::)' -m "$*" }
-new-pr() { jj new -r dev-root -m "$*" }
+new-pr() { jj new -r root -m "$*" }
+
+graph() { stack run -- --profile $1 --debug; dot ./recent/graph_0000.dot -Tsvg -o /tmp/out.svg; brave /tmp/out.svg }
 
 avalancheimpl() {
   PRS=$(gh pr list)
