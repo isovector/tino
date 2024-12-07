@@ -9,7 +9,7 @@ if v:shell_error != 0
   " hdmi is connected
   set guifont=Liberation\ Mono:h7
 else
-  set guifont=Liberation\ Mono:h6
+  set guifont=Liberation\ Mono:h8
 endif
 
 " if exists('g:GtkGuiLoaded')

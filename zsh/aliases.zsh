@@ -78,6 +78,9 @@ avalanche() {
   avalancheimpl | sed 's/∅ #/main/'
 }
 
+steamrun() {
+  NIXPKGS_ALLOW_UNFREE=1 nix-shell -p steam-run --run "steam-run $*"
+}
 
 alias arbtt-today='arbtt-stats -o this-day --filter='"'"'$sampleage <24:00'"'"
 alias arbtt-week='arbtt-stats -o this-week --filter='"'"'$sampleage <168:00'"'"
@@ -92,4 +95,9 @@ countdown() {
   while [ "$date1" -ge `date +%s` ]; do
     echo -ne "\r$(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S) "; sleep 0.1s;
   done
+}
+
+# stupid work stuff
+rdnop(){
+    RABBIT_HOST=manifold5 stack run $* -- -p tools/config/onprem.json
 }

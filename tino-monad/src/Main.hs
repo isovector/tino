@@ -8,7 +8,8 @@ module Main where
 
 import           Control.Exception
 import           Control.Monad
-import           Data.Char (isSpace)
+import           Data.Char (isSpace, intToDigit)
+import Numeric (showIntAtBase)
 import           Data.Foldable
 import           Data.List (sort, intercalate, isInfixOf)
 import           Data.Maybe (fromJust)
@@ -262,6 +263,11 @@ myPP = def
   , ppWsSep = ", "
   , ppTitle = mappend "\"title\": "
             . show
+            . concatMap (\c ->
+                case fromEnum c of
+                  n | n >= 128 -> "\\u" <> showIntAtBase 16 intToDigit n ""
+                  _ -> pure c
+                )
             . T.unpack
             . T.replace "- NVIM" ""
             . T.replace "- Brave" ""
@@ -294,7 +300,7 @@ shortcuts =
   , (xK_w, "https://workflowy.com")
   -- , (xK_b, "https://docs.google.com/forms/d/e/1FAIpQLSdHnF9PrE2FQNopHcdJnz0xEXpAKIFb_lShzBzbCpPphyzFdA/viewform")
   -- , (xK_j, "https://next.waveapps.com/5ff1dd74-11d9-4710-83a3-534a35ce9e70/invoices/1922138192530766354/edit")
-  , (xK_j, "https://docs.google.com/spreadsheets/d/1udeiGM0kxpk-LhfcrtbrDe3Hf60N11ol_h8lzRepvi8/edit?gid=1090125696#gid=1090125696")
+  , (xK_j, "https://docs.google.com/spreadsheets/d/1udeiGM0kxpk-LhfcrtbrDe3Hf60N11ol_h8lzRepvi8/edit?gid=563104560#gid=563104560")
   , (xK_p, "https://www.wellnessliving.com/rs/schedule/origins_parkour")
   , (xK_t, "https://www.rememberthemilk.com/app/#list/48436173")
   , (xK_a, "http://192.168.1.2:8123/")
