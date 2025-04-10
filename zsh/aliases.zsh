@@ -33,27 +33,37 @@ alias jd='jj diff'
 alias git-ignore='git update-index --assume-unchanged'
 alias git-unignore='git update-index --no-assume-unchanged'
 
-alias l='jj -r'
+alias l='jj log -r'
 
 alias cs='jj -r changeset'
 alias prs='jj -r avalanche'
 alias plans="jj -r 'downstream(trunk(), sigil_plan) | sandy-root'"
 alias format="new Format && ./tools/format.sh -f all"
 alias golden="new Golden; stack run -- --all --golden --update"
-alias jp='jj git push -r cap'
+alias jp='jj git push -r cap --allow-new'
 
 new() { jj new -B cap -m "$*" }
 bnew() { jj new -B @ -m "$*" }
-newb() { jj new -B @ -m "$*" }
+anew() { jj new -A @ -m "$*" }
 desc() { jj describe -m "$*" }
 a() { alias $1="cd $PWD"; }
 add-parent() { jj rebase -s @ -d "all:@- | ($1)" }
 rm-parent() { jj rebase -s @ -d "all:@- & ~($1)" }
-rebase-main() { jj git fetch && jj rebase -s sandy-root -d 'trunk()' }
+rebase-main() { jj git fetch -b main && jj rebase -s sandy-root -d 'trunk()' }
 stack-pr() { jj new -r 'heads(@::)' -m "$*" }
 new-pr() { jj new -r root -m "$*" }
 
-graph() { stack run -- --profile $1 --debug; dot ./recent/graph_0000.dot -Tsvg -o /tmp/out.svg; brave /tmp/out.svg }
+graph() { stack run -- --profile $1 --debug; mmdc -o /tmp/$1.${2:-pdf} -i ./recent/$1/artifact/artifact_0002.mmd ; xdg-open /tmp/$1.${2:-pdf} &! }
+
+testdiff() {
+    rm -r /tmp/diff-first /tmp/diff-second
+    jj edit $2
+    stack run -- --profile $1 --debug
+    cp -Rv ./recent/$1/artifact /tmp/diff-first
+    jj edit $3
+    stack run -- --profile $1 --debug
+    cp -Rv ./recent/$1/artifact /tmp/diff-second
+}
 
 avalancheimpl() {
   PRS=$(gh pr list)
@@ -70,7 +80,7 @@ avalancheimpl() {
     else
       echo $LINE
     fi
-  done < <(jj -r 'branches & (sandy-root::)' -T '" "++description.remove_suffix("\n")++" #"++ branches')
+  done < <(jj -r 'branches & (sandy-root::)' -T '" "++description.remove_suffix("\n")++" #"')
   echo '```'
 }
 

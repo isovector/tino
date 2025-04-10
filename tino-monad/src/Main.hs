@@ -163,6 +163,7 @@ keysToUnbind =
   , (modk, xK_h)
   , (modk, xK_l)
   , (modk, xK_period)
+  , (modk, xK_comma)
   ]
 
 
@@ -231,7 +232,7 @@ keysToBind =
   , ((modk .|. shiftMask, xK_Left),  shiftNextScreen >> nextScreen)
   , ((modk .|. shiftMask, xK_Right), shiftPrevScreen >> prevScreen)
 
-  , ((modk, xK_comma), spawn "eww update revealInfo=true; sleep 3s; eww update revealInfo=false")
+  -- , ((modk, xK_comma), spawn "eww update revealInfo=true; sleep 3s; eww update revealInfo=false")
   ] ++ fmap (uncurry mkShortcut) shortcuts
 
 
@@ -331,7 +332,7 @@ kdeOverride = ask >>= \w -> liftX $ do
 
 feh :: X ()
 feh =
-  spawn "feh --bg-fill ./.wallpapers/eDP-1.jpg ./.wallpapers/HDMI-1.jpg ./.wallpapers/DP-1.jpg"
+  spawn "feh --bg-tile ./.wallpapers/tiles.jpeg"
 
 homeDir :: FilePath
 homeDir = "/home/sandy"

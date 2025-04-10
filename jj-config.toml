@@ -3,17 +3,18 @@ name = "Sandy Maguire"
 email = "sandy@sandymaguire.me"
 
 [ui]
-default-command = 'log'
-# diff.tool = ["difft", "--color=always", "$left", "$right"]
+default-command = ['log', '--reversed']
+# diff.tool = ["difft", "--color=always", "--display=side-by-side", "$left", "$right"]
 merge-editor = ["meld", "$left", "$base", "$right", "-o", "$output"]
 log-synthetic-elided-nodes = false
-# paginate = "never"
+
+
 
 [revsets]
 log = "(trunk | changeset | avalanche | @ | roots)"
 
 [revset-aliases]
-old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandheads | sigil_folded) | branches_and_sigils)"
+old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
 'downstream(x,y)' = '(x::y) & y'
 'upstream(x,y)' = '(y::x) & y'
 'base(x)' = 'latest(branches_and_sigils::x- & branches_and_sigils)'
@@ -25,22 +26,19 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 'roots' = 'sandy-root'
 'root' = 'sandy-root'
 'boneyard' = 'latest(description("boneyard") & mine())'
-'branches' = 'downstream(trunk, branches() | sandy-root) & mine() ~ boneyard::'
+'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine() ~ boneyard::'
 'branches_and_sigils' = 'branches | (downstream(roots, sigils) & mine())'
 'branchesandheads' = '(branches_and_sigils | (heads(trunk::) & mine()))'
 'base' = 'base(@)'
 'cap' = 'cap(@)'
 'ctx' = 'ctx(@)'
 'stem' = 'stem(@)'
-'garbage' = '~(sandy-root:: | sandy-boneyard::) & mine() & ~(::trunk)'
+'garbage' = '~(sandy-root:: | boneyard::) & mine() & ~(::trunk)'
 'trunk' = 'trunk()'
 'nextc' = 'roots(@:: & conflict())'
 
 'changeset' = 'downstream(trunk, stem::cap)'
 'avalanche' = 'downstream(trunk, branchesandheads)'
-
-'hide(what, dueto)' = 'what & ~(dueto::)'
-'hide_folded(what)' = 'hide(what, (sigil_folded ~ upstream(@, sigil_folded))+)'
 
 'sigil_feat' = 'description(glob:"feat: *")'
 'sigil_fix' = 'description(glob:"fix: *")'
@@ -54,9 +52,12 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 'sigil_plan' = 'description(glob:"plan: *")'
 'sigil_todo' = 'description(glob:"todo: *")'
 'sigil_idea' = 'description(glob:"idea: *")'
+'sigil_ci' = 'description(glob:"ci: *")'
+'sigil_checkpoint' = 'description(glob:"checkpoint: *")'
+'sigil_tool' = 'description(glob:"tool: *")'
 'sigil_folded' = 'description(glob:"... *")'
 
-'sigils' = 'sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea'
+'sigils' = 'sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea | sigil_ci | sigil_tool | sigil_folded | sigil_checkpoint'
 
 
 'tree' = "(trunk::) & mine()"
@@ -65,3 +66,35 @@ old_log = "@ | roots | base::@ | @::cap | hide_folded(downstream(@, branchesandh
 # 'format_short_id(id)' = 'id.shortest()'
 'format_timestamp(timestamp)'="timestamp.ago()"
 
+[signing]
+sign-all = true
+backend = "ssh"
+key = "~/.ssh/id_rsa.pub"
+
+[fix.tools.maniga-format]
+command = ["fourmolu", "--mode", "stdout", "--check-idempotence", "--stdin-input-file", "$path"]
+
+patterns = ["glob:'**/*.hs'"]
+# command = ["/home/sandy/prj/manifold/maniga/tools/format.sh", "-f $path"]
+
+[git]
+subprocess=true
+
+[[--scope]]
+--when.commands = ["log"]
+
+[--scope.ui]
+paginate = "never"
+
+[templates]
+draft_commit_description = '''
+concat(
+  description,
+  surround(
+    "\nJJ: This commit contains the following changes:\n", "",
+    indent("JJ:     ", diff.stat(72)),
+  ),
+  "\nJJ: ignore-rest\n",
+  diff.git(),
+)
+'''

@@ -9,7 +9,7 @@ if v:shell_error != 0
   " hdmi is connected
   set guifont=Liberation\ Mono:h7
 else
-  set guifont=Liberation\ Mono:h8
+  set guifont=Liberation\ Mono:h6
 endif
 
 " if exists('g:GtkGuiLoaded')
@@ -28,6 +28,7 @@ endif
 let $PATH = $PATH . ':' . expand('~/.local/bin')
 let $PATH = $PATH . ':' . expand('~/.cabal/bin')
 let $PATH = $PATH . ':' . expand('~/.ghcup/bin')
+let $FZF_DEFAULT_COMMAND = 'ag -l -g ""'
 
 
 
@@ -38,7 +39,7 @@ call plug#begin('~/.vim/plugged')
 
 " Development
 Plug 'isovector/ghci.vim', { 'for': 'haskell' }
-Plug 'isovector/cornelis'
+" Plug 'isovector/cornelis'
 
 " Libraries
 Plug 'vim-scripts/L9'
@@ -63,6 +64,8 @@ Plug 'ctrlpvim/ctrlp.vim'
 
 " Misc
 " Plug 'Shougo/neosnippet'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
 
 " system clipboard
 Plug 'vim-scripts/tregisters'
@@ -110,6 +113,7 @@ Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
 Plug 'fielding/vice'
+Plug 'agude/vim-eldar'
 
 " Textobjs
 " expanded %
@@ -170,7 +174,7 @@ nnoremap zC zc
 nnoremap <leader>m :! (cd `git rev-parse --show-toplevel`; make)<CR>
 nnoremap <leader>g :silent! grep!  <BS>
 nnoremap K :silent! grep! <cword><CR>:copen<CR>
-nnoremap <leader>f ::CtrlPMRUFiles<CR>
+nnoremap <leader>f :FZF!<CR>
 nnoremap <leader>l :TagbarToggle<CR>
 
 nnoremap <leader>wc :! wc %<CR>
@@ -401,8 +405,8 @@ noremap <silent> <C-F12> :vertical resize +10<CR>
 nnoremap <silent> <C-c> :copen<CR>
 
 " Buffer list
-nnoremap gb :ls<CR>:b<Space>
-" nnoremap gb :Telescope buffers<CR>
+" nnoremap gb :ls<CR>:b<Space>
+nnoremap gb :Buffers<CR>
 
 
 
@@ -529,7 +533,7 @@ endif
 
 set guioptions=ac
 set background=dark
-colo ego
+colo eldar
 " set background=light
 
 " Rainbow colored parentheses
@@ -549,6 +553,8 @@ let g:rainbow#colors = {
 \   ] }
 
 " 2mat ErrorMsg '\%81v.'
+
+set diffopt+=iwhiteall
 
 set statusline=
 set statusline +=%3*%y%*                "file type
@@ -738,6 +744,9 @@ function! AgdaMarkdownFiletype()
 endfunction
 
 
+command! -bang WorkRecent call fzf#vim#files('/home/sandy/prj/manifold/maniga/recent', <bang>0)
+nnoremap <leader>gr :WorkRecent!<cr>
+
 function! HaskellFiletype()
     nnoremap <buffer> <leader>eh :e %-boot<cr>
     let b:surround_112="{-# \r #-}"
@@ -786,6 +795,8 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
     nnoremap <buffer> -- O-- \|<space>
+    nnoremap <buffer> <leader><leader>ms magg/^import<CR>Oimport Manifold.Term.Syntax qualified as T<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>mt magg/^import<CR>Oimport Manifold.Term.Syntax qualified as T<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>gg magg/^import<CR>Oimport GHC.Generics<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>db magg/^import<CR>Oimport Data.Bool<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
@@ -990,7 +1001,7 @@ endfunction
 
 if has("nvim")
 
-tnoremap <ESC> <C-\><C-n>:set relativenumber<CR>
+" tnoremap <ESC> <C-\><C-n>:set relativenumber<CR>
 highlight TermCursor ctermfg=red guifg=red
 
 func! MaybeInsertMode(direction)

@@ -37,11 +37,11 @@ parse_git_dirty() {
 }
 
 function jj_enabled() {
-  if jj st &> /dev/null; then
-    local REV=$(jj st | grep 'Working copy :' | cut -d' ' -f4)
-    echo -n "%{$fg_bold[green]%}@${REV} "
-  else
+  local REV=$((jj st | grep 'Working copy :' | cut -d' ' -f4) 2> /dev/null)
+  if [ -z "${REV}" ]; then
     echo -n "%{$fg_bold[red]%}➜  $(git_prompt_info)"
+  else
+    echo -n "%{$fg_bold[green]%}@${REV} "
   fi
   echo "%{$reset_color%}"
 }

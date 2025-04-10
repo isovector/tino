@@ -20,3 +20,8 @@ export NVIM_GTK_NO_HEADERBAR=1
 export REVIEW_BASE=main
 
 eval "$(direnv hook zsh)"
+
+# export FZF_DEFAULT_COMMAND='fd --type f --strip-cwd-prefix'
+export FZF_DEFAULT_COMMAND='ag -l -g ""'
+export FZF_ALT_C_COMMAND="find . -type d -not -path '*/.*'"
+export TERM=xterm-256color

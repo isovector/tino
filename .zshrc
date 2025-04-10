@@ -7,6 +7,7 @@ zstyle :compinstall filename "$HOME/.zshrc"
 autoload -Uz compinit
 autoload -U add-zsh-hook
 compinit
+source <(jj util completion zsh)
 
 HISTFILE=~/.histfile
 HISTSIZE=1000000
@@ -31,3 +32,12 @@ case $TERM in
 esac
 
 [ -f "/home/sandy/.ghcup/env" ] && source "/home/sandy/.ghcup/env" # ghcup-env
+
+source <(fzf --zsh)
+
+fzf-history-widget-accept() {
+  fzf-history-widget
+  # zle accept-line
+}
+zle     -N     fzf-history-widget-accept
+bindkey '^R' fzf-history-widget-accept
