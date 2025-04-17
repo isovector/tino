@@ -14,50 +14,51 @@ log-synthetic-elided-nodes = false
 log = "(trunk | changeset | avalanche | @ | roots)"
 
 [revset-aliases]
+
+'pruner(x)' = "1bdfdf35:: & x"
+
 old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
-'downstream(x,y)' = '(x::y) & y'
+'downstream(x,y)' = 'reachable(pruner(x::), pruner(y))'
 'upstream(x,y)' = '(y::x) & y'
 'base(x)' = 'latest(branches_and_sigils::x- & branches_and_sigils)'
 'cap(x)' = 'roots(x:: & branchesandheads)'
 'ctx(x)' = 'x---::x+++'
 'stem(x)' = 'base(x)+ & ::x'
 
-'sandy-root' = 'latest(description("∅"))'
+'sandy-root' = 'latest(pruner(description("∅")))'
 'roots' = 'sandy-root'
 'root' = 'sandy-root'
-'boneyard' = 'latest(description("boneyard") & mine())'
-'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine() ~ boneyard::'
-'branches_and_sigils' = 'branches | (downstream(roots, sigils) & mine())'
-'branchesandheads' = '(branches_and_sigils | (heads(trunk::) & mine()))'
+'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine()'
+'branches_and_sigils' = 'pruner(branches | (downstream(roots, sigils)))'
+'branchesandheads' = '(branches_and_sigils)'
 'base' = 'base(@)'
 'cap' = 'cap(@)'
 'ctx' = 'ctx(@)'
 'stem' = 'stem(@)'
-'garbage' = '~(sandy-root:: | boneyard::) & mine() & ~(::trunk)'
 'trunk' = 'trunk()'
 'nextc' = 'roots(@:: & conflict())'
 
 'changeset' = 'downstream(trunk, stem::cap)'
-'avalanche' = 'downstream(trunk, branchesandheads)'
+'avalanche' = 'branchesandheads'
 
-'sigil_feat' = 'description(glob:"feat: *")'
-'sigil_fix' = 'description(glob:"fix: *")'
-'sigil_refactor' = 'description(glob:"refactor: *")'
-'sigil_perf' = 'description(glob:"perf: *")'
-'sigil_design' = 'description(glob:"design: *")'
-'sigil_doc' = 'description(glob:"doc: *")'
-'sigil_chore' = 'description(glob:"chore: *")'
-'sigil_test' = 'description(glob:"test: *")'
-'sigil_wip' = 'description(glob:"wip: *")'
-'sigil_plan' = 'description(glob:"plan: *")'
-'sigil_todo' = 'description(glob:"todo: *")'
-'sigil_idea' = 'description(glob:"idea: *")'
-'sigil_ci' = 'description(glob:"ci: *")'
-'sigil_checkpoint' = 'description(glob:"checkpoint: *")'
-'sigil_tool' = 'description(glob:"tool: *")'
-'sigil_folded' = 'description(glob:"... *")'
+'sigil_feat' = 'mine() & description(glob:"feat: *")'
+'sigil_fix' = 'mine() & description(glob:"fix: *")'
+'sigil_refactor' = 'mine() & description(glob:"refactor: *")'
+'sigil_perf' = 'mine() & description(glob:"perf: *")'
+'sigil_design' = 'mine() & description(glob:"design: *")'
+'sigil_doc' = 'mine() & description(glob:"doc: *")'
+'sigil_chore' = 'mine() & description(glob:"chore: *")'
+'sigil_test' = 'mine() & description(glob:"test: *")'
+'sigil_wip' = 'mine() & description(glob:"wip: *")'
+'sigil_plan' = 'mine() & description(glob:"plan: *")'
+'sigil_todo' = 'mine() & description(glob:"todo: *")'
+'sigil_idea' = 'mine() & description(glob:"idea: *")'
+'sigil_ci' = 'mine() & description(glob:"ci: *")'
+'sigil_checkpoint' = 'mine() & description(glob:"checkpoint: *")'
+'sigil_tool' = 'mine() & description(glob:"tool: *")'
+'sigil_folded' = 'mine() & description(glob:"... *")'
 
-'sigils' = 'sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea | sigil_ci | sigil_tool | sigil_folded | sigil_checkpoint'
+'sigils' = 'pruner(sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea | sigil_ci | sigil_tool | sigil_folded | sigil_checkpoint)'
 
 
 'tree' = "(trunk::) & mine()"
@@ -79,6 +80,8 @@ patterns = ["glob:'**/*.hs'"]
 
 [git]
 subprocess=true
+auto_import = false
+auto_export = false
 
 [[--scope]]
 --when.commands = ["log"]

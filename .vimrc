@@ -240,18 +240,15 @@ nnoremap <leader>ct :cd ~/.tino/
                                  " Quick Edits
 " ------------------------------------------------------------------------------
 nnoremap <leader>ev :e ~/.vimrc<cr>
+nnoremap <leader>em :e ~/.config/neomutt/neomuttrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
-nnoremap <leader>el :e ~/.vimrc.local<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
 nnoremap <leader>ex :e ~/.config/xmonad/xmonad.hs<cr>
 nnoremap <leader>en :e /etc/nixos/configuration.nix<cr>
 nnoremap <leader>ej :e ~/.config/jj/config.toml<cr>
-nnoremap <leader>ew :e ~/.w3m/keymap<cr>
 nnoremap <leader>ey :e ~/.config/eww/eww.yuck<cr>
-nnoremap <leader>ez :e ~/.zshrc.local<cr>
 nnoremap <leader>ec :e ~/.arbtt/categorize.cfg<cr>
 nnoremap <leader>ee <C-w><C-v><C-l>:e ~/.notebook.db<cr>:vertical resize 84<cr>
-nnoremap <leader>ep :call EditPcfbFile()<cr>
 
 function! EditPcfbFile()
   let file = system("date +'%Y-%m-%d'")

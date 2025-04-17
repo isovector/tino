@@ -37,7 +37,7 @@ parse_git_dirty() {
 }
 
 function jj_enabled() {
-  local REV=$((jj st | grep 'Working copy :' | cut -d' ' -f4) 2> /dev/null)
+  local REV=$((jj st --config revsets.log=@ | grep 'Working copy :' | cut -d' ' -f4) 2> /dev/null)
   if [ -z "${REV}" ]; then
     echo -n "%{$fg_bold[red]%}➜  $(git_prompt_info)"
   else

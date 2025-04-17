@@ -25,3 +25,4 @@ eval "$(direnv hook zsh)"
 export FZF_DEFAULT_COMMAND='ag -l -g ""'
 export FZF_ALT_C_COMMAND="find . -type d -not -path '*/.*'"
 export TERM=xterm-256color
+export ESCDELAY=100
