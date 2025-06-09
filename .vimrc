@@ -128,7 +128,6 @@ Plug 'deris/vim-shot-f'
 Plug 'michaeljsmith/vim-indent-object'
 Plug 'justinmk/vim-sneak'
 
-" Plug 'neoclide/coc.nvim', {'branch': 'master', 'do': 'yarn install --frozen-lockfile'}
 
 " cornelis
 Plug 'neovimhaskell/nvim-hs.vim'
@@ -149,8 +148,6 @@ syntax on
 let g:solarized_termcolors=256
 set t_Co=256
 set background=light
-
-let g:coc_enable_locationlist=0
 
 
 
@@ -759,10 +756,6 @@ function! HaskellFiletype()
     inoremap <buffer> <localleader>[[ ⟦
     inoremap <buffer> <localleader>]] ⟧
 
-    nmap <buffer> <silent> [g <Plug>(coc-diagnostic-prev)
-    nmap <buffer> <silent> ]g <Plug>(coc-diagnostic-next)
-    nmap <buffer> <silent> gd <Plug>(coc-definition)
-
     nnoremap <buffer> <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
     nnoremap <buffer> <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
 
@@ -819,12 +812,6 @@ function! HaskellFiletype()
     syntax keyword haskellDecl Show Read Dict1 Dict2 Monad Num Fractional Real Floating Integral Eq Ord Applicative Functor
     syntax keyword haskellBottom DemoteRep Proxy Type Typeable
     syntax keyword haskellKeyword m
-
-    nnoremap <buffer> <silent> <space>r  :<C-u>set operatorfunc=<SID>WingmanRefine<CR>g@l
-    nnoremap <buffer> <silent> <space>d  :<C-u>set operatorfunc=<SID>WingmanDestruct<CR>g@l
-    nnoremap <buffer> <silent> <space>n  :<C-u>set operatorfunc=<SID>WingmanFillHole<CR>g@l
-    nnoremap <buffer> <silent> <space>c  :<C-u>set operatorfunc=<SID>WingmanUseCtor<CR>g@l
-    nnoremap <buffer> <silent> <space>a  :<C-u>set operatorfunc=<SID>WingmanDestructAll<CR>g@l
 endfunction
 
 " Set filetypes
@@ -961,6 +948,11 @@ endfunction
 nnoremap <expr> e <SID>bufSwitch(v:count)
 
 
+function! s:countup(count)
+    return ":\<C-U>call append(line('.'), map(range(0," . a:count . " - 1), 'v:val'))\<CR>"
+endfunction
+nnoremap <expr> <leader>n <SID>countup(v:count)
+
 
 " ------------------------------------------------------------------------------
                            " Source Local Definitions
@@ -1025,44 +1017,6 @@ nnoremap <silent> <c-l> :call MaybeInsertMode("l")<cr>
 endif
 
 
-" COC stuff
-
-xmap <leader>xa  <Plug>(coc-codeaction-selected)
-nmap <leader>xa  <Plug>(coc-codeaction-selected)
-nmap <c-space> <space>xal
-
-nmap <silent> <space>e  <Plug>(coc-codelens-action)
-
-function! s:GotoNextHole()
-  sleep 500m
-  normal 0
-  call CocActionAsync('diagnosticNext', 'hint')
-endfunction
-
-function! s:WingmanRefine(type)
-  call CocAction('codeAction', a:type, ['refactor.wingman.refine'])
-  call <SID>GotoNextHole()
-endfunction
-
-function! s:WingmanDestruct(type)
-  call CocAction('codeAction', a:type, ['refactor.wingman.caseSplit'])
-  call <SID>GotoNextHole()
-endfunction
-
-function! s:WingmanDestructAll(type)
-  call CocAction('codeAction', a:type, ['refactor.wingman.splitFuncArgs'])
-  call <SID>GotoNextHole()
-endfunction
-
-function! s:WingmanFillHole(type)
-  call CocAction('codeAction', a:type, ['refactor.wingman.fillHole'])
-  call <SID>GotoNextHole()
-endfunction
-
-function! s:WingmanUseCtor(type)
-  call CocAction('codeAction', a:type, ['refactor.wingman.useConstructor'])
-  call <SID>GotoNextHole()
-endfunction
 
 " Remove search highlighting
 nnoremap <silent> <leader><space>  :noh<cr>
@@ -1082,14 +1036,6 @@ else
   set signcolumn=yes
 endif
 " nnoremap <silent> K :call <SID>show_documentation()<CR>
-
-function! s:show_documentation()
-  if (index(['vim','help'], &filetype) >= 0)
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
 
 let g:ctrlp_working_path_mode = 'r'
 let g:ctrlp_mruf_relative = 1

@@ -15,7 +15,7 @@ log = "(trunk | changeset | avalanche | @ | roots)"
 
 [revset-aliases]
 
-'pruner(x)' = "1bdfdf35:: & x"
+'pruner(x)' = "mutable() & x"
 
 old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
 'downstream(x,y)' = 'reachable(pruner(x::), pruner(y))'

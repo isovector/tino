@@ -3,6 +3,8 @@ alias diff='git diff --'
 alias diffp='git diff --patience --'
 alias pacman='sudo pacman'
 
+alias dotfiles="git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
+
 alias calc='(cd && stack ghci)'
 
 alias xcopy='xclip -selection c'
