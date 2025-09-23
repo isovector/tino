@@ -54,6 +54,7 @@ rm-parent() { jj rebase -s @ -d "all:@- & ~($1)" }
 rebase-main() { jj git fetch -b main && jj rebase -s sandy-root -d 'trunk()' }
 stack-pr() { jj new -r 'heads(@::)' -m "$*" }
 new-pr() { jj new -r root -m "$*" }
+kill-pr() { jj abandon -r "pr($1)"}
 
 graph() { stack run -- --profile $1 --debug; mmdc -o /tmp/$1.${2:-pdf} -i ./recent/$1/artifact/artifact_0002.mmd ; xdg-open /tmp/$1.${2:-pdf} &! }
 
@@ -107,6 +108,21 @@ countdown() {
   while [ "$date1" -ge `date +%s` ]; do
     echo -ne "\r$(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S) "; sleep 0.1s;
   done
+}
+
+eliminate() {
+total=0
+
+for f in $(git ls-files '*.hs'); do
+  count=$(git --no-pager blame --line-porcelain "$f" \
+            | grep -c "^author $1")
+  if [ "$count" -gt 0 ]; then
+    echo "$f: $count"
+    total=$((total + count))
+  fi
+done
+
+echo "Total lines by $1: $total"
 }
 
 # stupid work stuff

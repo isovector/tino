@@ -9,7 +9,7 @@ if v:shell_error != 0
   " hdmi is connected
   set guifont=Liberation\ Mono:h7
 else
-  set guifont=Liberation\ Mono:h6
+  set guifont=Liberation\ Mono:h10
 endif
 
 " if exists('g:GtkGuiLoaded')
@@ -39,7 +39,7 @@ call plug#begin('~/.vim/plugged')
 
 " Development
 Plug 'isovector/ghci.vim', { 'for': 'haskell' }
-" Plug 'isovector/cornelis'
+Plug 'isovector/cornelis'
 
 " Libraries
 Plug 'vim-scripts/L9'
@@ -56,7 +56,7 @@ Plug 'tpope/vim-repeat'
 Plug 'majutsushi/tagbar'
 Plug 'vim-scripts/vim-lamdify'
 Plug 'junegunn/rainbow_parentheses.vim'
-Plug 'ap/vim-buftabline'
+Plug 'jose-elias-alvarez/buftabline.nvim'
 " Plug 'yssl/QFEnter'
 
 " Navigation
@@ -96,7 +96,6 @@ Plug 'BeneCollyridam/futhark-vim'
 Plug 'altercation/vim-colors-solarized'
 Plug 'ptrr/phd-vim'
 Plug 'ciaranm/inkpot'
-Plug 'ajh17/Spacegray.vim'
 Plug 'nanotech/jellybeans.vim'
 Plug 'ronny/birds-of-paradise.vim'
 Plug 'ratazzi/blackboard.vim'
@@ -109,7 +108,6 @@ Plug 'lanox/lanox-vim-theme'
 Plug 'pkukulak/idle'
 Plug 'mhartington/oceanic-next'
 Plug 'geetarista/ego.vim'
-Plug 'monkoose/boa.vim'
 Plug 'euclio/vim-nocturne'
 Plug 'fenetikm/falcon'
 Plug 'fielding/vice'
@@ -142,6 +140,8 @@ Plug 'smjonas/live-command.nvim'
 " let g:cornelis_max_size = 19
 " let g:cornelis_split_direction = 'Vertical'
 call plug#end()
+lua require("buftabline").setup {buffer_id_index = true}
+
 
 
 syntax on
@@ -240,7 +240,7 @@ nnoremap <leader>ev :e ~/.vimrc<cr>
 nnoremap <leader>em :e ~/.config/neomutt/neomuttrc<cr>
 nnoremap <leader>et :e ~/.tino/bin/tino<cr>
 nnoremap <leader>ea :e ~/.tino/zsh/aliases.zsh<cr>
-nnoremap <leader>ex :e ~/.config/xmonad/xmonad.hs<cr>
+nnoremap <leader>ex :e /etc/nixos/xmonad.hs<cr>
 nnoremap <leader>en :e /etc/nixos/configuration.nix<cr>
 nnoremap <leader>ej :e ~/.config/jj/config.toml<cr>
 nnoremap <leader>ey :e ~/.config/eww/eww.yuck<cr>
@@ -485,7 +485,6 @@ nnoremap <expr> PP SetPasteOver()
 " Regular copy and paste
 set iminsert=1
 set imsearch=1
-set imcmdline
 lnoremap <C-v> <C-r><C-o>+
 set clipboard+=unnamedplus
 
@@ -508,7 +507,6 @@ let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs\
                                 " GUI and Colors
 " ------------------------------------------------------------------------------
 if has("gui_running")
-    set guitablabel=%-0.12t%M
     set showtabline=2
     " au BufAdd * :RainbowParentheses
 
@@ -525,9 +523,8 @@ else
     set t_Co=256
 endif
 
-set guioptions=ac
 set background=dark
-colo eldar
+colo ego
 " set background=light
 
 " Rainbow colored parentheses
@@ -636,7 +633,7 @@ endfunction
 function! AgdaFiletype()
     setlocal nospell
     inoremap <buffer> <localleader> <C-O>:call cornelis#prompt_input()<CR>
-    set cc=64,81
+    " set cc=64,81
     let b:surround_104="{! \r !}"
     let b:surround_112="{-# \r #-}"
     let b:surround_105="⦃ \r ⦄"
@@ -744,6 +741,7 @@ nnoremap <leader>gr :WorkRecent!<cr>
 function! HaskellFiletype()
     nnoremap <buffer> <leader>eh :e %-boot<cr>
     let b:surround_112="{-# \r #-}"
+    let b:surround_115="[|\r|]"
 
     nnoremap <buffer> <leader>m yyp0f:C= _<esc>
     " set formatprg=stylish-haskell
@@ -755,6 +753,8 @@ function! HaskellFiletype()
 
     inoremap <buffer> <localleader>[[ ⟦
     inoremap <buffer> <localleader>]] ⟧
+
+    nnoremap <buffer> <leader><leader>i mx<C-]>gg/\v^module<CR>0y2t :e #<CR>gg/import<cr>O<esc>P0cwimport<esc>`x
 
     nnoremap <buffer> <buffer> [[ ?\v^[^ ]* +::<CR>:noh<CR>
     nnoremap <buffer> <buffer> ]] /\v^[^ ]* +::<CR>:noh<CR>
@@ -1041,7 +1041,8 @@ let g:ctrlp_working_path_mode = 'r'
 let g:ctrlp_mruf_relative = 1
 let g:ctrlp_mruf_exclude = '.jj'
 
-let g:neovide_cursor_vfx_mode = "ripple"
+let g:neovide_cursor_vfx_mode = ""
+let g:neovide_cursor_animate_in_insert_mode = v:false
 
 nnoremap J :set operatorfunc=Joinoperator<CR>g@
 nnoremap JJ J

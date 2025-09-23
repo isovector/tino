@@ -37,19 +37,17 @@ parse_git_dirty() {
 }
 
 function jj_enabled() {
-  local REV=$((jj st --config revsets.log=@ | grep 'Working copy :' | cut -d' ' -f4) 2> /dev/null)
+  local REV=$((jj st --config revsets.log=@ | grep '(@)' | cut -d' ' -f6) 2> /dev/null)
   if [ -z "${REV}" ]; then
-    echo -n "%{$fg_bold[red]%}➜  $(git_prompt_info)"
+    echo -n "$(git_prompt_info)"
   else
-    echo -n "%{$fg_bold[green]%}@${REV} "
+    echo -n "${REV} "
   fi
   echo "%{$reset_color%}"
 }
 
 PROMPT='
-$(jj_enabled)%{$fg[yellow]%}%~%{$reset_color%} '
-
-RPROMPT='%{$fg[green]%}%T%{$reset_color%}'
+%{$fg[blue]%}%T%{$reset_color%} $(jj_enabled)%{$fg[yellow]%}%~%{$reset_color%} '
 
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[red]%}%{$reset_color%}%{$fg[green]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "

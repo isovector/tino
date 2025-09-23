@@ -8,12 +8,15 @@ default-command = ['log', '--reversed']
 merge-editor = ["meld", "$left", "$base", "$right", "-o", "$output"]
 log-synthetic-elided-nodes = false
 
+[aliases]
+new-dev = ["new", "-m", "∅", "-r", "main"]
 
 
 [revsets]
 log = "(trunk | changeset | avalanche | @ | roots)"
 
 [revset-aliases]
+boneyard = 'zzroqqup'
 
 'pruner(x)' = "mutable() & x"
 
@@ -24,19 +27,21 @@ old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
 'cap(x)' = 'roots(x:: & branchesandheads)'
 'ctx(x)' = 'x---::x+++'
 'stem(x)' = 'base(x)+ & ::x'
+'pr(x)' = 'stem(x)::cap(x)'
+'pr' = 'pr(@)'
 
-'sandy-root' = 'latest(pruner(description("∅")))'
+'sandy-root' = 'coalesce(latest(pruner(description("∅"))), heads(::trunk() & ::@))'
 'roots' = 'sandy-root'
 'root' = 'sandy-root'
 'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine()'
 'branches_and_sigils' = 'pruner(branches | (downstream(roots, sigils)))'
 'branchesandheads' = '(branches_and_sigils)'
 'base' = 'base(@)'
-'cap' = 'cap(@)'
+'cap' = 'coalesce(cap(@), heads(@::))'
 'ctx' = 'ctx(@)'
-'stem' = 'stem(@)'
+'stem' = 'coalesce(stem(@), sandy-root)'
 'trunk' = 'trunk()'
-'nextc' = 'roots(@:: & conflict())'
+'nextc' = 'roots(@:: & conflicts())'
 
 'changeset' = 'downstream(trunk, stem::cap)'
 'avalanche' = 'branchesandheads'
@@ -68,7 +73,7 @@ old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
 'format_timestamp(timestamp)'="timestamp.ago()"
 
 [signing]
-sign-all = true
+behavior = "own"
 backend = "ssh"
 key = "~/.ssh/id_rsa.pub"
 
@@ -79,7 +84,6 @@ patterns = ["glob:'**/*.hs'"]
 # command = ["/home/sandy/prj/manifold/maniga/tools/format.sh", "-f $path"]
 
 [git]
-subprocess=true
 auto_import = false
 auto_export = false
 
