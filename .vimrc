@@ -7,7 +7,7 @@ set rtp +=~/.vim
 let output = system("xrandr | grep '^HDMI-1 disconnected'")
 if v:shell_error != 0
   " hdmi is connected
-  set guifont=Liberation\ Mono:h7
+  set guifont=Liberation\ Mono:h12
 else
   set guifont=Liberation\ Mono:h10
 endif
@@ -189,7 +189,6 @@ vnoremap <leader>sl :sort<Cr>gv:! awk '{ print length(), $0 \| "sort -n \| cut -
 
 nnoremap <silent> <leader>sT :set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/tags<CR>
 nnoremap <silent> <leader>st :! (cd `git rev-parse --show-toplevel`; hasktags **/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/tags<CR>
-nnoremap <silent> <leader>sgt :! (cd `git rev-parse --show-toplevel`; hasktags compiler/**/*.hs)<CR>:set tags=<C-R>=system("git rev-parse --show-toplevel")<CR><BS>/ctags<CR>
 
 function! MkHsModuleName(dir, path)
   return substitute(a:path[], '/', '.', '')
@@ -253,6 +252,11 @@ function! EditPcfbFile()
   execute ":e ~/.tino/var/" . file . ".txt"
 endfunction
 
+" ------------------------------------------------------------------------------
+                           " Keep Jumps
+" ------------------------------------------------------------------------------
+nnoremap <silent> } :<C-u>execute "keepjumps norm! " . v:count1 . "}"<CR>
+nnoremap <silent> { :<C-u>execute "keepjumps norm! " . v:count1 . "{"<CR>
 
 
 " ------------------------------------------------------------------------------
@@ -499,7 +503,7 @@ augroup line_return
 augroup END
 
 " Get rid of stupid system files from ctrl-p search
-let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs\|\.jj'
+let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|\.jj'
 " let g:ctrlp_by_filename = 1
 
 
@@ -508,7 +512,7 @@ let g:ctrlp_custom_ignore = 'target/\|dist/\|lua$\|ogg$\|ghcide\|testdata\|docs\
 " ------------------------------------------------------------------------------
 if has("gui_running")
     set showtabline=2
-    " au BufAdd * :RainbowParentheses
+    au BufAdd * :RainbowParentheses
 
     try
     if g:colors_name ==# "railscasts"
@@ -785,15 +789,13 @@ function! HaskellFiletype()
     nnoremap <buffer> <leader><leader>m ggI<C-R>%<ESC>V:s/\//./g<CR>:noh<CR>Imodule <ESC>A<BS><BS><BS> where<ESC>
 
     nnoremap <buffer> -- O-- \|<space>
-    nnoremap <buffer> <leader><leader>ms magg/^import<CR>Oimport Manifold.Term.Syntax qualified as T<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>mt magg/^import<CR>Oimport Manifold.Term.Syntax qualified as T<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>gg magg/^import<CR>Oimport GHC.Generics<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>db magg/^import<CR>Oimport Data.Bool<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>ca magg/^import<CR>Oimport Control.Arrow<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>cm magg/^import<CR>Oimport Control.Monad<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>dm magg/^import<CR>Oimport qualified Data.Map as M<CR>import Data.Map (Map)<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>ds magg/^import<CR>Oimport qualified Data.Set as S<CR>import Data.Set (Set)<ESC>`a:noh<CR>
-    nnoremap <buffer> <leader><leader>dim magg/^import<CR>Oimport qualified Data.IntMap as IM<CR>import Data.IntMap (IntMap)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>dm magg/^import<CR>Oimport Data.Map qualified as M<CR>import Data.Map (Map)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>ds magg/^import<CR>Oimport Data.Set qualified as S<CR>import Data.Set (Set)<ESC>`a:noh<CR>
+    nnoremap <buffer> <leader><leader>dim magg/^import<CR>Oimport Data.IntMap as IM<CR>import Data.IntMap (IntMap)<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>dt magg/^import<CR>Oimport Data.Traversable<ESC>`a:noh<CR>
     nnoremap <buffer> <leader><leader>df magg/^import<CR>Oimport Data.Foldable<ESC>`a:noh<CR>
 
@@ -898,7 +900,6 @@ set wildignore+=*.orig
 set wildignore+=*.pyc
 set wildignore+=*.spl
 set wildignore+=*.sw?
-set wildignore+=docs/
 set wildignore+=.hg,.git,.svn,.jj
 set wildignore+=tags
 set wildignore+=ghcide

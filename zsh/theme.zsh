@@ -47,7 +47,7 @@ function jj_enabled() {
 }
 
 PROMPT='
-%{$fg[blue]%}%T%{$reset_color%} $(jj_enabled)%{$fg[yellow]%}%~%{$reset_color%} '
+%{$fg[blue]%}%T%{$reset_color%} $(jj_enabled)%{$fg[yellow]%}$(shorten_path)%{$reset_color%} '
 
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[red]%}%{$reset_color%}%{$fg[green]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "

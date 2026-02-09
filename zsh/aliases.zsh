@@ -52,6 +52,7 @@ a() { alias $1="cd $PWD"; }
 add-parent() { jj rebase -s @ -d "all:@- | ($1)" }
 rm-parent() { jj rebase -s @ -d "all:@- & ~($1)" }
 rebase-main() { jj git fetch -b main && jj rebase -s sandy-root -d 'trunk()' }
+rebase-dev() { jj git fetch -b develop && jj rebase -s sandy-root -d 'develop' }
 stack-pr() { jj new -r 'heads(@::)' -m "$*" }
 new-pr() { jj new -r root -m "$*" }
 kill-pr() { jj abandon -r "pr($1)"}
@@ -108,6 +109,12 @@ countdown() {
   while [ "$date1" -ge `date +%s` ]; do
     echo -ne "\r$(date -u --date @$(($date1 - `date +%s` )) +%H:%M:%S) "; sleep 0.1s;
   done
+}
+
+function remote-nix() {
+  local target="${1:-oct}"
+  j $target
+  tmux new-session \; send-keys "ssh -t 192.168.10.2 'source ~/.zshrc && j $target && nix develop'" C-m
 }
 
 eliminate() {

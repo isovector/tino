@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ $# -lt 1 ]; then
+    echo "Usage: stdin-wrapper <program> [args...]" >&2
+    exit 1
+fi
+
+# Create a temp file and clean it up on exit
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+
+# Slurp stdin into the temp file
+cat > "$tmp"
+
+# Run the target program, passing the temp file as the first argument,
+# followed by any additional arguments.
+program="$1"
+shift
+
+"$program" "$@" "$tmp"

@@ -12,6 +12,7 @@ export LESS="FRK"
 export PAGER="less"
 
 export PYTHONPATH=$PYTHONPATH:/var/lib
+export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.cabal/bin:$HOME/.ghcup/bin:$PATH"
 export NVIM_GTK_NO_HEADERBAR=1
 

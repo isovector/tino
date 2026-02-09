@@ -9,61 +9,62 @@ merge-editor = ["meld", "$left", "$base", "$right", "-o", "$output"]
 log-synthetic-elided-nodes = false
 
 [aliases]
-new-dev = ["new", "-m", "∅", "-r", "main"]
+new-dev = ["new", "-m", "∅", "-r", "trunk"]
+b = ["bookmark", "set", "-r", "@"]
 
 
-[revsets]
-log = "(trunk | changeset | avalanche | @ | roots)"
+# [revsets]
+# log = "(trunk | changeset | avalanche | @ | roots)"
 
-[revset-aliases]
-boneyard = 'zzroqqup'
+# [revset-aliases]
+# boneyard = 'zzroqqup'
 
-'pruner(x)' = "mutable() & x"
+# 'pruner(x)' = "mutable() & x"
 
-old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
-'downstream(x,y)' = 'reachable(pruner(x::), pruner(y))'
-'upstream(x,y)' = '(y::x) & y'
-'base(x)' = 'latest(branches_and_sigils::x- & branches_and_sigils)'
-'cap(x)' = 'roots(x:: & branchesandheads)'
-'ctx(x)' = 'x---::x+++'
-'stem(x)' = 'base(x)+ & ::x'
-'pr(x)' = 'stem(x)::cap(x)'
-'pr' = 'pr(@)'
+# old_log = "@ | roots | base::@ | @::cap | branches_and_sigils)"
+# 'downstream(x,y)' = 'reachable(pruner(x::), pruner(y))'
+# 'upstream(x,y)' = '(y::x) & y'
+# 'base(x)' = 'latest(branches_and_sigils::x- & branches_and_sigils)'
+# 'cap(x)' = 'roots(x:: & branchesandheads)'
+# 'ctx(x)' = 'x---::x+++'
+# 'stem(x)' = 'base(x)+ & ::x'
+# 'pr(x)' = 'stem(x)::cap(x)'
+# 'pr' = 'pr(@)'
 
-'sandy-root' = 'coalesce(latest(pruner(description("∅"))), heads(::trunk() & ::@))'
-'roots' = 'sandy-root'
-'root' = 'sandy-root'
-'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine()'
-'branches_and_sigils' = 'pruner(branches | (downstream(roots, sigils)))'
-'branchesandheads' = '(branches_and_sigils)'
-'base' = 'base(@)'
-'cap' = 'coalesce(cap(@), heads(@::))'
-'ctx' = 'ctx(@)'
-'stem' = 'coalesce(stem(@), sandy-root)'
-'trunk' = 'trunk()'
-'nextc' = 'roots(@:: & conflicts())'
+# 'sandy-root' = 'coalesce(latest(pruner(description("∅"))), heads(::trunk() & ::@))'
+# 'roots' = 'sandy-root'
+# 'root' = 'sandy-root'
+# 'branches' = 'downstream(trunk, bookmarks() | sandy-root) & mine()'
+# 'branches_and_sigils' = 'pruner(branches | (downstream(roots, sigils)))'
+# 'branchesandheads' = '(branches_and_sigils)'
+# 'base' = 'base(@)'
+# 'cap' = 'coalesce(cap(@), heads(@::))'
+# 'ctx' = 'ctx(@)'
+# 'stem' = 'coalesce(stem(@), sandy-root)'
+# 'trunk' = 'coalesce(bookmarks("develop"), trunk())'
+# 'nextc' = 'roots(@:: & conflicts())'
 
-'changeset' = 'downstream(trunk, stem::cap)'
-'avalanche' = 'branchesandheads'
+# 'changeset' = 'downstream(trunk, stem::cap)'
+# 'avalanche' = 'branchesandheads'
 
-'sigil_feat' = 'mine() & description(glob:"feat: *")'
-'sigil_fix' = 'mine() & description(glob:"fix: *")'
-'sigil_refactor' = 'mine() & description(glob:"refactor: *")'
-'sigil_perf' = 'mine() & description(glob:"perf: *")'
-'sigil_design' = 'mine() & description(glob:"design: *")'
-'sigil_doc' = 'mine() & description(glob:"doc: *")'
-'sigil_chore' = 'mine() & description(glob:"chore: *")'
-'sigil_test' = 'mine() & description(glob:"test: *")'
-'sigil_wip' = 'mine() & description(glob:"wip: *")'
-'sigil_plan' = 'mine() & description(glob:"plan: *")'
-'sigil_todo' = 'mine() & description(glob:"todo: *")'
-'sigil_idea' = 'mine() & description(glob:"idea: *")'
-'sigil_ci' = 'mine() & description(glob:"ci: *")'
-'sigil_checkpoint' = 'mine() & description(glob:"checkpoint: *")'
-'sigil_tool' = 'mine() & description(glob:"tool: *")'
-'sigil_folded' = 'mine() & description(glob:"... *")'
+# 'sigil_feat' = 'mine() & description(glob:"feat: *")'
+# 'sigil_fix' = 'mine() & description(glob:"fix: *")'
+# 'sigil_refactor' = 'mine() & description(glob:"refactor: *")'
+# 'sigil_perf' = 'mine() & description(glob:"perf: *")'
+# 'sigil_design' = 'mine() & description(glob:"design: *")'
+# 'sigil_doc' = 'mine() & description(glob:"doc: *")'
+# 'sigil_chore' = 'mine() & description(glob:"chore: *")'
+# 'sigil_test' = 'mine() & description(glob:"test: *")'
+# 'sigil_wip' = 'mine() & description(glob:"wip: *")'
+# 'sigil_plan' = 'mine() & description(glob:"plan: *")'
+# 'sigil_todo' = 'mine() & description(glob:"todo: *")'
+# 'sigil_idea' = 'mine() & description(glob:"idea: *")'
+# 'sigil_ci' = 'mine() & description(glob:"ci: *")'
+# 'sigil_checkpoint' = 'mine() & description(glob:"checkpoint: *")'
+# 'sigil_tool' = 'mine() & description(glob:"tool: *")'
+# 'sigil_folded' = 'mine() & description(glob:"... *")'
 
-'sigils' = 'pruner(sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea | sigil_ci | sigil_tool | sigil_folded | sigil_checkpoint)'
+# 'sigils' = 'pruner(sigil_feat | sigil_perf | sigil_refactor | sigil_design | sigil_doc | sigil_chore | sigil_test | sigil_wip | sigil_plan | sigil_fix | sigil_todo | sigil_idea | sigil_ci | sigil_tool | sigil_folded | sigil_checkpoint)'
 
 
 'tree' = "(trunk::) & mine()"
@@ -77,11 +78,9 @@ behavior = "own"
 backend = "ssh"
 key = "~/.ssh/id_rsa.pub"
 
-[fix.tools.maniga-format]
+[fix.tools.haskell-format]
 command = ["fourmolu", "--mode", "stdout", "--check-idempotence", "--stdin-input-file", "$path"]
-
 patterns = ["glob:'**/*.hs'"]
-# command = ["/home/sandy/prj/manifold/maniga/tools/format.sh", "-f $path"]
 
 [git]
 auto_import = false
@@ -89,9 +88,35 @@ auto_export = false
 
 [[--scope]]
 --when.commands = ["log"]
-
 [--scope.ui]
 paginate = "never"
+
+
+[[--scope]]
+--when.repositories = ["~/prj/work"]
+[--scope.user]
+email = "sandy.maguire@tweag.io"
+
+
+[[--scope]]
+--when.repositories = ["~/prj/work/oct"]
+[--scope.revsets]
+'log' = 'conformance-testing:: | 7d0c10d4::to-upstream'
+[--scope.fix.tools.haskell-format]
+command = ["stdin-wrapper", "stylish-haskell", "--config", "/home/sandy/prj/work/oct/.stylish-haskell.yaml"]
+patterns = ["glob:'**/*.hs'"]
+[--scope.revset-aliases]
+"immutable_heads()" = "builtin_immutable_heads() | conformance-testing@origin"
+
+[[--scope]]
+--when.repositories = ["~/prj/work/node"]
+[--scope.revsets]
+'log' = 'conformance-testing::'
+[--scope.fix.tools.haskell-format]
+command = ["stdin-wrapper", "stylish-haskell", "--config", "/home/sandy/prj/work/node/.stylish-haskell.yaml"]
+patterns = ["glob:'**/*.hs'"]
+[--scope.revset-aliases]
+"immutable_heads()" = "builtin_immutable_heads() | conformance-testing@origin"
 
 [templates]
 draft_commit_description = '''

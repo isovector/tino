@@ -1,0 +1,3 @@
+ROFI=$(rofi -location 0 -p 'work hackage' -threads 0 -dmenu -i) || exit
+
+xdg-open $(printf "http://192.168.10.2:8080/?hoogle=%s" $(urlencode "$ROFI"))
